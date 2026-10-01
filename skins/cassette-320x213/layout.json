@@ -1,0 +1,42 @@
+{
+  "canvas": [
+    320,
+    213
+  ],
+  "touch_rects": {
+    "previous": [
+      53,
+      65,
+      128,
+      129
+    ],
+    "toggle": [
+      133,
+      73,
+      187,
+      121
+    ],
+    "next": [
+      192,
+      65,
+      267,
+      129
+    ]
+  },
+  "label_area": [
+    18,
+    21,
+    302,
+    143
+  ],
+  "images": [
+    {
+      "name": "cassette",
+      "width": 320,
+      "height": 213,
+      "raw_bytes": 136320,
+      "rgb565le_sha256": "d87c27ad5d83ecc4662d92ab1d54215c366fc1ddb9d69bccaa5cf962f6fb00b7",
+      "png_sha256": "638082d5cdadc5a7e5402091c1f0ee710b0c659cbb3767b1dca70b6328353e65"
+    }
+  ]
+}

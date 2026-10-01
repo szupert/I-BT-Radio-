@@ -1,0 +1,13 @@
+# Keep the public skins-only repository free of radio builds and local data.
+.pio/
+__pycache__/
+*.bin
+*.elf
+*.map
+*.uf2
+*.zip
+*.ino
+sdkconfig*
+secrets*
+RETURN_TO_EVA/
+*.log
