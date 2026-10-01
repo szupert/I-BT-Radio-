@@ -2,6 +2,24 @@
 
 This public repository currently contains **visual assets only**. Firmware, installers, hardware configuration, station lists, credentials and unfinished radio source are intentionally absent.
 
+Skin asset version: **0.1.0-preview** · [Version history](CHANGELOG.md). This version is based on the V118 artwork; its physical display test is still pending.
+
+## Preview images
+
+Winamp-inspired player and EQ, with **simulated** live values:
+
+![Winamp-inspired player and EQ preview](skins/classic-winamp-320x240/preview_simulated.png)
+
+Playlist view:
+
+![Winamp-inspired playlist view](skins/classic-winamp-320x240/playlist.png)
+
+Cassette body; station text and album artwork are added at runtime:
+
+![Translucent cassette skin](skins/cassette-320x213/cassette.png)
+
+## Files
+
 - [Classic Winamp-inspired skin](skins/classic-winamp-320x240/README.md): 320 × 240 player/EQ and playlist views.
 - [Cassette skin](skins/cassette-320x213/README.md): 320 × 213 translucent cassette image.
 

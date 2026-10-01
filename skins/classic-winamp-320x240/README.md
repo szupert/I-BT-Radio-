@@ -4,6 +4,10 @@
 
 ![Player and EQ](player_eq.png)
 
+The following image shows **simulated** time, bitrate, sample rate, spectrum and volume for layout review. It is not a hardware-test photo:
+
+![Player with simulated live values](preview_simulated.png)
+
 The black wells intentionally have no baked-in time, station, bitrate or sample rate. A renderer must update them. The EQ curve and slider positions are a **visual ROCK-style preview**; the current audio EQ is off. The separate PLAY/PAUSE buttons and previous/next station actions are implemented in I-BT-Radio V118, but these image files alone do not add controls to stock yoRadio.
 
 Stock yoRadio users can convert the raw data to a C header using `../../tools/rgb565le_to_header.py` and connect their display renderer to the coordinates in `layout.json`. A fully tested stock-yoRadio adapter is pending; these assets are usable for custom displays now.
