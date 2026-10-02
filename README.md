@@ -1,28 +1,29 @@
 # I-BT-Radio skins
 
-This public repository currently contains **visual assets only**. Firmware, installers, hardware configuration, station lists, credentials and unfinished radio source are intentionally absent.
+This public repository contains **visual skin assets only**. Radio firmware, installers, hardware configuration, station lists and credentials are not published here.
 
-Skin asset version: **0.1.0-preview** · [Version history](CHANGELOG.md). This version is based on the V118 artwork; its physical display test is still pending.
+Skin asset version: **0.1.1-preview** · [Version history](CHANGELOG.md). The Winamp-inspired pictures now reflect the V120 visual revision approved on the radio display. This is a visual preview; the Bluetooth audio stability test is still pending.
 
 ## Preview images
 
-Winamp-inspired player and EQ, with **simulated** live values:
+Classic Winamp-inspired player and EQ:
 
-![Winamp-inspired player and EQ preview](skins/classic-winamp-320x240/preview_simulated.png)
+![Winamp-inspired player and EQ](skins/classic-winamp-320x240/player_eq.png)
 
-Playlist view:
+Playlist:
 
-![Winamp-inspired playlist view](skins/classic-winamp-320x240/playlist.png)
+![Winamp-inspired playlist](skins/classic-winamp-320x240/playlist.png)
 
-Cassette body; station text and album artwork are added at runtime:
+Cassette body; the station name and artwork are drawn at runtime:
 
 ![Translucent cassette skin](skins/cassette-320x213/cassette.png)
 
-## Files
+## Skin files
 
-- [Classic Winamp-inspired skin](skins/classic-winamp-320x240/README.md): 320 × 240 player/EQ and playlist views.
-- [Cassette skin](skins/cassette-320x213/README.md): 320 × 213 translucent cassette image.
+- [Classic Winamp-inspired skin](skins/classic-winamp-320x240/README.md): 320 × 240 player/EQ and playlist pictures, RGB565LE data and layout coordinates.
+- [Cassette skin](skins/cassette-320x213/README.md): 320 × 213 cassette picture, RGB565LE data and touch zones.
 
-Each skin has a PNG preview, exact little-endian RGB565 data from the I-BT-Radio V118 asset, and a JSON coordinate map. The V118 firmware still needs a physical screen test. The images can be used in a custom 320 × 240 TFT renderer. Stock [yoRadio](https://github.com/e2002/yoradio) supports colors and widget layout through its own configuration; it does **not** automatically install arbitrary bitmap skins. A tested stock-yoRadio display adapter will be published separately when ready.
+The Winamp-style EQ curve is a **visual preview**. BT audio has no EQ processing. The pictures are usable in a custom 320 × 240 TFT renderer; the images alone do not install controls or a skin in stock [yoRadio](https://github.com/e2002/yoradio). A tested stock-yoRadio adapter is planned separately.
 
 I-BT-Radio grew from yoRadio. Thank you to its authors. These are unofficial community skins; Winamp and yoRadio are names of their respective owners.
+

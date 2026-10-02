@@ -1,91 +1,32 @@
 {
-  "canvas": [
-    320,
-    240
-  ],
+  "canvas": [320, 240],
   "live_fields": {
-    "station": [
-      129,
-      25,
-      176,
-      14
-    ],
-    "elapsed": [
-      44,
-      25,
-      77,
-      19
-    ],
-    "bitrate": [
-      129,
-      45,
-      22,
-      11
-    ],
-    "sample_rate_khz": [
-      183,
-      45,
-      20,
-      11
-    ],
-    "analyzer": [
-      15,
-      45,
-      99,
-      25
-    ],
-    "volume": [
-      126,
-      60,
-      74,
-      16
-    ],
-    "buffer": [
-      13,
-      77,
-      294,
-      4
-    ]
+    "station": [129, 25, 176, 14],
+    "elapsed": [44, 25, 77, 19],
+    "bitrate": [129, 44, 21, 11],
+    "sample_rate_khz": [183, 44, 17, 11],
+    "analyzer": [15, 45, 99, 25],
+    "volume": [126, 60, 74, 16],
+    "buffer": [13, 77, 294, 4]
   },
   "touch_rects": {
-    "transport_y": [
-      89,
-      111
-    ],
-    "previous_x": [
-      0,
-      40
-    ],
-    "play_x": [
-      40,
-      70
-    ],
-    "pause_x": [
-      70,
-      99
-    ],
-    "stop_x": [
-      99,
-      128
-    ],
-    "next_x": [
-      128,
-      158
-    ],
-    "playlist_x": [
-      158,
-      186
-    ]
+    "transport_y": [89, 111],
+    "previous_x": [0, 40],
+    "play_x": [40, 70],
+    "pause_x": [70, 99],
+    "stop_x": [99, 128],
+    "next_x": [128, 158],
+    "playlist_x": [158, 186]
   },
-  "eq_note": "ROCK-shaped visual preview only; audio EQ is off",
+  "eq_note": "ROCK-shaped visual preview only; BT audio EQ is off",
   "images": [
     {
       "name": "player_eq",
       "width": 320,
       "height": 240,
       "raw_bytes": 153600,
-      "rgb565le_sha256": "67fe8ff84d9dde59006d746ffe163f45d7939662b03cc7fb627e135e6ad0502f",
-      "png_sha256": "5a30377a03049315358df79e16c821b57fed49901aafe78d18feecb570969123"
+      "rgb565le_sha256": "aba27d5e3b2cecd28802c335f32bd14eb6970ccf53852687db5983ceb62f8a97",
+      "png_sha256": "5a969ec8caa6788793f7b5c8aad3d159359c9a578f18b32cc10b4fd23b473c21"
     },
     {
       "name": "playlist",
@@ -93,7 +34,8 @@
       "height": 240,
       "raw_bytes": 153600,
       "rgb565le_sha256": "aa10eaf2d2792911aa9f639ec40a0eed3273fb7842d0adb435efecb7bdf3c130",
-      "png_sha256": "f388079ff18b1b27eac154413aaadaab2eba9f54396697e2dd510d2ec5bad86c"
+      "png_sha256": "b7580ec12c335f75e30f581e79b3290b3be498e11c4b87f8087fe805d09686b3"
     }
   ]
 }
+
