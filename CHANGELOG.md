@@ -11,9 +11,11 @@ The `skins` version tracks only public pictures, RGB565 skin data, coordinate ma
 
 ## Hardware documentation — 2026-10-05
 
-- Added the ESP32 Small/Yellow Board V156 GPIO guide, the user-supplied PCM5102A, HW-040 rotary and ESP-PSRAM64H photos, a PSRAM wiring diagram and a menu status map.
+- Added the ESP32 Small/Yellow Board V156 GPIO guide with PCM5102A, HW-040 rotary and ESP-PSRAM64H component photos, a PSRAM wiring diagram and a menu status map.
+- Added the main-page hardware wiring and a standalone English README; the front page is primarily Hungarian.
 - Checked the pin mapping against the V156 board configuration and the PSRAM voltage families against Espressif documentation. Physical wiring on every Yellow Board revision remains to be checked separately.
-- Documented the required RGB LED removal and that the onboard amplifier is unused in this build.
+- Documented that I removed the onboard RGB LED and do not use the built-in amplifier in my radio.
+- Added the component photos and essential DAC, rotary, PSRAM and board GPIO wiring directly to the repository front page.
 - No firmware, installer or radio source was added; the skin asset version remains `0.1.1-preview`.
 
 ## 0.1.0-preview — 2026-10-02

@@ -1,6 +1,6 @@
 # I-BT-Radio R10 – Yellow Board hardver és bekötés
 
-Az alábbi **DAC-, rotary- és PSRAM-képek a felhasználó által küldött, változatlan alkatrészfotók**. A csatlakozókon látható feliratokat használd; a GPIO-hozzárendelés a fotók alatti táblázatokban van. A PSRAM-ról külön, típushoz kötött bekötési rajz is szerepel. Ezek nem igazolják, hogy a felhasználó saját paneljének revíziója elektromosan teljesen azonos a képeken láthatóval.
+A bekötési példa az általam használt PCM5102A DAC-hoz, HW-040 rotaryhoz és ESP-PSRAM64H memóriához készült. A képek az alkatrészek és a csatlakozófeliratok azonosítását segítik; a GPIO-hozzárendelést az alattuk lévő táblázatok mutatják. A Yellow Board revíziója eltérhet, ezért a saját panelen a lábakat és a forrasztási pontokat külön ellenőrizni kell.
 
 ## Eredeti ESP32-WROOM-32 pinout
 
@@ -14,25 +14,25 @@ A jelenlegi felület külön, piros/zöld állapotú térképe: [MENU_MAP_V156.j
 
 ## Yellow Board referenciafotó és ütközések
 
-![A felhasználó által küldött Yellow Board hátoldali kép csatlakozó- és GPIO-feliratokkal](hardware_media/YELLOW_BOARD_USER.png)
+![Yellow Board referenciafotó csatlakozó- és GPIO-feliratokkal](hardware_media/YELLOW_BOARD_USER.png)
 
 A fotó és az [ESP32-2432S028 pinleírás](https://github.com/khanhj/ESP32_2432S028/blob/main/PINS.md) az alábbi, **fizikailag már más áramkörre is kötött** jeleket mutatja. A firmware-ben szabadnak jelölni egy GPIO-t nem kapcsolja le a panelen lévő alkatrészt.
 
-**Kötelező hardvermódosítás ennél a kiosztásnál: az alaplapi RGB LED-et el kell távolítani, mielőtt a GPIO4/16/17 jeleket a rotary gomb, a PSRAM és a külső DAC használja. A felhasználó megerősítette, hogy a saját rádióján ez már megtörtént.** Az eltávolítást áramtalanított lapon, a konkrét panelrevízió alapján kell elvégezni; a három LED-ág leválasztását mérni kell. A firmware-ben az RGB funkció kikapcsolása önmagában nem helyettesíti a fizikai eltávolítást.
+**Kötelező hardvermódosítás ennél a kiosztásnál: az alaplapi RGB LED-et el kell távolítani, mielőtt a GPIO4/16/17 jeleket a rotary gomb, a PSRAM és a külső DAC használja. A saját rádiómban ezt a módosítást már elvégeztem.** Az eltávolítást áramtalanított lapon, a konkrét panelrevízió alapján kell elvégezni; a három LED-ág leválasztását mérni kell. A firmware-ben az RGB funkció kikapcsolása önmagában nem helyettesíti a fizikai eltávolítást.
 
 | GPIO | Beépített kapcsolat ezen a panelcsaládon | Jelenlegi rádiós felhasználás | Mit kell ellenőrizni |
 |---:|---|---|---|
-| 26 | belső hang-erősítő bemenete gyárilag | rotary `CLK` | a belső erősítő **nincs használatban**; az esetleg megmaradt fizikai bemeneti terhelést ellenőrizni kell |
+| 26 | belső hang-erősítő bemenete gyárilag | rotary `CLK` | a belső erősítőt **nem használom**; az esetleg megmaradt fizikai bemeneti terhelést ellenőrizni kell |
 | 4 | RGB LED piros ága gyárilag | rotary `SW` | **RGB LED eltávolítva legyen**; gombjel ellenőrzése |
 | 16 | RGB LED zöld ága gyárilag | PSRAM `CE#` | **RGB LED eltávolítva legyen**; CE# felhúzás és jel ellenőrzése |
 | 17 | RGB LED kék ága gyárilag | PCM5102A `DIN` | **RGB LED eltávolítva legyen**; DAC-adatjel ellenőrzése |
 | 21 | TFT háttérfény | továbbra is háttérfény | nem szabad újra kiosztani |
 
-A képen az IO1 csatlakozó `GND / IO35 / IO22 / IO21`, az IO2 csatlakozó `GND / IO22 / IO27 / 3,3 V` jelű. A GPIO26, GPIO4, GPIO16 és GPIO17 **nem mind ezeken a külső csatlakozókon van**; a tényleges átalakítás forrasztási pontjai panelrevíziótól függenek. Az [ESP3D CYD PSRAM-mod leírása](https://esp3d.io/esp3d-tft/version_1x/hardware/esp32/sunton-28-2432/) is RGB-LED-eltávolítást ír le, de ott **GPIO17-et használ PSRAM órának**. Ezt a változatot a jelenlegi rádióval nem szabad összekeverni: itt a firmware PSRAM órája **GPIO6**, a GPIO17 pedig **DAC-adat**. A felhasználó megerősítette a LED eltávolítását és azt, hogy a belső erősítőt nem használja; a GPIO26-hoz kötött eredeti erősítő bemenet fizikai leválasztása nincs igazolva. Ezért ez a leírás nem tekinthető minden Yellow Board-revízión közvetlenül utánépíthető, ellenőrzött forrasztási receptnek.
+A képen az IO1 csatlakozó `GND / IO35 / IO22 / IO21`, az IO2 csatlakozó `GND / IO22 / IO27 / 3,3 V` jelű. A GPIO26, GPIO4, GPIO16 és GPIO17 **nem mind ezeken a külső csatlakozókon van**; a tényleges átalakítás forrasztási pontjai panelrevíziótól függenek. Az [ESP3D CYD PSRAM-mod leírása](https://esp3d.io/esp3d-tft/version_1x/hardware/esp32/sunton-28-2432/) is RGB-LED-eltávolítást ír le, de ott **GPIO17-et használ PSRAM órának**. Ezt a változatot a jelenlegi rádióval nem szabad összekeverni: itt a firmware PSRAM órája **GPIO6**, a GPIO17 pedig **DAC-adat**. A saját rádiómban az RGB LED-eket eltávolítottam, és a belső erősítőt nem használom. A GPIO26-hoz kötött eredeti erősítőbemenet fizikai leválasztását nem ellenőriztem, ezért ez az útmutató nem tekinthető minden Yellow Board-revízión ellenőrzött forrasztási receptnek.
 
 ## Külső I²S DAC: PCM5102A
 
-![A felhasználó által küldött PCM5102A modul elöl és hátul](hardware_media/PCM5102A_FRONT_BACK_USER.png)
+![Az általam használt PCM5102A modul elöl és hátul](hardware_media/PCM5102A_FRONT_BACK_USER.png)
 
 A fotón látható lila modul bemeneti oldalán felülről lefelé `SCK`, `BCK`, `DIN`, `LCK`, `GND`, `VIN` szerepel. A jobb oldali jack a vonalszintű analóg kimenet. A hátoldal képe a forrasztási és konfigurációs pontok azonosításához segítség; a táblázat a firmware-hez szükséges vezetékeket adja meg.
 
@@ -49,7 +49,7 @@ Az `I2S_INTERNAL=false`, tehát a hang a külső I²S DAC-ra megy. Az `SCK/MCLK`
 
 ## Rotary enkóder
 
-![A felhasználó által küldött HW-040 rotary modul fém tengellyel, kupakkal és ötpontos csatlakozóval](hardware_media/ROTARY_HW040_USER.png)
+![Az általam használt HW-040 rotary modul fém tengellyel, kupakkal és ötpontos csatlakozóval](hardware_media/ROTARY_HW040_USER.png)
 
 A fotón `HW-040` jelű fekete panel, fém enkóderház és ötpontos csatlakozó látható; a kupak külön van lefényképezve. A vezetékeket a saját modul **nyomtatott `CLK`, `DT`, `SW`, `+`, `GND` feliratához** kösd, ne a fényképen becsült bal–jobb sorrendhez.
 
@@ -65,7 +65,7 @@ A firmware a GPIO26 és GPIO4 bemeneten belső felhúzást használ. **GPIO35 cs
 
 ## 8 MB PSRAM – az aktuális firmware-jelek
 
-![A felhasználó által küldött ESP-PSRAM64H chip fotója, az 1-es lábat jelölő ponttal](hardware_media/ESP_PSRAM64H_USER.jpg)
+![Az általam használt ESP-PSRAM64H chip fotója, az 1-es lábat jelölő ponttal](hardware_media/ESP_PSRAM64H_USER.jpg)
 
 Az eredeti fotón `ESP PSRAM64H` feliratú SOP-8 chip látható. A tokon lévő pont jelöli az **1-es láb oldalát**; a lábak számozását a következő rajz és az adatlap alapján ellenőrizd.
 
