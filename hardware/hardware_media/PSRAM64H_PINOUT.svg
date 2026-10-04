@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+  <title id="title">ESP-PSRAM64H 8 MB, SOP-8 bekötés</title>
+  <desc id="desc">Az ESP-PSRAM64H 3,3 V-os memória felülnézeti lábkiosztása. Az 1-es CE láb GPIO16-ra megy, és 10 kiloohmos ellenállás húzza a 8-as VCC láb 3,3 voltos tápjára.</desc>
+  <rect width="1100" height="620" fill="#f3f6fa"/>
+  <text x="42" y="52" font-family="Arial,sans-serif" font-size="32" font-weight="bold" fill="#1c2840">ESP-PSRAM64H · 8 MB · 3,3 V</text>
+  <text x="42" y="88" font-family="Arial,sans-serif" font-size="20" fill="#425873">SOP-8 felülnézet · csak ellenőrzött, 3,3 V-os flashbuszhoz</text>
+  <rect x="422" y="170" width="250" height="355" rx="20" fill="#252b37" stroke="#111827" stroke-width="5"/>
+  <circle cx="447" cy="193" r="12" fill="#b5bdc8"/>
+  <text x="466" y="333" font-family="Arial,sans-serif" font-size="29" font-weight="bold" fill="#e4e9f0">ESP-PSRAM64H</text>
+  <text x="492" y="370" font-family="Arial,sans-serif" font-size="26" fill="#d4dce8">8 MB</text>
+  <g fill="#b7c6d7" stroke="#69798c" stroke-width="2">
+    <rect x="393" y="219" width="32" height="24"/><rect x="393" y="301" width="32" height="24"/><rect x="393" y="383" width="32" height="24"/><rect x="393" y="465" width="32" height="24"/>
+    <rect x="670" y="219" width="32" height="24"/><rect x="670" y="301" width="32" height="24"/><rect x="670" y="383" width="32" height="24"/><rect x="670" y="465" width="32" height="24"/>
+  </g>
+  <g font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#1c2840">
+    <text x="55" y="237">1 CE# → GPIO16</text><text x="55" y="319">2 SO/SIO1 → GPIO7</text><text x="55" y="401">3 SIO2 → GPIO10</text><text x="55" y="483">4 VSS → GND</text>
+    <text x="730" y="237">8 VCC → 3,3 V</text><text x="730" y="319">7 SIO3 → GPIO9</text><text x="730" y="401">6 SCLK → GPIO6</text><text x="730" y="483">5 SI/SIO0 → GPIO8</text>
+  </g>
+  <path d="M393 231 H338 V142 H471" fill="none" stroke="#7d4ea8" stroke-width="5"/>
+  <rect x="471" y="125" width="136" height="34" rx="5" fill="#e7d2aa" stroke="#805833" stroke-width="3"/>
+  <rect x="492" y="126" width="9" height="32" fill="#704632"/><rect x="523" y="126" width="9" height="32" fill="#171717"/><rect x="554" y="126" width="9" height="32" fill="#e88422"/>
+  <path d="M607 142 H755 V231 H702" fill="none" stroke="#7d4ea8" stroke-width="5"/>
+  <text x="496" y="116" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#7d4ea8">10 kΩ felhúzó</text>
+  <text x="42" y="570" font-family="Arial,sans-serif" font-size="18" fill="#425873">GPIO6–10: közös flash/PSRAM jelek · GPIO16: külön PSRAM CS# · a flash CS# jelével nem szabad összekötni.</text>
+</svg>
