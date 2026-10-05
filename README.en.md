@@ -1,10 +1,20 @@
-# I-BT-Radio skins and hardware
+﻿# I-BT-Radio — skins, hardware and BETA installer
 
 **Magyar:** [README.md](README.md)
 
-This repository contains display skins and hardware documentation. Firmware, installers, station lists and credentials are not included. Skin version: **0.1.1-preview**. Bluetooth audio stability testing is still in progress.
+> **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
+
+## Test the firmware
+
+[V159 one-click installer package](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip) · [SHA-256](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip.sha256) · [test notes and current status](beta/V159_HTTPS_STREAM/README.en.md) · [source package](beta/V159_HTTPS_STREAM/V159_SOURCE_GPL3.zip)
+
+The installer writes the application only and keeps the existing 16 MB flash layout. Firmware upload requires Python 3.9+; the serial menu test uses PowerShell and does not need Python. The source archive includes the V157 source snapshot, GPL-3.0 license and V159 HTTPS patch; the V159 target build is not yet independently reproducible from that archive.
+
+**Known status:** V159 installed and booted, and the radio played through the DAC. The menu self-test immediately returned `start=DENIED` and completed zero menu steps, so it has not passed. HTTPS playback is unverified. TLS encrypts traffic, but this build does not validate the server certificate.
 
 ## Skins
+
+The interface is **Winamp-inspired**, with I-BT RADIO branding and original drawn graphics. The original lightning marks have been removed.
 
 ![Winamp-style player and EQ](skins/classic-winamp-320x240/player_eq.png)
 
@@ -55,13 +65,13 @@ The DAC output is line level and cannot drive a passive speaker. Check the exact
 
 GPIO35 has no internal pull-up. If the module has none, add a 10 kΩ resistor from DT/GPIO35 to 3.3 V. Never apply 5 V to an ESP32 GPIO.
 
-### ESP-PSRAM64H, 8 MB
+### ESP-PSRAM64H — 64 Mbit / 8 MB, SOP-8-150 mil, 3.3 V
 
 ![ESP-PSRAM64H chip](hardware/hardware_media/ESP_PSRAM64H_USER.jpg)
 
 ![ESP-PSRAM64H pinout and CE pull-up](hardware/hardware_media/PSRAM64H_PINOUT.svg)
 
-This wiring is only for the 3.3 V **ESP-PSRAM64H SOP-8**. Pin 1 is marked on the package.
+The package marking is `ESP PSRAM64H`; the exact Espressif part number is **ESP-PSRAM64H**, 64 Mbit (8 MB), SOP-8-150 mil, 3.3 V. Pin 1 is marked on the package. This wiring is only for this part.
 
 | SOP-8 pin | Signal | Connection |
 |---:|---|---|
@@ -82,6 +92,8 @@ Keep PSRAM CS separate from flash CS. GPIO6–10 are shared flash/PSRAM bus sign
 | ESP-PSRAM32H | 4 MB | 3.3 V |
 | ESP-PSRAM64 | 8 MB | 1.8 V |
 | ESP-PSRAM64H | 8 MB | 3.3 V |
+
+**Replacement options:** for 8 MB, use `ESP-PSRAM64H` or `LY68L6400SLI(T)` (64 Mbit, 3.3 V, SOP-8-150 mil). For a 4 MB downgrade, use `ESP-PSRAM32H`. ESP-IDF 5.5.5 lists LY68L6400 as a supported ESP32 PSRAM type. The non-H 1.8 V parts are not drop-in replacements for this 3.3 V board. Match the package and verify the chip marking before purchase. [Lyontek datasheet](https://www.lyontek.com.tw/pdf/ddr/LY68L6400-1.2.pdf) · [ESP-IDF 5.5.5 support](https://github.com/espressif/esp-idf/blob/v5.5.5/components/esp_psram/esp32/Kconfig.spiram).
 
 ### Other occupied pins
 

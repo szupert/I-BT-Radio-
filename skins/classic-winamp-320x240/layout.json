@@ -25,8 +25,8 @@
       "width": 320,
       "height": 240,
       "raw_bytes": 153600,
-      "rgb565le_sha256": "aba27d5e3b2cecd28802c335f32bd14eb6970ccf53852687db5983ceb62f8a97",
-      "png_sha256": "5a969ec8caa6788793f7b5c8aad3d159359c9a578f18b32cc10b4fd23b473c21"
+      "rgb565le_sha256": "852fa5052ed0c2395597fa04df34574d0f6468f09bd9d1513c152aafc203c885",
+      "png_sha256": "3df13ac85c10b4db367da22b87c13399c156ea3faa36777c5bffda6a194788f4"
     },
     {
       "name": "playlist",

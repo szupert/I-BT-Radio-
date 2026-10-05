@@ -1,4 +1,6 @@
-# Classic Winamp-inspired skin (320 × 240)
+# Winamp-inspired classic player skin (320 × 240)
+
+Original I-BT RADIO graphics inspired by the classic compact player layout. Winamp lightning marks and original Winamp logo artwork are not included.
 
 `player_eq.png` and `playlist.png` show the V120 visual revision. The matching `*.rgb565le` files contain one little-endian RGB565 word per pixel in row-major order, without a header. Each raw view is 153,600 bytes. `layout.json` lists the dynamic fields and touch coordinates.
 

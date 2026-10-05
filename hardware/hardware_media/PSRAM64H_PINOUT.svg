@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
-  <title id="title">ESP-PSRAM64H 8 MB, SOP-8 bekötés</title>
-  <desc id="desc">Az ESP-PSRAM64H 3,3 V-os memória felülnézeti lábkiosztása. Az 1-es CE láb GPIO16-ra megy, és 10 kiloohmos ellenállás húzza a 8-as VCC láb 3,3 voltos tápjára.</desc>
+  <title id="title">ESP-PSRAM64H (64 Mbit / 8 MB, SOP-8-150 mil, 3,3 V) bekötés</title>
+  <desc id="desc">Az Espressif ESP-PSRAM64H pontos típusszámú memória bekötése. A tokon ESP PSRAM64H jelölés szerepel. 64 Mbit, 3,3 V. Az 1-es CE láb GPIO16-ra megy, és 10 kiloohmos ellenállás húzza a 8-as VCC láb 3,3 voltos tápjára.</desc>
   <rect width="1100" height="620" fill="#f3f6fa"/>
-  <text x="42" y="52" font-family="Arial,sans-serif" font-size="32" font-weight="bold" fill="#1c2840">ESP-PSRAM64H · 8 MB · 3,3 V</text>
+  <text x="42" y="52" font-family="Arial,sans-serif" font-size="32" font-weight="bold" fill="#1c2840">ESP-PSRAM64H · 64 Mbit / 8 MB · 3,3 V</text>
   <text x="42" y="88" font-family="Arial,sans-serif" font-size="20" fill="#425873">SOP-8 felülnézet · csak ellenőrzött, 3,3 V-os flashbuszhoz</text>
   <rect x="422" y="170" width="250" height="355" rx="20" fill="#252b37" stroke="#111827" stroke-width="5"/>
   <circle cx="447" cy="193" r="12" fill="#b5bdc8"/>
