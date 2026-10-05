@@ -14,17 +14,17 @@ A telepítő csak az alkalmazást írja a meglévő 16 MB-os flash kiosztásra. 
 
 A projekt a yoRadio GPL-3.0 licencű forrására épül. A forráscsomag a V157 forrásalapot, a licencet és a V159 HTTPS-módosítás patchét tartalmazza; önálló, reprodukálható V159 buildet még nem igazoltunk. A telepítő nem tartalmaz rádióról visszaküldött COM-naplókat vagy személyes hangfájlokat. Hibajelzés előtt távolítsd el a naplókból a Wi-Fi-adatokat és más személyes információkat.
 
-Skinverzió: **0.1.2-preview** · [Változások](CHANGELOG.md). A felület Winamp ihlette, de saját I-BT RADIO fejléccel és saját rajzolt grafikával készült; az eredeti villámjelöléseket eltávolítottam. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
+Skinverzió: **0.1.3-preview** · [Változások](CHANGELOG.md). Saját I-BT RADIO grafika, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
 
 ## Skin előnézetek
 
-Winamp ihlette lejátszó és EQ:
+Lejátszó és EQ:
 
-![Winamp-inspired player and EQ](skins/classic-winamp-320x240/player_eq.png)
+![I-BT-Radio lejátszó és EQ](skins/classic-player-320x240/player_eq.png)
 
 Lejátszási lista:
 
-![Winamp-inspired playlist](skins/classic-winamp-320x240/playlist.png)
+![I-BT-Radio állomáslista](skins/classic-player-320x240/playlist.png)
 
 Kazettatest; az állomás neve és borítóképe működés közben kerül rá:
 
@@ -34,7 +34,7 @@ Kazettatest; az állomás neve és borítóképe működés közben kerül rá:
 
 - [Részletes Yellow Board hardverleírás](hardware/README.md): panelváltozatok, foglalt GPIO-k, PSRAM-típusok és beépítés előtti ellenőrzések.
 - [English readme](README.en.md): angol nyelvű, önállóan követhető hardver- és bekötési útmutató.
-- [Winamp ihlette skin](skins/classic-winamp-320x240/README.md): 320 × 240 lejátszó/EQ és lista képek, RGB565LE adatok, koordináták.
+- [Lejátszóskin](skins/classic-player-320x240/README.md): 320 × 240 lejátszó/EQ és lista képek, RGB565LE adatok, koordináták.
 - [Kazettaskin](skins/cassette-320x213/README.md): 320 × 213-as kép, RGB565LE adat és érintési zónák.
 
 ## Hardver és bekötés
@@ -127,6 +127,6 @@ Ez a rajz kizárólag 3,3 V-os **ESP-PSRAM64H** chiphez való. Az ESP-PSRAM64 1,
 
 A zöld jelölés az adott funkcióval kapcsolatban rendelkezésre álló működési visszajelzést, a piros a kikapcsolt, hibás vagy még teljes fizikai tesztet igénylő részt jelöli. A térkép nem jelent teljes stabilitási igazolást. A GPIO-k, a PSRAM-részletek és a panelrevíziókra vonatkozó ellenőrzések a [részletes hardverleírásban](hardware/README.md) találhatók.
 
-A Winamp-stílusú EQ-görbe **csak látványelem**; Bluetooth módban nincs hangszínszabályzás. A képek egyedi 320 × 240-es TFT-megjelenítőben használhatók; önmagukban nem telepítik a kezelőfelületet a gyári [yoRadio](https://github.com/e2002/yoradio) rendszerbe. A yoRadio-hoz illesztőréteg külön készül.
+A lejátszó EQ-görbéje **csak látványelem**; Bluetooth módban nincs hangszínszabályzás. A képek egyedi 320 × 240-es TFT-megjelenítőben használhatók; önmagukban nem telepítik a kezelőfelületet a gyári [yoRadio](https://github.com/e2002/yoradio) rendszerbe. A yoRadio-hoz illesztőréteg külön készül.
 
-Az I-BT-Radio a yoRadio alapjaira épül. Köszönet a yoRadio készítőinek. Ezek nem hivatalos közösségi skinek; a Winamp és a yoRadio nevei a saját tulajdonosaikhoz tartoznak.
+Az I-BT-Radio a yoRadio alapjaira épül. Köszönet a yoRadio készítőinek.

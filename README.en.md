@@ -14,11 +14,11 @@ The installer writes the application only and keeps the existing 16 MB flash lay
 
 ## Skins
 
-The interface is **Winamp-inspired**, with I-BT RADIO branding and original drawn graphics. The original lightning marks have been removed.
+The interface uses original I-BT RADIO artwork, labels, and controls.
 
-![Winamp-style player and EQ](skins/classic-winamp-320x240/player_eq.png)
+![I-BT-Radio player and EQ](skins/classic-player-320x240/player_eq.png)
 
-![Winamp-style playlist](skins/classic-winamp-320x240/playlist.png)
+![I-BT-Radio station list](skins/classic-player-320x240/playlist.png)
 
 ![Cassette skin](skins/cassette-320x213/cassette.png)
 

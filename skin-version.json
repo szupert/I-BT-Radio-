@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0-preview",
-  "source_firmware_artwork": "V118-R10",
+  "version": "0.1.3-preview",
+  "source_firmware_artwork": "V153 BT-OUT layout, customized I-BT-Radio artwork",
   "firmware_included": false,
   "physical_screen_test": "pending",
   "stock_yoradio_adapter": "pending"

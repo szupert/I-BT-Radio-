@@ -1,0 +1,99 @@
+{
+  "canvas": [
+    320,
+    240
+  ],
+  "live_fields": {
+    "station": [
+      129,
+      25,
+      176,
+      14
+    ],
+    "elapsed": [
+      44,
+      25,
+      77,
+      19
+    ],
+    "bitrate": [
+      129,
+      44,
+      21,
+      11
+    ],
+    "sample_rate_khz": [
+      183,
+      44,
+      17,
+      11
+    ],
+    "analyzer": [
+      15,
+      45,
+      99,
+      25
+    ],
+    "volume": [
+      126,
+      60,
+      74,
+      16
+    ],
+    "buffer": [
+      13,
+      77,
+      294,
+      4
+    ]
+  },
+  "touch_rects": {
+    "transport_y": [
+      89,
+      111
+    ],
+    "previous_x": [
+      0,
+      40
+    ],
+    "play_x": [
+      40,
+      70
+    ],
+    "pause_x": [
+      70,
+      99
+    ],
+    "stop_x": [
+      99,
+      128
+    ],
+    "next_x": [
+      128,
+      158
+    ],
+    "playlist_x": [
+      158,
+      186
+    ]
+  },
+  "eq_note": "Decorative EQ curve only; no Bluetooth audio equalization",
+  "images": [
+    {
+      "name": "player_eq",
+      "width": 320,
+      "height": 240,
+      "raw_bytes": 153600,
+      "rgb565le_sha256": "BE978CC034C0A0329FD1B50E8DE9D0F8AE1600A382CF452E845E3210A5951267",
+      "png_sha256": "D4EA0DA3AEAE9006EE54A5C6A64A40D5B825BF8CF4E6F18AC087C9FE9B50A724"
+    },
+    {
+      "name": "playlist",
+      "width": 320,
+      "height": 240,
+      "raw_bytes": 153600,
+      "rgb565le_sha256": "4DCFC869AEA7E76B5EC14674E1594A2683D17D4A035A8DED69F48E26E424DF48",
+      "png_sha256": "9E73A0665E033E741633CA578A251F299FB3160ACDAC79C3C171854330AAF260"
+    }
+  ]
+}
