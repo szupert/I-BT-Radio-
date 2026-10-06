@@ -115,8 +115,7 @@ Grün kennzeichnet vorhandene Funktionsrückmeldungen. Rot kennzeichnet deaktivi
 
 ## Unterstützung
 
-Die Unterstützung ist freiwillig. Beiträge können für ESP-Boards, Messgeräte und Entwicklungswerkzeuge sowie für die weitere Projektentwicklung verwendet werden.
-Wenn du kannst, hilf bitte beim Kauf neuer ESP-Boards und bei der Erweiterung der Liste unterstützter Geräte. Vielen Dank! :)
+Wenn du das Projekt unterstützen möchtest, kannst du das hier tun. Von den Spenden kaufe ich neue ESP-Boards und Entwicklungswerkzeuge, damit ich weitere Hardware testen kann. Vielen Dank! :)
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
