@@ -1,6 +1,6 @@
 ﻿# I-BT-Radio — skins, hardware and BETA installer
 
-**Magyar:** [README.md](README.md)
+**Magyar:** [README.md](README.md) · **Deutsch:** [README.de.md](README.de.md)
 
 > **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
 
@@ -111,3 +111,10 @@ No IR receiver GPIO is assigned in the current firmware.
 ![V156 menu status map](hardware/MENU_MAP_V156.jpg)
 
 Green indicates positive operating feedback; red indicates disabled, faulty or not fully tested functions. This map is not a stability certification. See the [detailed hardware guide](hardware/README.md) for the original ESP32-WROOM-32 pinout and board-revision notes.
+
+## Support
+
+Support is voluntary. Contributions may be used to purchase ESP boards, measurement equipment and development tools, and to continue developing the project.
+
+- **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
+- **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`

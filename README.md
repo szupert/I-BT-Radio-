@@ -1,6 +1,6 @@
 ﻿# I-BT-Radio — skinek, hardver és BETA telepítő
 
-**English:** [README.en.md](README.en.md)
+**English:** [README.en.md](README.en.md) · **Deutsch:** [README.de.md](README.de.md)
 
 > **BETA — csak tesztelésre.** Korlátozottan működőképes; beépítésre, mindennapos vagy felügyelet nélküli használatra nem ajánlott.
 
@@ -130,3 +130,10 @@ A zöld jelölés az adott funkcióval kapcsolatban rendelkezésre álló műkö
 A lejátszó EQ-görbéje **csak látványelem**; Bluetooth módban nincs hangszínszabályzás. A képek egyedi 320 × 240-es TFT-megjelenítőben használhatók; önmagukban nem telepítik a kezelőfelületet a gyári [yoRadio](https://github.com/e2002/yoradio) rendszerbe. A yoRadio-hoz illesztőréteg külön készül.
 
 Az I-BT-Radio a yoRadio alapjaira épül. Köszönet a yoRadio készítőinek.
+
+## Támogatás
+
+A támogatás önkéntes. A hozzájárulások ESP-k, mérőeszközök és fejlesztési kellékek vásárlására, valamint a projekt további fejlesztésére fordíthatók.
+
+- **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
+- **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
