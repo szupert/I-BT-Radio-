@@ -115,6 +115,7 @@ Green indicates positive operating feedback; red indicates disabled, faulty or n
 ## Support
 
 Support is voluntary. Contributions may be used to purchase ESP boards, measurement equipment and development tools, and to continue developing the project.
+If you can, please help fund new ESP boards and expand the list of supported devices. Thank you! :)
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
