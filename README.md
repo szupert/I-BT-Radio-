@@ -133,7 +133,7 @@ Az I-BT-Radio a yoRadio alapjaira épül. Köszönet a yoRadio készítőinek.
 
 ## Támogatás
 
-Ha szívesen támogatnád a projektet, itt megteheted. A támogatásból új ESP-paneleket és fejlesztőeszközöket veszek, hogy többféle hardvert próbálhassak ki. Köszönöm! :)
+Ha szívesen támogatnád a projektet, itt megteheted. A támogatásból új ESP-paneleket, az általatok javasolt más paneleket és fejlesztőeszközöket veszek, hogy többféle hardveren is elérhetővé és jobbá tehessem a rádiót. Ha van ilyen paneled, vagy szívesen küldenél egyet, vedd fel velem a kapcsolatot.
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`

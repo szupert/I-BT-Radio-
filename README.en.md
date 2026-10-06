@@ -114,7 +114,7 @@ Green indicates positive operating feedback; red indicates disabled, faulty or n
 
 ## Support
 
-If you'd like to support the project, you can do so here. I'll use donations to buy ESP boards and development tools so I can test more hardware. Thank you! :)
+If you'd like to support the project, you can do so here. I'll use donations to buy new ESP boards, other boards you suggest, and development tools so I can make the radio available on more hardware and keep improving it. If you already have a board you'd like to contribute or send me, please get in touch.
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
