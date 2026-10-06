@@ -120,3 +120,4 @@ Wenn du kannst, hilf bitte beim Kauf neuer ESP-Boards und bei der Erweiterung de
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
+- **PayPal:** `LT253250028810624563`

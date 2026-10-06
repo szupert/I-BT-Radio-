@@ -119,3 +119,4 @@ If you can, please help fund new ESP boards and expand the list of supported dev
 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
+- **PayPal:** `LT253250028810624563`
