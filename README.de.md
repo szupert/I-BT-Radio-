@@ -16,15 +16,26 @@ V159 wurde gestartet und gab Radio über den DAC aus. Der Menütest wurde mit `s
 
 ## Oberflächen
 
+**0.2.0-preview · Grafikbasis V166-R29.** Gerenderte Vorschauen, keine Gerätetest-Fotos. Das oben angebotene V159-Installationspaket ist älter und enthält die neuen Ansichten nicht.
+
+**Klassisch:** BT-OUT und MENU; neutrales Eckfeld statt des alten Emblems. Die EQ-Kurve ist dekorativ.
+
 ![Klassischer Player](skins/classic-player-320x240/player_eq.png)
-![Senderliste](skins/classic-player-320x240/playlist.png)
+![Hintergrund der Senderliste](skins/classic-player-320x240/playlist.png)
+
+**Kassette:** Senderdaten und Cover werden zur Laufzeit ergänzt.
+
 ![Kassette](skins/cassette-320x213/cassette.png)
 
-Die EQ-Kurve ist eine Anzeige, kein aktiver Bluetooth-Equalizer. Die Bilder allein installieren keine Oberfläche in unverändertem yoRadio.
+**Media Player:** eigenes Menü und eigene Wiedergabeliste, Radio/SD, BT OUT und MENU. USB bleibt deaktiviert. Beispiel-Metadaten in der Vorschau.
 
-In der lokalen V164-Testfassung werden die Oberflächen unter **Einstellungen → Anzeige → Oberfläche** zusammengefasst: Einfach, Kassette, Klassisch und Media Player. Die Auswahl ersetzt getrennte Ein/Aus-Schalter. Diese Menüänderung gehört noch nicht zum oben verlinkten V159-Paket.
+![Media Player](skins/media-player-320x240/player.png)
 
-Die Media-Player-Oberfläche ist für 320 × 240 Pixel im Querformat ausgelegt. Sie nutzt die bestehenden Aktionen für Radio/SD, Wiedergabe/Stopp, vorherigen/nächsten Titel, Liste, Lautstärke, BT OUT und Menü. USB bleibt ohne passende Hardware inaktiv. Ein neutrales Musiksymbol ersetzt vorerst ein echtes Cover. Keine Spektrumanimation; bei Internet-Bluetooth bleibt die reduzierte Anzeige erhalten. Die gemeldete blaue Farbdarstellung wird noch untersucht. Noch keine Freigabe als geprüfte neue Firmware.
+**Service:** unkalibrierter Signalgenerator für Verstärkertests mit Sinus, Rechteck, Dreieck und steigenden/fallenden Rampen; DAC/BT, Pegel und Kanalwahl. Kein kalibriertes Messgerät. Die Bluetooth-Ausgabe hat eigene Grenzen. Die Vorschau zeigt eine beispielhafte Ruheansicht.
+
+![Service](skins/service-320x240/preview.png)
+
+Entwicklungsfirmware: **Einstellungen → Anzeige → Oberfläche**. Darstellung abhängig von Quelle und Audioweg; bei Bluetooth kann eine reduzierte Ansicht erscheinen. [Bilddaten und Prüfsummen](skin-version.json).
 
 ## Hardware und Anschlüsse
 

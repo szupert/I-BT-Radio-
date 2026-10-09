@@ -1,3 +1,9 @@
+# 0.2.0-preview
+
+- Friss Klasszikus BT-OUT/MENU és Kazetta grafika a V166-R29 forrásból.
+- Media Player és Service előnézet; magyar, angol és német főoldal frissítve.
+- RGB565 visszaellenőrzés PASS. Firmware-kiadás és fizikai stabilitási állítás nincs ebben a frissítésben.
+
 # Skin asset version history
 
 These files contain display artwork and layout metadata only. They do not include firmware.

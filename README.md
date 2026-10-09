@@ -1,4 +1,4 @@
-﻿# I-BT-Radio — skinek, hardver és BETA telepítő
+# I-BT-Radio — skinek, hardver és BETA telepítő
 
 **English:** [README.en.md](README.en.md) · **Deutsch:** [README.de.md](README.de.md)
 
@@ -14,21 +14,30 @@ A telepítő csak az alkalmazást írja a meglévő 16 MB-os flash kiosztásra. 
 
 A projekt a yoRadio GPL-3.0 licencű forrására épül. A forráscsomag a V157 forrásalapot, a licencet és a V159 HTTPS-módosítás patchét tartalmazza; önálló, reprodukálható V159 buildet még nem igazoltunk. A telepítő nem tartalmaz rádióról visszaküldött COM-naplókat vagy személyes hangfájlokat. Hibajelzés előtt távolítsd el a naplókból a Wi-Fi-adatokat és más személyes információkat.
 
-Skinverzió: **0.1.3-preview** · [Változások](CHANGELOG.md). Saját I-BT RADIO grafika, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
+Skinverzió: **0.2.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felület, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
 
 ## Skin előnézetek
 
-Lejátszó és EQ:
+**0.2.0-preview · V166-R29 grafikai alap.** A képek előnézetek, nem hardveres tesztképek. A fent letölthető V159 telepítő korábbi kiadás; az új nézeteket nem tartalmazza.
 
-![I-BT-Radio lejátszó és EQ](skins/classic-player-320x240/player_eq.png)
+**Klasszikus** — BT-OUT és MENU gomb, semlegesített régi sarokembléma. Az EQ-görbe látványelem.
 
-Lejátszási lista:
+![Klasszikus lejátszó](skins/classic-player-320x240/player_eq.png)
+![Klasszikus lista háttere](skins/classic-player-320x240/playlist.png)
 
-![I-BT-Radio állomáslista](skins/classic-player-320x240/playlist.png)
+**Kazetta** — a háttérre lejátszás közben kerül az állomás és a borító.
 
-Kazettatest; az állomás neve és borítóképe működés közben kerül rá:
+![Kazetta](skins/cassette-320x213/cassette.png)
 
-![Translucent cassette skin](skins/cassette-320x213/cassette.png)
+**Media Player** — saját menü és lejátszási lista, rádió/SD, BT OUT és MENU. Az USB-forrás jelenleg inaktív. A képen példaadatok láthatók.
+
+![Media Player](skins/media-player-320x240/player.png)
+
+**Service** — erősítőteszthez használható jelgenerátor: szinusz, négyszög, háromszög, fel- és lefutó jel; DAC/BT kimenet, szint és csatorna választása. Nem kalibrált mérőműszer; a BT-kimenet saját korlátai érvényesek. A kép az alaphelyzet elrendezését mutatja.
+
+![Service jelgenerátor](skins/service-320x240/preview.png)
+
+A nézetválasztás a fejlesztői firmware-ben: **Beállítások → Kijelző → Felület**. A pillanatnyi forrás és hangút módosíthatja a megjelenést, BT-nél csökkentett kijelzés is használatos. [Képadatok és ellenőrzőösszegek](skin-version.json).
 
 ## További fájlok
 

@@ -1,4 +1,4 @@
-﻿# I-BT-Radio — skins, hardware and BETA installer
+# I-BT-Radio — skins, hardware and BETA installer
 
 **Magyar:** [README.md](README.md) · **Deutsch:** [README.de.md](README.de.md)
 
@@ -14,15 +14,26 @@ The installer writes the application only and keeps the existing 16 MB flash lay
 
 ## Skins
 
-The interface uses original I-BT RADIO artwork, labels, and controls.
+**0.2.0-preview · V166-R29 graphics.** These are rendered previews, not device test screenshots. The downloadable V159 installer above is an older release and does not include the new views.
 
-![I-BT-Radio player and EQ](skins/classic-player-320x240/player_eq.png)
+**Classic:** BT-OUT and MENU buttons; neutralised legacy corner emblem. The EQ curve is decorative.
 
-![I-BT-Radio station list](skins/classic-player-320x240/playlist.png)
+![Classic player](skins/classic-player-320x240/player_eq.png)
+![Classic playlist background](skins/classic-player-320x240/playlist.png)
 
-![Cassette skin](skins/cassette-320x213/cassette.png)
+**Cassette:** station information and cover artwork are added at runtime.
 
-The EQ curve is visual only; Bluetooth audio has no EQ processing. These images need a custom 320 × 240 TFT renderer and do not install themselves in stock yoRadio.
+![Cassette](skins/cassette-320x213/cassette.png)
+
+**Media Player:** its own menu and playlist, radio/SD, BT OUT and MENU. USB is currently disabled. Example metadata is shown.
+
+![Media Player](skins/media-player-320x240/player.png)
+
+**Service:** an uncalibrated signal generator for amplifier testing, with sine, square, triangle and rising/falling ramps; DAC/BT, level and channel selection. It is not a calibrated measuring instrument. Bluetooth output limitations still apply. The preview shows an illustrative idle layout.
+
+![Service generator](skins/service-320x240/preview.png)
+
+Development firmware: **Settings → Display → Appearance**. Rendering depends on the source and audio route; Bluetooth may use a reduced display. [Asset provenance and hashes](skin-version.json).
 
 ## Hardware and wiring
 

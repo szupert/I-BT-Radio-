@@ -1,7 +1,64 @@
 {
-  "version": "0.1.3-preview",
-  "source_firmware_artwork": "V153 BT-OUT layout, customized I-BT-Radio artwork",
-  "firmware_included": false,
-  "physical_screen_test": "pending",
-  "stock_yoradio_adapter": "pending"
+  "version": "0.2.0-preview",
+  "source": "V166-R29",
+  "validation": "RGB565 roundtrip PASS; rendered previews, not hardware screenshots",
+  "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
+  "assets": {
+    "skins/classic-player-320x240/player_eq.png": {
+      "array": "playerSkinEq",
+      "source_sha256": "c0eebe9a7b58452b5fd383818993767a282ad480da348de9957973a67113768a",
+      "png_sha256": "afaa6bea1a25a6b169e9e396a9a7e94464fc491be765eec09b16b06e0feb07d7",
+      "rgb565_sha256": "80ca036519582523cd2d867f00d5be506ca943a8552a4c13f3bb87521a65b200",
+      "size": [
+        320,
+        240
+      ]
+    },
+    "skins/classic-player-320x240/playlist.png": {
+      "array": "playerSkinPlaylist",
+      "source_sha256": "c0eebe9a7b58452b5fd383818993767a282ad480da348de9957973a67113768a",
+      "png_sha256": "e9e399fdce2402e03aa250069b83f8bb5414787926ecf9e3dbe71d3b140f546c",
+      "rgb565_sha256": "f1cb60bffcf549eaaf9a38c8a5ad802a768b88b42e3c53bbec60a251a1cb5e7e",
+      "size": [
+        320,
+        240
+      ]
+    },
+    "skins/cassette-320x213/cassette.png": {
+      "array": "cassettePhoto",
+      "source_sha256": "3047025f2f85d35676cce423f7e4b2fe63be5194e0f1d0da833088d2164df32f",
+      "png_sha256": "2f6ff2165582a023b1ffb3f41c19bb4282371af958c955a238448a58e422b6c9",
+      "rgb565_sha256": "d87c27ad5d83ecc4662d92ab1d54215c366fc1ddb9d69bccaa5cf962f6fb00b7",
+      "size": [
+        320,
+        213
+      ]
+    },
+    "skins/media-player-320x240/background.png": {
+      "array": "mediaPlayerBackground",
+      "source_sha256": "6ce8a4f50e3bb5dd450b9897c4eda5d2a4776fcd5d1855a451526c8c2abb776c",
+      "png_sha256": "9cd6dee205356d0c18ea808fbb19234f0365524ccdfd8991e1a005b0ca52e260",
+      "rgb565_sha256": "9acfde41dd4478f285ec3189f0c30384438fbd09975ee0e58f8db9bf49501fd1",
+      "size": [
+        320,
+        240
+      ]
+    },
+    "skins/media-player-320x240/player.png": {
+      "png_sha256": "ee4ae00a621b32921798ec10ae838f3f04163a910f551f568f6f5f3081673f07",
+      "size": [
+        320,
+        240
+      ],
+      "kind": "source-layout reconstruction with example values"
+    },
+    "skins/service-320x240/preview.png": {
+      "png_sha256": "2f701eb8417c54b903a2164e9f3dcac25459351f806c52e3e83be30438b60350",
+      "size": [
+        320,
+        240
+      ],
+      "kind": "source-layout reconstruction with example values"
+    }
+  }
 }
