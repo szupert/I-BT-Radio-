@@ -14,7 +14,7 @@ The installer writes the application only and keeps the existing 16 MB flash lay
 
 ## Skins
 
-**0.2.0-preview · V166-R29 graphics.** These are rendered previews, not device test screenshots. The downloadable V159 installer above is an older release and does not include the new views.
+**0.3.0-preview · V166-R32 graphics.** These are rendered previews, not device test screenshots. The downloadable V159 installer above is an older release and does not include the new views.
 
 **Classic:** BT-OUT and MENU buttons; neutralised legacy corner emblem. The EQ curve is decorative.
 

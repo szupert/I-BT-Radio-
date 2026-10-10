@@ -14,11 +14,11 @@ A telepítő csak az alkalmazást írja a meglévő 16 MB-os flash kiosztásra. 
 
 A projekt a yoRadio GPL-3.0 licencű forrására épül. A forráscsomag a V157 forrásalapot, a licencet és a V159 HTTPS-módosítás patchét tartalmazza; önálló, reprodukálható V159 buildet még nem igazoltunk. A telepítő nem tartalmaz rádióról visszaküldött COM-naplókat vagy személyes hangfájlokat. Hibajelzés előtt távolítsd el a naplókból a Wi-Fi-adatokat és más személyes információkat.
 
-Skinverzió: **0.2.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felület, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
+Skinverzió: **0.3.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felület, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
 
 ## Skin előnézetek
 
-**0.2.0-preview · V166-R29 grafikai alap.** A képek előnézetek, nem hardveres tesztképek. A fent letölthető V159 telepítő korábbi kiadás; az új nézeteket nem tartalmazza.
+**0.3.0-preview · V166-R32 grafikai alap.** A képek előnézetek, nem hardveres tesztképek. A fent letölthető V159 telepítő korábbi kiadás; az új nézeteket nem tartalmazza.
 
 **Klasszikus** — BT-OUT és MENU gomb, semlegesített régi sarokembléma. Az EQ-görbe látványelem.
 

@@ -1,8 +1,9 @@
 {
-  "version": "0.2.0-preview",
-  "source": "V166-R29",
+  "version": "0.3.0-preview",
+  "source": "V166-R32",
   "validation": "RGB565 roundtrip PASS; rendered previews, not hardware screenshots",
   "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
+  "media_changes": "metallic route field; disabled USB retains the original tab lettering and bevel",
   "assets": {
     "skins/classic-player-320x240/player_eq.png": {
       "array": "playerSkinEq",
@@ -45,7 +46,7 @@
       ]
     },
     "skins/media-player-320x240/player.png": {
-      "png_sha256": "ee4ae00a621b32921798ec10ae838f3f04163a910f551f568f6f5f3081673f07",
+      "png_sha256": "0af2d82d752b9904fe538e9309067064af0fd947bf6bde71fdecc0eec5940e7a",
       "size": [
         320,
         240

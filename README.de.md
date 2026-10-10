@@ -16,7 +16,7 @@ V159 wurde gestartet und gab Radio über den DAC aus. Der Menütest wurde mit `s
 
 ## Oberflächen
 
-**0.2.0-preview · Grafikbasis V166-R29.** Gerenderte Vorschauen, keine Gerätetest-Fotos. Das oben angebotene V159-Installationspaket ist älter und enthält die neuen Ansichten nicht.
+**0.3.0-preview · Grafikbasis V166-R32.** Gerenderte Vorschauen, keine Gerätetest-Fotos. Das oben angebotene V159-Installationspaket ist älter und enthält die neuen Ansichten nicht.
 
 **Klassisch:** BT-OUT und MENU; neutrales Eckfeld statt des alten Emblems. Die EQ-Kurve ist dekorativ.
 

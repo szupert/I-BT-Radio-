@@ -1,3 +1,9 @@
+## 0.3.0-preview — 2026-10-10
+
+- Media Player: a kilógó fekete eszközmező az ezüst gombokhoz igazított keretet kapott.
+- Az inaktív USB tab megtartja az eredeti betűit és keretét; a lapos utólagos szürke téglalap megszűnt.
+- V166-R32 fejlesztői renderer szerinti előnézet, ellenőrzött RGB565 adatok. A letölthető firmware továbbra V159; fizikai R32 kijelző-/hangteszt még nincs.
+
 # 0.2.0-preview
 
 - Friss Klasszikus BT-OUT/MENU és Kazetta grafika a V166-R29 forrásból.
