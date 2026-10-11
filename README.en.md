@@ -6,7 +6,7 @@
 
 ## Latest BETA — V166-R33
 
-[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source / Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
+[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source](beta/V166_R33/V166-R33_SOURCE.zip)
 
 One-click installer; existing compatible 16 MB layout required. Wi-Fi→BT is 32 kHz; occasional gaps remain possible. Offline checks PASS; physical validation of this public package NOT_RUN.
 
@@ -34,6 +34,12 @@ One-click installer; existing compatible 16 MB layout required. Wi-Fi→BT is 32
 ![Service generator](skins/service-320x240/preview.png)
 
 Development firmware: **Settings → Display → Appearance**. Rendering depends on the source and audio route; Bluetooth may use a reduced display. [Asset provenance and hashes](skin-version.json).
+
+**Kajon-Jon-bt-vu skin:** twin VU meters with softly edged pointers that taper from a wider base to a fine tip. This is the approved visual design; integration into the firmware renderer is still pending. The V166-R33 installer is unchanged.
+
+![Kajon-Jon-bt-vu skin — tapered pointer preview](skins/kajon-vu-320x240/player_tapered_preview.png)
+
+[Skin details](skins/kajon-vu-320x240/README.en.md)
 
 ## Hardware and wiring
 

@@ -8,7 +8,7 @@ I-BT-Radio ist ein ESP32-Internetradio auf Basis von [yoRadio](https://github.co
 
 ## Aktuelle BETA — V166-R33
 
-[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source / Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
+[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
 
 One-Click-Installer; vorhandene kompatible 16-MB-Partition erforderlich. WLAN→BT mit 32 kHz; gelegentliche Aussetzer sind weiterhin möglich. Offline-Prüfungen PASS; physischer Test dieses öffentlichen Pakets NOT_RUN.
 
@@ -36,6 +36,12 @@ One-Click-Installer; vorhandene kompatible 16-MB-Partition erforderlich. WLAN→
 ![Service](skins/service-320x240/preview.png)
 
 Entwicklungsfirmware: **Einstellungen → Anzeige → Oberfläche**. Darstellung abhängig von Quelle und Audioweg; bei Bluetooth kann eine reduzierte Ansicht erscheinen. [Bilddaten und Prüfsummen](skin-version.json).
+
+**Kajon-Jon-bt-vu Skin:** zwei VU-Meter mit weich gezeichneten Zeigern, die sich von einer breiteren Basis zu einer feinen Spitze verjüngen. Dies ist der freigegebene Grafikentwurf; die Umsetzung im Firmware-Renderer steht noch aus. Der V166-R33-Installer bleibt unverändert.
+
+![Kajon-Jon-bt-vu Skin — Entwurf mit spitzen Zeigern](skins/kajon-vu-320x240/player_tapered_preview.png)
+
+[Details zur Oberfläche](skins/kajon-vu-320x240/README.de.md)
 
 ## Hardware und Anschlüsse
 
