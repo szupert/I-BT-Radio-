@@ -4,21 +4,25 @@
 
 > **BETA — csak tesztelésre.** Korlátozottan működőképes; beépítésre, mindennapos vagy felügyelet nélküli használatra nem ajánlott.
 
-## BETA firmware tesztelése
+## Gyors indulás — V166-R33 BETA
 
-[V159 one-click telepítőcsomag](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip) · [SHA-256](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip.sha256) · [tesztleírás és aktuális állapot](beta/V159_HTTPS_STREAM/README.md) · [forrásanyagok, licenc és V159 patch](beta/V159_HTTPS_STREAM/V159_SOURCE_GPL3.zip)
+[One-click telepítő](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [tesztelés és ismert korlátok](beta/V166_R33/README.md) · [forrás és buildrecept](beta/V166_R33/V166-R33_SOURCE.zip)
 
-A telepítő csak az alkalmazást írja a meglévő 16 MB-os flash kiosztásra. A firmware feltöltéséhez Python 3.9+ kell; a soros menüteszt PowerShellt használ, Python nélkül.
+Bontsd ki a csomagot, majd `1_FELTOLTES.bat`. ESP32-WROOM/Yellow Board + PSRAM, PCM5102A, **16 MB flash és kompatibilis partíció**. A feltöltő élő COM/BOOT/százalékos állapotot mutat, hash- és partícióhibánál megáll. Python 3.9+ kell; a PowerShell menüteszthez nem kell Python.
 
-**Ismert állapot:** a V159 telepítése és indulása sikerült, a rádió DAC-kimeneten szólt. A menü-önteszt induláskor azonnal `start=DENIED` választ adott, 0 menülépéssel; ez nem menüteszt-PASS. A HTTPS-lejátszást még nem igazoltuk. A TLS titkosít, de a szerver tanúsítványát a jelenlegi kliens nem ellenőrzi.
+`19_MENU_STABILITAS_10PERC.bat`: tízperces teljes menü/audio kontroll WebUI nélkül. `20_MENU_WEB_STABILITAS_10PERC.bat`: WebUI-terheléssel. A visszaadandó napló a RETURN_TO_EVA mappába kerül.
 
-A projekt a yoRadio GPL-3.0 licencű forrására épül. A forráscsomag a V157 forrásalapot, a licencet és a V159 HTTPS-módosítás patchét tartalmazza; önálló, reprodukálható V159 buildet még nem igazoltunk. A telepítő nem tartalmaz rádióról visszaküldött COM-naplókat vagy személyes hangfájlokat. Hibajelzés előtt távolítsd el a naplókból a Wi-Fi-adatokat és más személyes információkat.
+**Ismert korlát:** Wi-Fi→BT 32 kHz; ritka hangkihagyás még előfordulhat. USB-forrás inaktív. A Service jelgenerátor nem kalibrált mérőműszer. Az R33 célbuild és offline feltöltő/runner ellenőrzés PASS; a friss csomag fizikai tesztje NOT_RUN. A régi [V159](beta/V159_HTTPS_STREAM/README.md) történeti kiadás.
+
+## Tartalom
+
+[Hardver és bekötés](#hardver-és-bekötés) · [Nézetek](#skin-előnézetek) · [Kezelés](docs/Controls.md) · [Beállítás és frissítés](docs/Quick-start.md) · [Mappatérkép](docs/Project-layout.md) · [Változások](CHANGELOG.md)
 
 Skinverzió: **0.3.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felület, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
 
 ## Skin előnézetek
 
-**0.3.0-preview · V166-R32 grafikai alap.** A képek előnézetek, nem hardveres tesztképek. A fent letölthető V159 telepítő korábbi kiadás; az új nézeteket nem tartalmazza.
+**V166-R33 grafikai alap.** A képek előnézetek, nem hardveres tesztképek.
 
 **Klasszikus** — BT-OUT és MENU gomb, semlegesített régi sarokembléma. Az EQ-görbe látványelem.
 
@@ -38,6 +42,10 @@ Skinverzió: **0.3.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felü
 ![Service jelgenerátor](skins/service-320x240/preview.png)
 
 A nézetválasztás a fejlesztői firmware-ben: **Beállítások → Kijelző → Felület**. A pillanatnyi forrás és hangút módosíthatja a megjelenést, BT-nél csökkentett kijelzés is használatos. [Képadatok és ellenőrzőösszegek](skin-version.json).
+
+**KAJON VU** — saját menüvel és listával; az eredeti grafikai alap szerzői jogai megmaradnak.
+
+![KAJON VU](skins/kajon-vu-320x240/player.png)
 
 ## További fájlok
 

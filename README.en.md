@@ -4,17 +4,17 @@
 
 > **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
 
-## Test the firmware
+## Latest BETA — V166-R33
 
-[V159 one-click installer package](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip) · [SHA-256](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip.sha256) · [test notes and current status](beta/V159_HTTPS_STREAM/README.en.md) · [source package](beta/V159_HTTPS_STREAM/V159_SOURCE_GPL3.zip)
+[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source / Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
 
-The installer writes the application only and keeps the existing 16 MB flash layout. Firmware upload requires Python 3.9+; the serial menu test uses PowerShell and does not need Python. The source archive includes the V157 source snapshot, GPL-3.0 license and V159 HTTPS patch; the V159 target build is not yet independently reproducible from that archive.
+One-click installer; existing compatible 16 MB layout required. Wi-Fi→BT is 32 kHz; occasional gaps remain possible. Offline checks PASS; physical validation of this public package NOT_RUN.
 
-**Known status:** V159 installed and booted, and the radio played through the DAC. The menu self-test immediately returned `start=DENIED` and completed zero menu steps, so it has not passed. HTTPS playback is unverified. TLS encrypts traffic, but this build does not validate the server certificate.
+`19_MENU_STABILITAS_10PERC.bat`: 10 minutes without WebUI. `20_MENU_WEB_STABILITAS_10PERC.bat`: with WebUI. Results: RETURN_TO_EVA.
 
 ## Skins
 
-**0.3.0-preview · V166-R32 graphics.** These are rendered previews, not device test screenshots. The downloadable V159 installer above is an older release and does not include the new views.
+**V166-R33.** Rendered previews, not hardware test screenshots.
 
 **Classic:** BT-OUT and MENU buttons; neutralised legacy corner emblem. The EQ curve is decorative.
 

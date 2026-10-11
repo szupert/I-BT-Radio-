@@ -6,17 +6,17 @@
 
 I-BT-Radio ist ein ESP32-Internetradio auf Basis von [yoRadio](https://github.com/e2002/yoradio). Vielen Dank an dessen Entwickler. Das Projekt verwendet GPL-3.0-lizenzierten Quellcode.
 
-## Installation und Teststatus
+## Aktuelle BETA — V166-R33
 
-Das derzeit veröffentlichte Paket ist [V159 mit One-Click-Starter](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip). Dazu gehören [Prüfsumme](beta/V159_HTTPS_STREAM/I-BT-Radio_V159_HTTPS_STREAM_BETA.zip.sha256), [Status und Anleitung](beta/V159_HTTPS_STREAM/README.md) sowie [Quellmaterial und Patch](beta/V159_HTTPS_STREAM/V159_SOURCE_GPL3.zip).
+[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source / Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
 
-ZIP entpacken und den enthaltenen Installer starten. Python 3.9 oder neuer wird benötigt. Der Installer prüft das Gerät und die vorhandene **16-MB-Partitionierung** und aktualisiert nur die Anwendung. Nicht auf eine beliebige 4-MB-Platine übertragen. Portauswahl und tatsächlicher Schreibfortschritt erscheinen im Fenster. Der Menütest verwendet Windows PowerShell.
+One-Click-Installer; vorhandene kompatible 16-MB-Partition erforderlich. WLAN→BT mit 32 kHz; gelegentliche Aussetzer sind weiterhin möglich. Offline-Prüfungen PASS; physischer Test dieses öffentlichen Pakets NOT_RUN.
 
-V159 wurde gestartet und gab Radio über den DAC aus. Der Menütest wurde mit `start=DENIED` abgewiesen; das ist kein bestandener Test. HTTPS und langfristig unterbrechungsfreier Bluetooth-Betrieb sind nicht vollständig bestätigt. Der HTTPS-Client verschlüsselt, prüft derzeit aber das Serverzertifikat nicht. Der veröffentlichte Quellstand enthält eine Basis und einen Patch; ein eigenständig reproduzierbarer V159-Build ist noch nicht bestätigt.
+`19_MENU_STABILITAS_10PERC.bat`: 10 Minuten ohne WebUI. `20_MENU_WEB_STABILITAS_10PERC.bat`: mit WebUI. Ergebnisse: RETURN_TO_EVA.
 
 ## Oberflächen
 
-**0.3.0-preview · Grafikbasis V166-R32.** Gerenderte Vorschauen, keine Gerätetest-Fotos. Das oben angebotene V159-Installationspaket ist älter und enthält die neuen Ansichten nicht.
+**V166-R33.** Gerenderte Vorschauen, keine Gerätetest-Fotos.
 
 **Klassisch:** BT-OUT und MENU; neutrales Eckfeld statt des alten Emblems. Die EQ-Kurve ist dekorativ.
 

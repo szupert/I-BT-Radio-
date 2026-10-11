@@ -1,3 +1,10 @@
+# V166-R33 BETA — 2026-10-11
+
+- Aktuális alkalmazásfrissítő, SHA256 és hozzá tartozó forráspillanatkép.
+- MENU10 FIX3: a rövid mérési ablakban gyakoribb mintavétel; 19-es és 20-as tízperces teszt.
+- Magyar főoldal, angol/német melléklet, külön bekötés/kezelés/indulás/mappatérkép.
+- Offline feltöltő- és runnerellenőrzés PASS; új fizikai teszt NOT_RUN. A Wi-Fi→BT hangkihagyás továbbra ismert hiba.
+
 ## 0.3.0-preview — 2026-10-10
 
 - Media Player: a kilógó fekete eszközmező az ezüst gombokhoz igazított keretet kapott.
