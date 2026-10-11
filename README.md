@@ -43,9 +43,9 @@ Skinverzió: **0.3.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felü
 
 A nézetválasztás a fejlesztői firmware-ben: **Beállítások → Kijelző → Felület**. A pillanatnyi forrás és hangút módosíthatja a megjelenést, BT-nél csökkentett kijelzés is használatos. [Képadatok és ellenőrzőösszegek](skin-version.json).
 
-**KAJON VU** — saját menüvel és listával; az eredeti grafikai alap szerzői jogai megmaradnak.
+**KAJON VU** — alul szélesebb, hegyesre vékonyodó, lágy szélű mutatók. Az alábbi kép az elfogadott grafikai terv; a firmware-be építés még hátravan.
 
-![KAJON VU](skins/kajon-vu-320x240/player.png)
+![KAJON VU – hegyes mutatós terv](skins/kajon-vu-320x240/player_tapered_preview.png)
 
 ## További fájlok
 

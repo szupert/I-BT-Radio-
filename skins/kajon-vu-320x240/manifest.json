@@ -9,6 +9,12 @@
     "menu.png": "98812ecf845536a95d74ccd57a3eb6b4c677b4208c2e8dde54b41424aa695b51",
     "player.png": "022e2460a348f2f06956f619543936ec1da27615bf73bb0afa9e2432314bd95e",
     "playlist.png": "e54ada01c8aed067aafc25b24d516b1bbe1b6ce7dbacc2b28f6c177b3473ce66",
-    "README.md": "758fcb2aced5f08c392b397f35522ca11307943d4cc9319b9ef04a1ba84b6f0e"
+    "README.md": "2f7e2908c1204b168d28001f6bea8c3bd0b87650c48e14afc330b1bd12cef586",
+    "player_tapered_preview.png": "e222568e874b2295aa61befb19c426868700b8cf4a64c57466bde2861ef5ee53"
+  },
+  "needle_preview": {
+    "file": "player_tapered_preview.png",
+    "status": "APPROVED_DESIGN_NOT_IN_FIRMWARE",
+    "shape": "wide base, tapered pointed tip; soft antialiased edges"
   }
 }

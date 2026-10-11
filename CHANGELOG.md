@@ -1,3 +1,8 @@
+# KAJON mutatóterv — 2026-10-11
+
+- Elfogadott hegyes, alul szélesebb és lágy szélű mutató előnézete a főoldalon.
+- Firmware, RGB565 háttér és telepítő változatlan; renderer-beépítés még hátravan.
+
 # V166-R33 BETA — 2026-10-11
 
 - Aktuális alkalmazásfrissítő, SHA256 és hozzá tartozó forráspillanatkép.
