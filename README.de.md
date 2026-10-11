@@ -137,3 +137,5 @@ Wenn du das Projekt unterstützen möchtest, kannst du das hier tun. Von den Spe
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
 - **PayPal:** `LT253250028810624563`
+
+[Menüprüfung und bekannte Fehler (Ungarisch)](docs/menu/README.md)

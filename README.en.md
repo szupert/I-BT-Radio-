@@ -136,3 +136,5 @@ If you'd like to support the project, you can do so here. I'll use donations to 
 - **Ethereum (ETH):** `0xf044db3277a1b880713e81d66b6E507F65450EE6`
 - **Bitcoin (BTC):** `3KLgXnbCs1WCD3igiVErxdy2CAH7QWchLs`
 - **PayPal:** `LT253250028810624563`
+
+[Menu verification and known issues (Hungarian)](docs/menu/README.md)
