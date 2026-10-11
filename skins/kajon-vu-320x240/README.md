@@ -1,4 +1,4 @@
-# KAJON VU · 320 × 240
+# Kajon-Jon-bt-vu skin · 320 × 240
 
 KAJON VU PLAYER grafikai alapból igazított, aránytartó nézet. A két műszer és a fémes kezelőszervek megmaradtak. A képek elrendezési előnézetek, nem hardveres mérés; a mutatók és számadatok illusztrációk.
 
@@ -15,3 +15,5 @@ Alul szélesebb, felfelé folyamatosan hegyesre vékonyodó, enyhén térhatás�
 ![Hegyes mutatós grafikai terv](player_tapered_preview.png)
 
 Ez nagyított, generált előnézet, nem 320 × 240-es firmware-képadat. A korábbi player.png és RGB565 háttér változatlan; a mozgó mutató rendererébe beépítés még nincs kész. Az R33 telepítő nem változott.
+
+[Az eredeti player.png előnézet](player.png) · [Elfogadott hegyes mutatós terv](player_tapered_preview.png)
