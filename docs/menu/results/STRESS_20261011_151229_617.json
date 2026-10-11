@@ -1,0 +1,37 @@
+{
+  "test_id": "STRESS_20261011_151229_617",
+  "firmware_reported": "V166-R33",
+  "hash_verification": "PASS",
+  "manifest_files": {
+    "LOAD_SUMMARY.csv": "4c3076fd1de955647ab536b96961cde8d1914e16945bd8000096accffc7db477",
+    "RESULT.json": "10ce9b8ed2b4fe20387a2a38982badbf6ed4b3596636bfe564f7408b79284abe",
+    "SAMPLES.json": "fed0b6a3f053f44ca574c8f7f3f7533462ccf2229237b05c8349feef46a741ca",
+    "serial.log": "70150e78caa4bbbb4c8c6c7926f841e6b123e36ac9f9349d1af5e4172a04cb90"
+  },
+  "overall": "PARTIAL_REVIEW_REQUIRED",
+  "error": "",
+  "active_seconds": 600,
+  "target_seconds": 600,
+  "submenu_navigation": "PASS",
+  "ram_only_edits": 4,
+  "menu_restore": "PASS",
+  "final_audio_restore": "UNCONFIRMED: MENU10_WINDOW_END",
+  "render_pages": 22,
+  "render_rows_per_speed": 128,
+  "render_speeds_ms": [
+    500,
+    200,
+    50
+  ],
+  "webui": "NOT_RUN_DISABLED",
+  "physical_buttons": "NOT_RUN",
+  "audio_continuity": "NOT_PROVEN; 4 observed underruns in initial BT phase and 47 in monitor",
+  "bt_negotiated_hz": 32000,
+  "monitor_core0_percent": 78.24,
+  "monitor_core1_percent": 93.62,
+  "previous_stop_reproduced": false,
+  "artwork": "OFF",
+  "mp3_offload": "OFF",
+  "runner_defect": "measurement timeout still active in cleanup",
+  "runner_fix": "FIX4 clears measurement timer on entry to finally; endpoint/supervisor/fault guards preserved; host PASS, physical NOT_RUN"
+}

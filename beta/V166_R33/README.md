@@ -8,6 +8,6 @@
 
 R33: internetes rádió→BT 32 kHz; SD→BT forrásfüggő tárgyalt ráta; DAC a forrás/hardver szerint. Az USB-forrás inaktív. A hosszú Wi-Fi/BT hangfolytonosság még nem igazolt, kihagyás előfordul. Service: nem kalibrált jelgenerátor, nem hiteles mérőműszer.
 
-BIN és ELF korábban lefordítva; a csomag/hash, feltöltő élő progress/timeout/baud/partíció ellenőrzése és a runner offline selftest PASS. Az új nyilvános csomag fizikai tesztje NOT_RUN. A menüteszt FIX3 rövidszakasz-mintavételi javítását tartalmazza. Ez nem új audio-stabilitási PASS.
+BIN és ELF korábban lefordítva; a csomag/hash, feltöltő élő progress/timeout/baud/partíció ellenőrzése és a runner offline selftest PASS. Az új nyilvános csomag fizikai tesztje NOT_RUN. A menüteszt FIX4: rövidszakasz-mintavétel és külön mérési/lezárási időkorlát. Ez nem új audio-stabilitási PASS.
 
 [Telepítő SHA256](I-BT-Radio_V166-R33_BETA.zip.sha256) · [forráspillanatkép és buildrecept](V166-R33_SOURCE.zip) · [forrás SHA256](V166-R33_SOURCE.zip.sha256). A forrás ugyanahhoz az R33-hoz tartozik; független tiszta gépes újrafordítás NOT_RUN. yoRadio-alapú kód GPL-3.0; a grafika jogai az eredeti szerzőknél maradnak.
