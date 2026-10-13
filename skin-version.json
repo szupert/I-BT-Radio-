@@ -1,7 +1,7 @@
 {
-  "version": "0.3.0-preview",
-  "source": "V166-R32",
-  "validation": "RGB565 roundtrip PASS; rendered previews, not hardware screenshots",
+  "version": "0.5.0-gallery",
+  "source": "V166-R83 asset audit; earlier illustrative previews retained",
+  "validation": "Vintage PNG to firmware RGB565 equality PASS; binary/PNG pairs PASS. Physical SMALL display validation NOT_RUN. Gallery update is not a firmware release.",
   "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
   "media_changes": "metallic route field; disabled USB retains the original tab lettering and bevel",
   "assets": {
@@ -60,6 +60,40 @@
         240
       ],
       "kind": "source-layout reconstruction with example values"
+    },
+    "skins/retro-neon-320x240/background.png": {
+      "size": [
+        320,
+        240
+      ],
+      "array": "skin_retro",
+      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
+      "png_sha256": "b1dde4a9303986cd7d29615b398c10341f27a0f31d565be089ec52ef8686646f",
+      "rgb565_sha256": "5c43c2b16072dfec8293de0ac1d36603cf54f40955ddd7ff5c79afef9ff92393",
+      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
+    },
+    "skins/vintage-hifi-320x240/background.png": {
+      "size": [
+        320,
+        240
+      ],
+      "array": "skin_hifi",
+      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
+      "png_sha256": "4ff9637a22b6311d12c76dfb0320b6f972e7decf24777c0afd6498ead565ec01",
+      "rgb565_sha256": "b6a8c111128d199f9b74b3b7057baecf059e44e8cea3d5c7fa2fc486e457e1e8",
+      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
+    },
+    "skins/classic-wood-320x240/background.png": {
+      "size": [
+        320,
+        240
+      ],
+      "array": "skin_classic",
+      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
+      "png_sha256": "ce5758b4b6410f3bb6c79c34f81f870891b7157da46e27c35fbbdc25b899788d",
+      "rgb565_sha256": "63a08d9189dc3c98657b036660dbf313b6b0b2c19fbff390baac6b627ea7f0b7",
+      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
     }
-  }
+  },
+  "updated": "2026-10-13"
 }
