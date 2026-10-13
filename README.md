@@ -4,7 +4,19 @@
 
 > **BETA — csak tesztelésre.** Korlátozottan működőképes; beépítésre, mindennapos vagy felügyelet nélküli használatra nem ajánlott.
 
-## Gyors indulás — V166-R33 BETA
+## Fejlesztési állapot — 2026. október 13.
+
+**A nagy kijelzőn is elindult a felület.** Az ESP32-8048S070C 7 hüvelykes, 800 × 480-as kapacitív érintőkijelzőn a **MENU8048C-R4** menü- és felületdemó működését a felhasználó visszaigazolta. A demó 55 menüoldalt, 287 menüsort és 9 választható nézetet tartalmaz; érintéssel bejárható, visszalépéssel és görgetéssel. Ez a jóváhagyott nagy kijelzős alap.
+
+A nagy panel jelenleg **felületdemó**: a rádiózás, SD-lejátszás, Bluetooth, EQ és ébresztés mögötti funkciók még nincsenek átportolva. A menüben látható értékek és listák részben minták. Nem teljes rádiókiadás, és nem a SMALL mellé kötött második processzor.
+
+A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. A célbuild és az offline ellenőrzések sikeresek; az R83 teljes fizikai ellenőrzése még nincs lezárva. A DAC-hang kihagyásának vizsgálata folytatódik, ezért általános hangstabilitást nem állítunk.
+
+**Az internetes rádió → BT-kimenet a jelenlegi fejlesztői ágban tiltva marad.** A WebUI és az internetes rádió → DAC külön funkció. Az SD → DAC, SD → BT és telefon → BT-IN → DAC út külön ellenőrzendő.
+
+Az alábbi letölthető **R33 történeti BETA** csomag nem az R83 és nem a nagy kijelzős demó; ebben a dokumentációfrissítésben a telepítőt nem cseréltük le.
+
+## Letölthető történeti csomag — V166-R33 BETA
 
 [One-click telepítő](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [tesztelés és ismert korlátok](beta/V166_R33/README.md) · [forrás és buildrecept](beta/V166_R33/V166-R33_SOURCE.zip)
 
