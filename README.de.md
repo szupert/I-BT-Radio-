@@ -6,7 +6,19 @@
 
 I-BT-Radio ist ein ESP32-Internetradio auf Basis von [yoRadio](https://github.com/e2002/yoradio). Vielen Dank an dessen Entwickler. Das Projekt verwendet GPL-3.0-lizenzierten Quellcode.
 
-## Aktuelle BETA — V166-R33
+## Entwicklungsstand — 13. Oktober 2026
+
+**Die Oberfläche läuft jetzt auch auf dem großen Display.** Der Nutzer hat die Funktion der Menü-/Oberflächendemo **MENU8048C-R4** auf dem 7-Zoll-ESP32-8048S070C mit kapazitivem 800 × 480-Touchscreen bestätigt. Die Demo enthält 55 Menüseiten, 287 Menüzeilen und 9 auswählbare Ansichten mit Touchbedienung, Zurücknavigation und Scrollen. Dies ist die freigegebene Grundlage für das große Display.
+
+Es handelt sich um eine **Oberflächendemo**. Radio, SD-Audio, Bluetooth, EQ und die Ausführung der Weckfunktion sind noch nicht auf diese Platine portiert. Einige Listen und Werte sind Beispiele. Dies ist weder eine vollständige Radiofreigabe noch ein zweiter Prozessor für SMALL.
+
+Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Zielbuild und Offline-Prüfungen bestanden; die vollständige physische Prüfung von R83 steht noch aus. Aussetzer bei der DAC-Wiedergabe werden weiter untersucht.
+
+**Internetradio → Bluetooth-Ausgang bleibt in der aktuellen Entwicklung deaktiviert.** WebUI und Internetradio → DAC bleiben eigenständige Funktionen. SD → DAC, SD → BT und Telefon → BT-IN → DAC müssen getrennt geprüft werden.
+
+Das unten angebotene **historische R33-BETA-Paket** ist weder R83 noch die Großdisplay-Demo. Der Installer wurde bei dieser Dokumentationsaktualisierung nicht ersetzt.
+
+## Historische BETA zum Download — V166-R33
 
 [Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
 
