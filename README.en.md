@@ -4,7 +4,19 @@
 
 > **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
 
-## Latest BETA — V166-R33
+## Development status — 13 October 2026
+
+**The interface now runs on the large display too.** The user confirmed that the **MENU8048C-R4** menu/interface demo works on the 7-inch ESP32-8048S070C, with an 800 × 480 capacitive touchscreen. It includes 55 menu pages, 287 rows and 9 selectable views, with touch navigation, back navigation and scrolling. This is the approved large-display baseline.
+
+This is an **interface demo**. Radio playback, SD audio, Bluetooth, EQ and alarm execution have not yet been ported to this board. Some displayed lists and values are examples. It is not a full radio release or a second processor attached to SMALL.
+
+The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. Target builds and offline checks passed; full physical validation of R83 is still pending. DAC playback gaps remain under investigation.
+
+**Internet radio → Bluetooth output remains disabled in the current development line.** WebUI and internet radio → DAC remain separate functions. SD → DAC, SD → BT and phone → BT-IN → DAC require separate validation.
+
+The downloadable **R33 historical BETA** below is neither R83 nor the large-display demo. Its installer has not been replaced by this documentation update.
+
+## Downloadable historical BETA — V166-R33
 
 [Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source](beta/V166_R33/V166-R33_SOURCE.zip)
 
