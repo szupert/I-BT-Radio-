@@ -16,15 +16,53 @@ I am building my own yoRadio-based ESP32-WROOM + PSRAM radio. SMALL is the activ
 
 The ESP32-8048S070C 800×480 touch menu demo worked on the device; it is not a full radio port. I am not publishing a new firmware download in this documentation update.
 
-## Public skin
+## Skins
 
-**Winamp / Classic** is the only skin in the current public gallery. All others are **private**.
+All skin previews are visible. Winamp and Service remain public; I am not publishing source code for the other skins. These are visual previews, not proof that every R125 feature has passed a device test. I am not publishing a new firmware download here.
+
+### Winamp / Classic
 
 ![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
 
-![Winamp playlist](skins/classic-player-320x240/playlist.png)
+### Media Player
 
-These are earlier visual previews, not full R125 device screenshots. I have retired mixed-skin downloads from the current branch. Previously published assets may remain in Git history; a private label does not retroactively restrict access.
+![Media Player](skins/media-player-320x240/player.png)
+
+The source code is private at the owner's request.
+
+### Cassette
+
+![Cassette](skins/cassette-320x213/cassette.png)
+
+The source code is private at the owner's request.
+
+### Kajon-Jon-bt-vu
+
+![Kajon-Jon-bt-vu](skins/kajon-vu-320x240/player_tapered_preview.png)
+
+The source code is private at the owner's request.
+
+### Service
+
+![Service](skins/service-320x240/preview.png)
+
+### Classic Wood
+
+![Classic Wood](skins/classic-wood-320x240/background.png)
+
+The source code is private at the owner's request.
+
+### Vintage HiFi
+
+![Vintage HiFi](skins/vintage-hifi-320x240/background.png)
+
+The source code is private at the owner's request.
+
+### Retro Neon
+
+![Retro Neon](skins/retro-neon-320x240/background.png)
+
+The source code is private at the owner's request.
 
 ## Hardware and wiring
 

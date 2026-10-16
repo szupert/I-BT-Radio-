@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-winamp-public",
+  "version": "0.6.1-public-previews",
   "source": "Public Winamp preview retained; development firmware V166-R125, 2026-10-16",
   "validation": "Vintage PNG to firmware RGB565 equality PASS; binary/PNG pairs PASS. Physical SMALL display validation NOT_RUN. Gallery update is not a firmware release.",
   "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
@@ -23,8 +23,56 @@
         320,
         240
       ]
+    },
+    "skins/cassette-320x213/cassette.png": {
+      "png_sha256": "2f6ff2165582a023b1ffb3f41c19bb4282371af958c955a238448a58e422b6c9",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/classic-wood-320x240/background.png": {
+      "png_sha256": "ce5758b4b6410f3bb6c79c34f81f870891b7157da46e27c35fbbdc25b899788d",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/kajon-vu-320x240/background.png": {
+      "png_sha256": "38973d6a8c4c82a70619f2780511121c086b6e326e24510461214427489641e3",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/kajon-vu-320x240/menu.png": {
+      "png_sha256": "98812ecf845536a95d74ccd57a3eb6b4c677b4208c2e8dde54b41424aa695b51",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/kajon-vu-320x240/player.png": {
+      "png_sha256": "022e2460a348f2f06956f619543936ec1da27615bf73bb0afa9e2432314bd95e",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/kajon-vu-320x240/player_tapered_preview.png": {
+      "png_sha256": "e222568e874b2295aa61befb19c426868700b8cf4a64c57466bde2861ef5ee53",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/kajon-vu-320x240/playlist.png": {
+      "png_sha256": "e54ada01c8aed067aafc25b24d516b1bbe1b6ce7dbacc2b28f6c177b3473ce66",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/media-player-320x240/background.png": {
+      "png_sha256": "9cd6dee205356d0c18ea808fbb19234f0365524ccdfd8991e1a005b0ca52e260",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/media-player-320x240/player.png": {
+      "png_sha256": "0af2d82d752b9904fe538e9309067064af0fd947bf6bde71fdecc0eec5940e7a",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/retro-neon-320x240/background.png": {
+      "png_sha256": "b1dde4a9303986cd7d29615b398c10341f27a0f31d565be089ec52ef8686646f",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/service-320x240/preview.png": {
+      "png_sha256": "2f701eb8417c54b903a2164e9f3dcac25459351f806c52e3e83be30438b60350",
+      "kind": "public preview; source private except Winamp/Service"
+    },
+    "skins/vintage-hifi-320x240/background.png": {
+      "png_sha256": "4ff9637a22b6311d12c76dfb0320b6f972e7decf24777c0afd6498ead565ec01",
+      "kind": "public preview; source private except Winamp/Service"
     }
   },
   "updated": "2026-10-13",
-  "visibility": "Only Winamp/Classic assets public in current tree; all other skins private; former published versions may remain in Git history"
+  "visibility": "All skin preview images public; source private at owner request except Winamp and Service; history unchanged"
 }

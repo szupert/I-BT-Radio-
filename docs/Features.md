@@ -44,4 +44,4 @@ Frissítve: **2026. október 16.** Az I-BT-Radiót egy klasszikus ESP32-WROOM + 
 7. Android-távirányító automatikus helyi hálózati felismeréssel, ritka kérésekkel; a többletfeladatokat a telefon végezné.
 8. CPU/RAM/PSRAM további takarékos használata, a memóriahatárok csökkentése nélkül.
 
-A nyilvános galériában csak a **Winamp / Classic** marad. A többi skin **privát**. A régebben közzétett változatok a Git-előzményekben megmaradhatnak; a „privát” felirat önmagában nem hozzáférés-védelem.
+Minden skin előnézete nyilvános. A Winamp és a Service nyilvános marad; a többi alatt: **A tulajdonos kérésére a forráskód privát.** A régi vegyes kódcsomagokat nem teszem vissza. Korábban közzétett anyagok a Git-előzményekben megmaradhatnak.

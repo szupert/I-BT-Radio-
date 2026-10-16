@@ -12,15 +12,53 @@ A rádió→DAC és SD→DAC már működött a készüléken; telefon→BT-IN�
 
 A 800×480-as ESP32-8048S070C panelen az érintéses menüdemó működött. Ez még nem teljes rádióport.
 
-## Nyilvános skin
+## Skinek
 
-**Winamp / Classic** — az EQ itt látványelem.
+Minden skin előnézete látható. A Winamp és a Service nyilvános marad; a többi skin forráskódját nem teszem közzé. A képek grafikai előnézetek, nem az összes R125-funkció készülékes igazolásai. Új firmware-letöltést most nem publikálok.
+
+### Winamp / Classic
 
 ![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
 
-![Winamp lista](skins/classic-player-320x240/playlist.png)
+### Media Player
 
-A képek korábbi grafikai előnézetek, nem az R125 teljes készülékes képernyőfotói. **Minden más skin privát**; [skinlista](skins/README.md). A korábban közzétett grafikák és régi csomagok a Git-előzményekben megmaradhatnak. A jelenlegi ágból a vegyes skinletöltéseket visszavontam; új firmware-t ebben a dokumentációfrissítésben nem publikálok.
+![Media Player](skins/media-player-320x240/player.png)
+
+A tulajdonos kérésére a forráskód privát.
+
+### Cassette
+
+![Cassette](skins/cassette-320x213/cassette.png)
+
+A tulajdonos kérésére a forráskód privát.
+
+### Kajon-Jon-bt-vu
+
+![Kajon-Jon-bt-vu](skins/kajon-vu-320x240/player_tapered_preview.png)
+
+A tulajdonos kérésére a forráskód privát.
+
+### Service
+
+![Service](skins/service-320x240/preview.png)
+
+### Classic Wood
+
+![Classic Wood](skins/classic-wood-320x240/background.png)
+
+A tulajdonos kérésére a forráskód privát.
+
+### Vintage HiFi
+
+![Vintage HiFi](skins/vintage-hifi-320x240/background.png)
+
+A tulajdonos kérésére a forráskód privát.
+
+### Retro Neon
+
+![Retro Neon](skins/retro-neon-320x240/background.png)
+
+A tulajdonos kérésére a forráskód privát.
 
 ## Hardver és bekötés
 

@@ -7,7 +7,7 @@
 | docs/menu/ | Menüleírás és történeti eredmények |
 | hardware/ | Bekötés és paneladatok |
 | skins/classic-player-320x240/ | Nyilvános Winamp előnézetek |
-| skins/ többi almappája | Privát jelölés, közzétett grafika nélkül |
+| skins/ többi almappája | Nyilvános előnézeti képek; a Winamp és Service kivételével privát forráskód |
 | beta/ | Történeti leírások, visszavont letöltések |
 
 Helyben SYSTEM őrzi a forrást, eszközöket, teszteket és kiadást; USER a feltöltő/tesztelő csomag. A meglévő naplók megőrzésével újraépíthető. Az aktuális R125 firmware-t ebben a GitHub-dokumentációfrissítésben nem teszem közzé.

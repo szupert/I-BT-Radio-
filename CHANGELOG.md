@@ -1,3 +1,7 @@
+## 2026-10-16 — skinláthatóság pontosítása
+
+Minden skin előnézeti képe megjelenik. A Winamp és Service nyilvános marad. A többi kép alatt: „A tulajdonos kérésére a forráskód privát.” A privát RGB565/layout/forrásadatokat és vegyes forráscsomagokat nem teszem vissza.
+
 ## 2026-10-16 — V166-R125 dokumentáció
 
 - Funkciólista: készüléken már kipróbált, még tesztelendő és tervezett részek külön.
