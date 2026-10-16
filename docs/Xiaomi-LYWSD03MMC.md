@@ -20,14 +20,22 @@ A MAC hat hexadecimális pár, például AA:BB:CC:DD:EE:FF. A böngésző Blueto
 
 Ne publikálj valódi kulcsot, tokent, Xiaomi-azonosítót vagy személyes MAC-címet. A firmware nem tartalmaz előre beégetett személyes kulcsot.
 
+## MAC-cím megkeresése Windows alatt: BluetoothLEView
+
+1. Kapcsold be a számítógép Bluetooth-adapterét, és indítsd a NirSoft BluetoothLEView programját: https://www.nirsoft.net/utils/bluetooth_low_energy_scanner.html
+2. Várd meg a LYWSD03MMC nevű sort. A First/Last Detected és Counter mező segít ellenőrizni, hogy új hirdetések érkeznek.
+3. Másold ki a MAC Address mezőt. Az AA-BB-CC-DD-EE-FF alak a rádió számára AA:BB:CC:DD:EE:FF formára írható át.
+4. RSSI alapján megkülönböztethetők a közeli jelöltek, de az önmagában nem bizonyítja a tulajdonost. A saját bindkeyvel hitelesített mérés igazolja az egyezést.
+
+Ez a MAC azonosítására szolgál, a bindkeyt nem nyeri ki. A Scan Response típusú bejegyzés is használható a cím megkeresésére. A felhasználó 2026-10-16-án ezzel találta meg az érzékelőt; a személyes címet nem közöljük.
+
 ## R115 BETA rádiós integráció
 
 R115 célzottan a gyári LYWSD03MMC MiBeacon v5 AES-CCM hitelesített adatát támogatja. Más Xiaomi protokollok titkosított támogatása nem következik ebből. Csak nyugalmi óralapon, STOP lejátszás mellett dolgozik; a belső memóriahatárok változatlanok. Fizikai adatfogadás a dokumentum készítésekor NOT_RUN.
 
-A helyi soros karbantartási parancsok: `r10 sensor search`, `r10 sensor list`, `r10 sensor bind <listaindex> <32_hex_kulcs>`, `r10 sensor`. A bind nyugalmi, leállított scan után kerül alkalmazásra és mentésre; a kulcs nem kerül a válaszba. Nyilvános példában kizárólag helyőrzőt használj. A lista szolgáltatás és cím alapján jelöltet mutat; a kulccsal hitelesített hő/pára igazolja a tényleges egyezést.
+A helyi soros karbantartási parancsok: `r10 sensor search`, `r10 sensor list`, `r10 sensor bind <listaindex> <32_hex_kulcs>` vagy ismert cím esetén `r10 sensor pair <MAC> <32_hex_kulcs>`, `r10 sensor`. A bind nyugalmi, leállított scan után kerül alkalmazásra és mentésre; a kulcs nem kerül a válaszba. Nyilvános példában kizárólag helyőrzőt használj. A lista szolgáltatás és cím alapján jelöltet mutat; a kulccsal hitelesített hő/pára igazolja a tényleges egyezést.
 
 Források:
 - https://esphome.io/components/sensor/xiaomi_ble/#obtaining-the-bindkey
 - https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor
 - https://github.com/pvvx/ATC_MiThermometer
-
