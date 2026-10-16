@@ -20,7 +20,9 @@ A MAC hat hexadecimális pár, például AA:BB:CC:DD:EE:FF. A böngésző Blueto
 
 Ne publikálj valódi kulcsot, tokent, Xiaomi-azonosítót vagy személyes MAC-címet. A firmware nem tartalmaz előre beégetett személyes kulcsot.
 
-## MAC-cím megkeresése Windows alatt: BluetoothLEView
+## MAC-cím megkeresése Windows alatt: NirSoft BluetoothLEView
+
+A saját LYWSD03MMC hőmérőm MAC-címét a **[NirSoft BluetoothLEView – Bluetooth Low Energy Scanner](https://www.nirsoft.net/utils/bluetooth_low_energy_scanner.html)** programmal találtam meg. A futtatható fájl neve **BluetoothLEView.exe**. Ehhez a lépéshez ezt a Windowsos keresőt használtam; a Mi Bind Key kiolvasását külön, a Telink Flasherrel végeztem.
 
 1. Kapcsold be a számítógép Bluetooth-adapterét, és indítsd a NirSoft BluetoothLEView programját: https://www.nirsoft.net/utils/bluetooth_low_energy_scanner.html
 2. Várd meg a LYWSD03MMC nevű sort. A First/Last Detected és Counter mező segít ellenőrizni, hogy új hirdetések érkeznek.
