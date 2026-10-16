@@ -12,7 +12,7 @@ Az I-BT-Radio a saját ESP32-alapú rádióprojektem. A yoRadio alapjaira épít
 
 A nagy panel jelenleg **felületdemó**: a rádiózás, SD-lejátszás, Bluetooth, EQ és ébresztés mögötti funkciók még nincsenek átportolva. A menüben látható értékek és listák részben minták. Nem teljes rádiókiadás, és nem a SMALL mellé kötött második processzor.
 
-A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. A célbuild és az offline ellenőrzések sikeresek; az R83 teljes fizikai ellenőrzése még nincs lezárva. A DAC-hang kihagyásának okát még keresem, ezért ezt a változatot nem nevezem stabil kiadásnak.
+A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. Az R83-at lefordítottam és offline ellenőriztem, de a készüléken még nem próbáltam végig minden funkcióját. A DAC-hang kihagyásának okát még keresem, ezért ezt a változatot nem nevezem stabil kiadásnak.
 
 **Az internetes rádió → BT-kimenet a jelenlegi fejlesztői ágban tiltva marad.** A WebUI és az internetes rádió → DAC külön funkció. Az SD → DAC, SD → BT és telefon → BT-IN → DAC út külön ellenőrzendő.
 

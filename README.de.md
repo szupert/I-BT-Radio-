@@ -12,7 +12,7 @@ Ich entwickle I-BT-Radio als mein eigenes ESP32-Internetradio auf Basis von [yoR
 
 Es handelt sich um eine **Oberflächendemo**. Radio, SD-Audio, Bluetooth, EQ und die Ausführung der Weckfunktion sind noch nicht auf diese Platine portiert. Einige Listen und Werte sind Beispiele. Dies ist weder eine vollständige Radiofreigabe noch ein zweiter Prozessor für SMALL.
 
-Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Zielbuild und Offline-Prüfungen bestanden; die vollständige physische Prüfung von R83 steht noch aus. Die Ursache der Aussetzer bei der DAC-Wiedergabe untersuche ich noch.
+Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Ich habe R83 kompiliert und offline geprüft, aber noch nicht alle Funktionen auf dem Gerät ausprobiert. Die Ursache der Aussetzer bei der DAC-Wiedergabe untersuche ich noch.
 
 **Internetradio → Bluetooth-Ausgang bleibt in der aktuellen Entwicklung deaktiviert.** WebUI und Internetradio → DAC bleiben eigenständige Funktionen. SD → DAC, SD → BT und Telefon → BT-IN → DAC müssen getrennt geprüft werden.
 

@@ -12,7 +12,7 @@ I am building I-BT-Radio as my own ESP32 radio, based on yoRadio, with custom co
 
 This is an **interface demo**. Radio playback, SD audio, Bluetooth, EQ and alarm execution have not yet been ported to this board. Some displayed lists and values are examples. It is not a full radio release or a second processor attached to SMALL.
 
-The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. Target builds and offline checks passed; full physical validation of R83 is still pending. I am still investigating the DAC playback gaps.
+The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. I built R83 and ran the offline checks, but I have not yet tested all its functions on the device. I am still investigating the DAC playback gaps.
 
 **Internet radio → Bluetooth output remains disabled in the current development line.** WebUI and internet radio → DAC remain separate functions. SD → DAC, SD → BT and phone → BT-IN → DAC require separate validation.
 
