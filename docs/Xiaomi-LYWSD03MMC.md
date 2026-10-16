@@ -39,3 +39,11 @@ Források:
 - https://esphome.io/components/sensor/xiaomi_ble/#obtaining-the-bindkey
 - https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor
 - https://github.com/pvvx/ATC_MiThermometer
+
+## R116 BETA: beállítás közvetlenül a WebUI-ból
+
+A BLE hőmérő szakaszban külön MAC-cím és Mi Bind Key mező, Érzékelő mentése gomb és kézi Állapot frissítése található. A kulcs POST-törzsben kerül átadásra, nem az URL-ben. A mentett kulcsot az API nem adja vissza, a böngésző helyi tárába nem kerül. A rádió nyugalmi óralapon alkalmazza és menti a beállítást; a vételhez STOP lejátszás szükséges.
+
+A korábban elmentett saját érzékelő új keresés nélkül is szerepel a rádió listájában „mentett / vételre vár” állapottal. Ez nem azonos friss észleléssel vagy hitelesített mérési adattal. Az adatmegőrző firmware-frissítés megtartja a kötést; teljes formázás törli.
+
+R115-ön a tényleges helyi próba igazolta a cím és kulcs alkalmazását és NVS-mentését, de a generikus dekódertask foglalása után 32196 bájt belső RAM maradt a szükséges32768 helyett. A vétel ezért helyesen halasztott. R116 a célzott Xiaomi adatot külön JSON-dekódertask nélkül, korlátozott idle-feldolgozással kezeli. A biztonsági memóriahatárok változatlanok. Az R116 fizikai vételi eredménye még NOT_RUN; sikeres fordításból nem következik működő érzékelő.
