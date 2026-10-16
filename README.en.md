@@ -1,59 +1,30 @@
-# I-BT-Radio — skins, hardware and BETA installer
+# I-BT-Radio — V166-R125 BETA · 16 October 2026
 
-**Magyar:** [README.md](README.md) · **Deutsch:** [README.de.md](README.de.md)
+[Magyar](README.md) · [Deutsch](README.de.md)
 
-> **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
+I am building my own yoRadio-based ESP32-WROOM + PSRAM radio. SMALL is the active target. [Feature status](docs/Features.md) and [menu guide](docs/menu/README.md) distinguish completed checks from work still ahead; these detailed pages are in Hungarian.
 
-I am building I-BT-Radio as my own ESP32 radio, based on yoRadio, with custom controls and skins. Here I document the wiring, what I have tried on the device, and the issues I still need to fix.
+## Working, under test, planned
 
-## Development status — 13 October 2026
+| Status | Features |
+|---|---|
+| Tried on the device | Internet radio→DAC, SD→DAC, earlier phone→BT-IN→DAC playback, local navigation. R124 completed two short Budapest Rock/DAC phases, with and without menu navigation. |
+| Implemented; verification ongoing | Weekly alarm, volume/brightness ramps, local fallback tone, NTP and timezone settings, WebUI, weather and Xiaomi sensor support, adaptive display refresh up to 20fps. This is not a claim that every combination has passed a device test. |
+| R125, host checks passed | Immediate test failure after terminal BT→DAC fallback; queued reconnect distinguished from previous failure; ACL/authentication/A2DP diagnostics; scan and direct BLE acquisition share a minimum 60-second interval. R125 device tests are still pending. |
+| Known limitation | SD→BT failed during A2DP service discovery in R124. Bluetooth buffer performance was therefore not measured. Wi-Fi audio→BT is disabled. EQ audio processing is disabled; Winamp EQ is decorative. |
+| Planned | Resolve BT connection and remaining stability issues; full alarm/snooze tests; brightness and battery validation; Radio Browser; a low-traffic Android remote; further CPU/RAM optimization. |
 
-**The interface works on the large display too.** I tested the **MENU8048C-R4** menu demo on the 7-inch ESP32-8048S070C with its 800 × 480 capacitive touchscreen. Touch navigation, scrolling and back navigation worked on the device. The demo has 55 menu pages, 287 rows and 9 views; I am using it as the starting point for the large-display interface.
+The ESP32-8048S070C 800×480 touch menu demo worked on the device; it is not a full radio port. I am not publishing a new firmware download in this documentation update.
 
-This is an **interface demo**. Radio playback, SD audio, Bluetooth, EQ and alarm execution have not yet been ported to this board. Some displayed lists and values are examples. It is not a full radio release or a second processor attached to SMALL.
+## Public skin
 
-The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. I built R83 and ran the offline checks, but I have not yet tested all its functions on the device. I am still investigating the DAC playback gaps.
+**Winamp / Classic** is the only skin in the current public gallery. All others are **private**.
 
-**Internet radio → Bluetooth output remains disabled in the current development line.** WebUI and internet radio → DAC remain separate functions. SD → DAC, SD → BT and phone → BT-IN → DAC require separate validation.
+![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
 
-The downloadable **R33 historical BETA** below is neither R83 nor the large-display demo. I have not replaced its installer in this documentation update.
+![Winamp playlist](skins/classic-player-320x240/playlist.png)
 
-## Downloadable historical BETA — V166-R33
-
-[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Source](beta/V166_R33/V166-R33_SOURCE.zip)
-
-One-click installer; existing compatible 16 MB layout required. Wi-Fi→BT is 32 kHz; occasional gaps remain possible. Offline checks PASS; physical validation of this public package NOT_RUN.
-
-`19_MENU_STABILITAS_10PERC.bat`: 10 minutes without WebUI. `20_MENU_WEB_STABILITAS_10PERC.bat`: with WebUI. Results: RETURN_TO_EVA.
-
-## Skins
-
-**V166-R33.** Rendered previews, not hardware test screenshots.
-
-**Classic:** BT-OUT and MENU buttons; neutralised legacy corner emblem. The EQ curve is decorative.
-
-![Classic player](skins/classic-player-320x240/player_eq.png)
-![Classic playlist background](skins/classic-player-320x240/playlist.png)
-
-**Cassette:** station information and cover artwork are added at runtime.
-
-![Cassette](skins/cassette-320x213/cassette.png)
-
-**Media Player:** its own menu and playlist, radio/SD, BT OUT and MENU. USB is currently disabled. Example metadata is shown.
-
-![Media Player](skins/media-player-320x240/player.png)
-
-**Service:** an uncalibrated signal generator for amplifier testing, with sine, square, triangle and rising/falling ramps; DAC/BT, level and channel selection. It is not a calibrated measuring instrument. Bluetooth output limitations still apply. The preview shows an illustrative idle layout.
-
-![Service generator](skins/service-320x240/preview.png)
-
-Development firmware: **Settings → Display → Appearance**. Rendering depends on the source and audio route; Bluetooth may use a reduced display. [Asset provenance and hashes](skin-version.json).
-
-**Kajon-Jon-bt-vu skin:** twin VU meters with softly edged pointers that taper from a wider base to a fine tip. This is the design I chose; I still need to integrate it into the firmware renderer. The V166-R33 installer is unchanged.
-
-![Kajon-Jon-bt-vu skin — tapered pointer preview](skins/kajon-vu-320x240/player_tapered_preview.png)
-
-[Skin details](skins/kajon-vu-320x240/README.en.md)
+These are earlier visual previews, not full R125 device screenshots. I have retired mixed-skin downloads from the current branch. Previously published assets may remain in Git history; a private label does not retroactively restrict access.
 
 ## Hardware and wiring
 

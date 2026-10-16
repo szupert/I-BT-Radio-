@@ -1,5 +1,9 @@
 # vintage-hifi-320x240
 
-320×240 static background verified against the R83 firmware RGB565 array. Text, artwork and controls are drawn at runtime. This is not a device photograph or a complete menu screenshot. Select through Display → Skin in the development firmware; check the public installer version separately. SMALL physical display/touch validation: NOT_RUN.
+**Privát / Private / Privat.**
 
-![Background](background.png)
+Ezt a skint jelenleg nem teszem közzé. A nyilvános galériában csak a Winamp / Classic felület szerepel.
+
+I am keeping this skin private. Only Winamp / Classic is included in the current public gallery.
+
+Diesen Skin veröffentliche ich derzeit nicht. In der aktuellen öffentlichen Galerie ist nur Winamp / Classic enthalten.

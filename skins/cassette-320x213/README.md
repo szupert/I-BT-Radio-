@@ -1,3 +1,9 @@
-# Kazetta · 320 × 213
+# cassette-320x213
 
-A jelenlegi cassettePhoto firmware-adatból visszaolvasott háttér. A PNG és RGB565LE pár pixelre egyezik; a nyers adat 136 320 bájt. A szövegek és a borító futás közben kerülnek rá. A régi layout.json történeti leírás. [Forrás és hash](../../skin-version.json).
+**Privát / Private / Privat.**
+
+Ezt a skint jelenleg nem teszem közzé. A nyilvános galériában csak a Winamp / Classic felület szerepel.
+
+I am keeping this skin private. Only Winamp / Classic is included in the current public gallery.
+
+Diesen Skin veröffentliche ich derzeit nicht. In der aktuellen öffentlichen Galerie ist nur Winamp / Classic enthalten.

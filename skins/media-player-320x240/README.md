@@ -1,7 +1,9 @@
-# Media Player · 320 × 240
+# media-player-320x240
 
-V166-R32 renderer-előnézet. Az alsó DAC/eszköznév ezüst, lekerekített mezőt kapott; az inaktív USB megőrzi az eredeti tab keretét és betűit. A képen példaadatok szerepelnek, nem hardveres teszt.
+**Privát / Private / Privat.**
 
-player.png: működés közbeni elrendezés. background.png: nyers háttér, beégetett illusztrációval; a firmware ezt a tényleges metadata/vezérlés adataira cseréli. Az USB a SMALL klasszikus ESP32 hardveren inaktív. Az előnézet nem az R83 aktuális dinamikus feliratainak képernyőképe; a nyilvános telepítő verzióját a fő README jelöli.
+Ezt a skint jelenleg nem teszem közzé. A nyilvános galériában csak a Winamp / Classic felület szerepel.
 
-[Hash és eredet](../../skin-version.json).
+I am keeping this skin private. Only Winamp / Classic is included in the current public gallery.
+
+Diesen Skin veröffentliche ich derzeit nicht. In der aktuellen öffentlichen Galerie ist nur Winamp / Classic enthalten.

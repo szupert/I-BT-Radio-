@@ -1,17 +1,9 @@
-# Kajon-Jon-bt-vu Skin
+# kajon-vu-320x240
 
-[Magyar](README.md) · [English](README.en.md)
+**Privát / Private / Privat.**
 
-Zwei VU-Meter und metallische Bedienelemente mit eigenem Menü und eigener Wiedergabeliste. Auswahl in V166-R33: Einstellungen → Anzeige → Oberfläche → KAJON VU.
+Ezt a skint jelenleg nem teszem közzé. A nyilvános galériában csak a Winamp / Classic felület szerepel.
 
-## Freigegebener Zeigerentwurf
+I am keeping this skin private. Only Winamp / Classic is included in the current public gallery.
 
-Breitere Basis, gleichmäßig zu einer feinen Spitze verjüngt; dezente räumliche Wirkung, weiche Kanten und ein leichter Schatten.
-
-![Entwurf mit spitzen Zeigern](player_tapered_preview.png)
-
-Diese vergrößerte, generierte Vorschau ist eine Gestaltungsvorlage und keine Firmware-Bilddatei mit 320 × 240 Pixeln. Die ursprüngliche player.png und der RGB565-Hintergrund bleiben unverändert. Die Umsetzung im Zeiger-Renderer steht noch aus; der R33-Installer wurde nicht verändert. Physische Anzeige-/Audioprüfung: NOT_RUN.
-
-[Aktuelle Renderer-Vorschau](player.png) · [Menü](menu.png) · [Wiedergabeliste](playlist.png)
-
-Die ursprüngliche Grafik stammt aus der bereitgestellten KAJON_VU_PLAYER.rar. Die Grafiklizenz ist nicht unabhängig bestätigt; durch diese Veröffentlichung wird keine neue Lizenz dafür erteilt. Die yoRadio-Codelizenz gilt nicht automatisch für diese Grafik.
+Diesen Skin veröffentliche ich derzeit nicht. In der aktuellen öffentlichen Galerie ist nur Winamp / Classic enthalten.

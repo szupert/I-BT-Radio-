@@ -1,59 +1,30 @@
-# I-BT-Radio — Hardware, Oberflächen und BETA
+# I-BT-Radio — V166-R125 BETA · 16. Oktober 2026
 
 [Magyar](README.md) · [English](README.en.md)
 
-> **BETA — ausschließlich zum Testen.** Die Software funktioniert nur eingeschränkt. Nicht für den festen Einbau, den unbeaufsichtigten Betrieb oder als zuverlässiges Alltagsgerät empfohlen.
+Ich entwickle mein eigenes, auf yoRadio basierendes Radio mit ESP32-WROOM und PSRAM. SMALL ist das aktive Ziel. [Funktionsstand](docs/Features.md) und [Menübeschreibung](docs/menu/README.md) trennen geprüfte Funktionen von offenen Aufgaben; diese Detailseiten sind auf Ungarisch.
 
-Ich entwickle I-BT-Radio als mein eigenes ESP32-Internetradio auf Basis von [yoRadio](https://github.com/e2002/yoradio), mit eigener Bedienoberfläche und eigenen Skins. Hier beschreibe ich die Anschlüsse, meine Versuche am Gerät und die noch offenen Fehler. Vielen Dank an die yoRadio-Entwickler. Das Projekt verwendet GPL-3.0-lizenzierten Quellcode.
+## Funktioniert, wird geprüft, geplant
 
-## Entwicklungsstand — 13. Oktober 2026
+| Stand | Funktionen |
+|---|---|
+| Am Gerät erprobt | Internetradio→DAC, SD→DAC, früher auch Telefon→BT-IN→DAC und lokale Bedienung. R124 absolvierte zwei kurze Budapest-Rock/DAC-Phasen mit und ohne Menünavigation. |
+| Implementiert, Prüfung läuft | Wochenwecker, Lautstärke-/Helligkeitsrampen, lokaler Ersatzton, NTP/Zeitzone, WebUI, Wetter und Xiaomi-Sensoren, adaptive Anzeige bis 20fps. Nicht jede Kombination ist bereits am Gerät geprüft. |
+| R125, Hosttests erfolgreich | Kein unnötiges Warten nach endgültigem BT-Fehler und DAC-Rückfall; neue Verbindungsanfrage getrennt vom alten Fehler; ACL-/Authentifizierungs-/A2DP-Diagnose. BLE-Scan und direkte Abfrage starten zusammen höchstens einmal pro Minute. Gerätetest von R125 steht aus. |
+| Bekannte Grenzen | SD→BT scheiterte in R124 bei der A2DP-Dienstsuche, daher keine gültige BT-Puffermessung. WLAN-Audio→BT ist gesperrt. EQ-Signalverarbeitung ist abgeschaltet; Winamp-EQ dient nur der Darstellung. |
+| Geplant | BT-Verbindung und verbleibende Stabilitätsfehler beheben; vollständige Wecker-/Schlummertests; Helligkeit und Akku prüfen; Radio Browser; sparsame Android-Fernbedienung; weitere CPU-/RAM-Optimierung. |
 
-**Die Oberfläche funktioniert auch auf dem großen Display.** Ich habe die Menüdemonstration **MENU8048C-R4** auf dem 7-Zoll-ESP32-8048S070C mit kapazitivem 800 × 480-Touchscreen ausprobiert. Touchbedienung, Scrollen und Zurücknavigation funktionierten auf dem Gerät. Die Demo enthält 55 Menüseiten, 287 Menüzeilen und 9 Ansichten; darauf baue ich die Oberfläche für das große Display auf.
+Die 800×480-Touch-Menüdemo auf dem ESP32-8048S070C funktionierte am Gerät. Sie ist noch kein vollständiger Radioport. Mit diesem Dokumentationsupdate veröffentliche ich keine neue Firmware.
 
-Es handelt sich um eine **Oberflächendemo**. Radio, SD-Audio, Bluetooth, EQ und die Ausführung der Weckfunktion sind noch nicht auf diese Platine portiert. Einige Listen und Werte sind Beispiele. Dies ist weder eine vollständige Radiofreigabe noch ein zweiter Prozessor für SMALL.
+## Öffentlicher Skin
 
-Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Ich habe R83 kompiliert und offline geprüft, aber noch nicht alle Funktionen auf dem Gerät ausprobiert. Die Ursache der Aussetzer bei der DAC-Wiedergabe untersuche ich noch.
+Nur **Winamp / Classic** bleibt in der aktuellen öffentlichen Galerie. Alle anderen Skins sind **privat**.
 
-**Internetradio → Bluetooth-Ausgang bleibt in der aktuellen Entwicklung deaktiviert.** WebUI und Internetradio → DAC bleiben eigenständige Funktionen. SD → DAC, SD → BT und Telefon → BT-IN → DAC müssen getrennt geprüft werden.
+![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
 
-Das unten angebotene **historische R33-BETA-Paket** ist weder R83 noch die Großdisplay-Demo. Den Installer habe ich bei dieser Dokumentationsaktualisierung nicht ersetzt.
+![Winamp-Liste](skins/classic-player-320x240/playlist.png)
 
-## Historische BETA zum Download — V166-R33
-
-[Installer](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [Quellcode](beta/V166_R33/V166-R33_SOURCE.zip)
-
-One-Click-Installer; vorhandene kompatible 16-MB-Partition erforderlich. WLAN→BT mit 32 kHz; gelegentliche Aussetzer sind weiterhin möglich. Offline-Prüfungen PASS; physischer Test dieses öffentlichen Pakets NOT_RUN.
-
-`19_MENU_STABILITAS_10PERC.bat`: 10 Minuten ohne WebUI. `20_MENU_WEB_STABILITAS_10PERC.bat`: mit WebUI. Ergebnisse: RETURN_TO_EVA.
-
-## Oberflächen
-
-**V166-R33.** Gerenderte Vorschauen, keine Gerätetest-Fotos.
-
-**Klassisch:** BT-OUT und MENU; neutrales Eckfeld statt des alten Emblems. Die EQ-Kurve ist dekorativ.
-
-![Klassischer Player](skins/classic-player-320x240/player_eq.png)
-![Hintergrund der Senderliste](skins/classic-player-320x240/playlist.png)
-
-**Kassette:** Senderdaten und Cover werden zur Laufzeit ergänzt.
-
-![Kassette](skins/cassette-320x213/cassette.png)
-
-**Media Player:** eigenes Menü und eigene Wiedergabeliste, Radio/SD, BT OUT und MENU. USB bleibt deaktiviert. Beispiel-Metadaten in der Vorschau.
-
-![Media Player](skins/media-player-320x240/player.png)
-
-**Service:** unkalibrierter Signalgenerator für Verstärkertests mit Sinus, Rechteck, Dreieck und steigenden/fallenden Rampen; DAC/BT, Pegel und Kanalwahl. Kein kalibriertes Messgerät. Die Bluetooth-Ausgabe hat eigene Grenzen. Die Vorschau zeigt eine beispielhafte Ruheansicht.
-
-![Service](skins/service-320x240/preview.png)
-
-Entwicklungsfirmware: **Einstellungen → Anzeige → Oberfläche**. Darstellung abhängig von Quelle und Audioweg; bei Bluetooth kann eine reduzierte Ansicht erscheinen. [Bilddaten und Prüfsummen](skin-version.json).
-
-**Kajon-Jon-bt-vu Skin:** zwei VU-Meter mit weich gezeichneten Zeigern, die sich von einer breiteren Basis zu einer feinen Spitze verjüngen. Diesen Entwurf habe ich ausgewählt; die Umsetzung im Firmware-Renderer steht noch aus. Der V166-R33-Installer bleibt unverändert.
-
-![Kajon-Jon-bt-vu Skin — Entwurf mit spitzen Zeigern](skins/kajon-vu-320x240/player_tapered_preview.png)
-
-[Details zur Oberfläche](skins/kajon-vu-320x240/README.de.md)
+Die Bilder sind frühere Entwürfe, keine vollständigen R125-Gerätefotos. Downloads mit mehreren Skins habe ich aus dem aktuellen Zweig entfernt. Früher veröffentlichte Dateien können in der Git-Historie erhalten bleiben; eine Privat-Markierung schützt sie nicht rückwirkend.
 
 ## Hardware und Anschlüsse
 

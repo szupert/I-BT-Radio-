@@ -1,7 +1,5 @@
 # Kezelés
 
-Rotary: rövid nyomás Play/Stop; hosszú nyomás lejátszási lista; rövid, majd hosszú nyomás menü. A funkció az aktuális képernyő/állapot szerint változhat. Érintéssel MENU és BT OUT is elérhető.
+A jelenlegi kezelést és menüterületeket a [menüleírásban](menu/README.md), a működési állapotot a [funkciólistában](Features.md) írom le.
 
-Beállítások → Kijelző → Felület: választható nézet. A lista és menü a nézethez tartozik. Service: jelgenerátor tesztcélra, nem kalibrált mérésre. Akkumulátorkijelzés csak megfelelő hardveres osztó és saját kalibráció után használható.
-
-Forrás: internetes rádió / SD. Internetes rádió→BT 32 kHz; SD→BT tárgyalt forrásráta. Az USB lap jelenleg nem aktív. Bluetoothnál hangfolytonosság az első; a kijelző és artwork terhelése korlátozott.
+Rotary: rövid, majd hosszú nyomás a menühöz, óramódban is. Érintés: Menü, Vissza és görgethető listák. A lejátszási gombok állapotfüggők. EQ DSP kikapcsolva; Winamp EQ csak látvány. Wi-Fi-hang→BT tiltva, rádió→DAC megmarad.

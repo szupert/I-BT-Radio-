@@ -1,9 +1,8 @@
 {
-  "version": "0.5.0-gallery",
-  "source": "V166-R83 asset audit; earlier illustrative previews retained",
+  "version": "0.6.0-winamp-public",
+  "source": "Public Winamp preview retained; development firmware V166-R125, 2026-10-16",
   "validation": "Vintage PNG to firmware RGB565 equality PASS; binary/PNG pairs PASS. Physical SMALL display validation NOT_RUN. Gallery update is not a firmware release.",
   "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
-  "media_changes": "metallic route field; disabled USB retains the original tab lettering and bevel",
   "assets": {
     "skins/classic-player-320x240/player_eq.png": {
       "array": "playerSkinEq",
@@ -24,76 +23,8 @@
         320,
         240
       ]
-    },
-    "skins/cassette-320x213/cassette.png": {
-      "array": "cassettePhoto",
-      "source_sha256": "3047025f2f85d35676cce423f7e4b2fe63be5194e0f1d0da833088d2164df32f",
-      "png_sha256": "2f6ff2165582a023b1ffb3f41c19bb4282371af958c955a238448a58e422b6c9",
-      "rgb565_sha256": "d87c27ad5d83ecc4662d92ab1d54215c366fc1ddb9d69bccaa5cf962f6fb00b7",
-      "size": [
-        320,
-        213
-      ]
-    },
-    "skins/media-player-320x240/background.png": {
-      "array": "mediaPlayerBackground",
-      "source_sha256": "6ce8a4f50e3bb5dd450b9897c4eda5d2a4776fcd5d1855a451526c8c2abb776c",
-      "png_sha256": "9cd6dee205356d0c18ea808fbb19234f0365524ccdfd8991e1a005b0ca52e260",
-      "rgb565_sha256": "9acfde41dd4478f285ec3189f0c30384438fbd09975ee0e58f8db9bf49501fd1",
-      "size": [
-        320,
-        240
-      ]
-    },
-    "skins/media-player-320x240/player.png": {
-      "png_sha256": "0af2d82d752b9904fe538e9309067064af0fd947bf6bde71fdecc0eec5940e7a",
-      "size": [
-        320,
-        240
-      ],
-      "kind": "source-layout reconstruction with example values"
-    },
-    "skins/service-320x240/preview.png": {
-      "png_sha256": "2f701eb8417c54b903a2164e9f3dcac25459351f806c52e3e83be30438b60350",
-      "size": [
-        320,
-        240
-      ],
-      "kind": "source-layout reconstruction with example values"
-    },
-    "skins/retro-neon-320x240/background.png": {
-      "size": [
-        320,
-        240
-      ],
-      "array": "skin_retro",
-      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
-      "png_sha256": "b1dde4a9303986cd7d29615b398c10341f27a0f31d565be089ec52ef8686646f",
-      "rgb565_sha256": "5c43c2b16072dfec8293de0ac1d36603cf54f40955ddd7ff5c79afef9ff92393",
-      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
-    },
-    "skins/vintage-hifi-320x240/background.png": {
-      "size": [
-        320,
-        240
-      ],
-      "array": "skin_hifi",
-      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
-      "png_sha256": "4ff9637a22b6311d12c76dfb0320b6f972e7decf24777c0afd6498ead565ec01",
-      "rgb565_sha256": "b6a8c111128d199f9b74b3b7057baecf059e44e8cea3d5c7fa2fc486e457e1e8",
-      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
-    },
-    "skins/classic-wood-320x240/background.png": {
-      "size": [
-        320,
-        240
-      ],
-      "array": "skin_classic",
-      "source_sha256": "3def09ee263ad353ff93dad33e13918773e50e6b4e208e2872cfac59fd42b42a",
-      "png_sha256": "ce5758b4b6410f3bb6c79c34f81f870891b7157da46e27c35fbbdc25b899788d",
-      "rgb565_sha256": "63a08d9189dc3c98657b036660dbf313b6b0b2c19fbff390baac6b627ea7f0b7",
-      "kind": "static firmware background; labels, artwork and controls rendered at runtime"
     }
   },
-  "updated": "2026-10-13"
+  "updated": "2026-10-13",
+  "visibility": "Only Winamp/Classic assets public in current tree; all other skins private; former published versions may remain in Git history"
 }

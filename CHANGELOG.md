@@ -1,3 +1,11 @@
+## 2026-10-16 — V166-R125 dokumentáció
+
+- Funkciólista: készüléken már kipróbált, még tesztelendő és tervezett részek külön.
+- Menü és kezelés frissítve, EQ DSP kikapcsolása és Wi-Fi-hang→BT tiltása egyértelmű.
+- Csak Winamp / Classic marad a jelenlegi nyilvános galériában; más skinek privát jelölést kapnak. Korábbi nyilvános verziók a Git-előzményekben megmaradhatnak.
+- Vegyes skinletöltések visszavonva a jelenlegi ágból; helyi példány megőrizve. Nincs új nyilvános firmware-kiadás.
+- R125 fordítás és hostteszt sikeres, készülékes kontroll még hátravan.
+
 # KAJON mutatóterv — 2026-10-11
 
 - Elfogadott hegyes, alul szélesebb és lágy szélű mutató előnézete a főoldalon.

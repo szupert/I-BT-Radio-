@@ -1,9 +1,7 @@
 # Beállítás és frissítés
 
-1. Ellenőrizd a [hardvert és bekötést](../hardware/README.md).
-2. Töltsd le az [R33 BETA csomagot](../beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) és a SHA256 jegyzéket.
-3. Bontsd ki; `1_FELTOLTES.bat`. Kövesd a COM/BOOT/EN jelzéseket. Hiba esetén ne kerüld meg a hash/partíció ellenőrzést.
-4. A rádió saját menüjében állítsd be a Wi-Fi-t és a forrást. A telepítő nem tartalmaz személyes Wi-Fi-beállítást.
-5. Rövid kontroll: 19-es BAT WebUI nélkül; 20-as BAT WebUI-val. A hibajelzéshez a RETURN_TO_EVA eredményt küldd, személyes adatokat eltávolítva.
+A jelenlegi fejlesztői állapot V166-R125 BETA. Ebben a nyilvános dokumentációfrissítésben nincs új firmware-letöltés. A régi vegyes skin-csomagokat visszavontam a jelenlegi ágból.
 
-A telepítő alkalmazásfrissítés meglévő kompatibilis 16 MB-os kiosztásra; nem általános gyári flash/NVS-törlő. Az első, üres flash-es telepítést ez a csomag nem ígéri. Python 3.9+ / Windows PowerShell szükséges.
+A saját helyi csomagomban az 1_FELTOLTES.bat az alap, adatmegőrző feltöltő. Élő COM/BOOT és valódi százalékjelzés, csomag- és partícióellenőrzés. Teljes törlés csak külön, egyértelmű megerősítéssel történhet. A megfelelő SMALL hardver/PSRAM és16MB flashkiosztás előfeltétel.
+
+A TESZT_CELZOTT_8PERC.bat rádió-DAC kontrollt és SD-BT próbát végez. A sikertelen BT nem hangteszt-PASS. A teljes teszt- és funkcióállapot a [funkciólistában](Features.md) található.

@@ -1,72 +1,26 @@
-# I-BT-Radio — skinek, hardver és BETA telepítő
+# I-BT-Radio — V166-R125 BETA · 2026. október 16.
 
-**English:** [README.en.md](README.en.md) · **Deutsch:** [README.de.md](README.de.md)
+[English](README.en.md) · [Deutsch](README.de.md)
 
-> **BETA — csak tesztelésre.** Korlátozottan működőképes; beépítésre, mindennapos vagy felügyelet nélküli használatra nem ajánlott.
+Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A SMALL változaton dolgozom; a működő és a még hátralévő részeket külön vezetem.
 
-Az I-BT-Radio a saját ESP32-alapú rádióprojektem. A yoRadio alapjaira építem, saját kezelőfelülettel és skinekkel. Itt a bekötést, a kipróbált megoldásokat és a még nyitott hibákat is leírom.
+**[Funkciólista: működő, tesztelendő, tervezett](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-## Fejlesztési állapot — 2026. október 13.
+R124 alatt a Budapest Rock→DAC rövid kontrollja menüvel is lefutott. R125-ben a sikertelen BT-kapcsolódás utáni fölösleges várakozást javítottam, kapcsolati diagnosztikát és közös BLE-percenkénti korlátot adtam hozzá. Az új build és hosttesztek sikeresek; az R125 készülékes próbája még hátravan. Nem nevezem végleges stabil kiadásnak.
 
-**A nagy kijelzőn is működik a felület.** A **MENU8048C-R4** menüdemót az ESP32-8048S070C 7 hüvelykes, 800 × 480-as kapacitív érintőkijelzőjén is kipróbáltam. Az érintés, a görgetés és a visszalépés a készüléken is működött. A demóban 55 menüoldal, 287 menüsor és 9 nézet érhető el; a nagy kijelzős felületet erre az alapra építem tovább.
+A rádió→DAC és SD→DAC már működött a készüléken; telefon→BT-IN→DAC is működött korábban. Az SD→BT jelenleg kapcsolódási hiba miatt külön vizsgálatot igényel. **A Wi-Fi-hang→BT út tiltott, az EQ hangfeldolgozás teljesen kikapcsolt.** Óra/ébresztő, heti időzítés, NTP, WebUI, szenzorok és időjárás részletes állapota a funkciólistában található. Android-vezérlő, Radio Browser és további optimalizálás tervezett munka.
 
-A nagy panel jelenleg **felületdemó**: a rádiózás, SD-lejátszás, Bluetooth, EQ és ébresztés mögötti funkciók még nincsenek átportolva. A menüben látható értékek és listák részben minták. Nem teljes rádiókiadás, és nem a SMALL mellé kötött második processzor.
+A 800×480-as ESP32-8048S070C panelen az érintéses menüdemó működött. Ez még nem teljes rádióport.
 
-A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. Az R83-at lefordítottam és offline ellenőriztem, de a készüléken még nem próbáltam végig minden funkcióját. A DAC-hang kihagyásának okát még keresem, ezért ezt a változatot nem nevezem stabil kiadásnak.
+## Nyilvános skin
 
-**Az internetes rádió → BT-kimenet a jelenlegi fejlesztői ágban tiltva marad.** A WebUI és az internetes rádió → DAC külön funkció. Az SD → DAC, SD → BT és telefon → BT-IN → DAC út külön ellenőrzendő.
+**Winamp / Classic** — az EQ itt látványelem.
 
-Az alábbi letölthető **R33 történeti BETA** csomag nem az R83 és nem a nagy kijelzős demó; ebben a dokumentációfrissítésben a telepítőt nem cseréltem le.
+![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
 
-## Letölthető történeti csomag — V166-R33 BETA
+![Winamp lista](skins/classic-player-320x240/playlist.png)
 
-[One-click telepítő](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip) · [SHA256](beta/V166_R33/I-BT-Radio_V166-R33_BETA.zip.sha256) · [tesztelés és ismert korlátok](beta/V166_R33/README.md) · [forrás és buildrecept](beta/V166_R33/V166-R33_SOURCE.zip)
-
-Bontsd ki a csomagot, majd `1_FELTOLTES.bat`. ESP32-WROOM/Yellow Board + PSRAM, PCM5102A, **16 MB flash és kompatibilis partíció**. A feltöltő élő COM/BOOT/százalékos állapotot mutat, hash- és partícióhibánál megáll. Python 3.9+ kell; a PowerShell menüteszthez nem kell Python.
-
-`19_MENU_STABILITAS_10PERC.bat`: tízperces teljes menü/audio kontroll WebUI nélkül. `20_MENU_WEB_STABILITAS_10PERC.bat`: WebUI-terheléssel. A visszaadandó napló a RETURN_TO_EVA mappába kerül.
-
-**Ismert korlát:** Wi-Fi→BT 32 kHz; ritka hangkihagyás még előfordulhat. USB-forrás inaktív. A Service jelgenerátor nem kalibrált mérőműszer. Az R33 célbuild és offline feltöltő/runner ellenőrzés PASS; a friss csomag fizikai tesztje NOT_RUN. A régi [V159](beta/V159_HTTPS_STREAM/README.md) történeti kiadás.
-
-## Tartalom
-
-[Hardver és bekötés](#hardver-és-bekötés) · [Nézetek](#skin-előnézetek) · [Kezelés](docs/Controls.md) · [Beállítás és frissítés](docs/Quick-start.md) · [Mappatérkép](docs/Project-layout.md) · [Változások](CHANGELOG.md)
-
-Skinverzió: **0.3.0-preview** · [Változások](CHANGELOG.md). I-BT RADIO felület, egyedi feliratokkal és kezelőelemekkel. Ez grafikai előnézet; a Bluetooth-hang hosszú távú stabilitási próbája még folyamatban van.
-
-## Skin előnézetek
-
-**V166-R33 grafikai alap.** A képek előnézetek, nem hardveres tesztképek.
-
-**Klasszikus** — BT-OUT és MENU gomb, semlegesített régi sarokembléma. Az EQ-görbe látványelem.
-
-![Klasszikus lejátszó](skins/classic-player-320x240/player_eq.png)
-![Klasszikus lista háttere](skins/classic-player-320x240/playlist.png)
-
-**Kazetta** — a háttérre lejátszás közben kerül az állomás és a borító.
-
-![Kazetta](skins/cassette-320x213/cassette.png)
-
-**Media Player** — saját menü és lejátszási lista, rádió/SD, BT OUT és MENU. Az USB-forrás jelenleg inaktív. A képen példaadatok láthatók.
-
-![Media Player](skins/media-player-320x240/player.png)
-
-**Service** — erősítőteszthez használható jelgenerátor: szinusz, négyszög, háromszög, fel- és lefutó jel; DAC/BT kimenet, szint és csatorna választása. Nem kalibrált mérőműszer; a BT-kimenet saját korlátai érvényesek. A kép az alaphelyzet elrendezését mutatja.
-
-![Service jelgenerátor](skins/service-320x240/preview.png)
-
-A nézetválasztás a fejlesztői firmware-ben: **Beállítások → Kijelző → Felület**. A pillanatnyi forrás és hangút módosíthatja a megjelenést, BT-nél csökkentett kijelzés is használatos. [Képadatok és ellenőrzőösszegek](skin-version.json).
-
-**Kajon-Jon-bt-vu skin** — alul szélesebb, hegyesre vékonyodó, lágy szélű mutatók. Az alábbi kép az elfogadott grafikai terv; a firmware-be építés még hátravan.
-
-![Kajon-Jon-bt-vu skin – hegyes mutatós terv](skins/kajon-vu-320x240/player_tapered_preview.png)
-
-## További fájlok
-
-- [Részletes Yellow Board hardverleírás](hardware/README.md): panelváltozatok, foglalt GPIO-k, PSRAM-típusok és beépítés előtti ellenőrzések.
-- [English readme](README.en.md): angol nyelvű, önállóan követhető hardver- és bekötési útmutató.
-- [Lejátszóskin](skins/classic-player-320x240/README.md): 320 × 240 lejátszó/EQ és lista képek, RGB565LE adatok, koordináták.
-- [Kazettaskin](skins/cassette-320x213/README.md): 320 × 213-as kép, RGB565LE adat és érintési zónák.
+A képek korábbi grafikai előnézetek, nem az R125 teljes készülékes képernyőfotói. **Minden más skin privát**; [skinlista](skins/README.md). A korábban közzétett grafikák és régi csomagok a Git-előzményekben megmaradhatnak. A jelenlegi ágból a vegyes skinletöltéseket visszavontam; új firmware-t ebben a dokumentációfrissítésben nem publikálok.
 
 ## Hardver és bekötés
 

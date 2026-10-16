@@ -1,5 +1,9 @@
 # vintage-hifi-320x240
 
-320×240-as statikus háttér, az R83 firmware színadataival ellenőrizve. Az élő feliratokat, borítót és vezérlést a firmware rajzolja rá. Nem készülékfotó, és nem tartalmazza a teljes menürendszert. Kijelző → Felület alatt választható a fejlesztői firmware-ben. A nyilvános telepítő verzióját külön ellenőrizd. SMALL fizikai kép/touch ellenőrzés: NOT_RUN.
+**Privát / Private / Privat.**
 
-![Background](background.png)
+Ezt a skint jelenleg nem teszem közzé. A nyilvános galériában csak a Winamp / Classic felület szerepel.
+
+I am keeping this skin private. Only Winamp / Classic is included in the current public gallery.
+
+Diesen Skin veröffentliche ich derzeit nicht. In der aktuellen öffentlichen Galerie ist nur Winamp / Classic enthalten.
