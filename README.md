@@ -4,17 +4,19 @@
 
 > **BETA — csak tesztelésre.** Korlátozottan működőképes; beépítésre, mindennapos vagy felügyelet nélküli használatra nem ajánlott.
 
+Az I-BT-Radio a saját ESP32-alapú rádióprojektem. A yoRadio alapjaira építem, saját kezelőfelülettel és skinekkel. Itt a bekötést, a kipróbált megoldásokat és a még nyitott hibákat is leírom.
+
 ## Fejlesztési állapot — 2026. október 13.
 
-**A nagy kijelzőn is elindult a felület.** Az ESP32-8048S070C 7 hüvelykes, 800 × 480-as kapacitív érintőkijelzőn a **MENU8048C-R4** menü- és felületdemó működését a felhasználó visszaigazolta. A demó 55 menüoldalt, 287 menüsort és 9 választható nézetet tartalmaz; érintéssel bejárható, visszalépéssel és görgetéssel. Ez a jóváhagyott nagy kijelzős alap.
+**A nagy kijelzőn is működik a felület.** A **MENU8048C-R4** menüdemót az ESP32-8048S070C 7 hüvelykes, 800 × 480-as kapacitív érintőkijelzőjén is kipróbáltam. Az érintés, a görgetés és a visszalépés a készüléken is működött. A demóban 55 menüoldal, 287 menüsor és 9 nézet érhető el; a nagy kijelzős felületet erre az alapra építem tovább.
 
 A nagy panel jelenleg **felületdemó**: a rádiózás, SD-lejátszás, Bluetooth, EQ és ébresztés mögötti funkciók még nincsenek átportolva. A menüben látható értékek és listák részben minták. Nem teljes rádiókiadás, és nem a SMALL mellé kötött második processzor.
 
-A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. A célbuild és az offline ellenőrzések sikeresek; az R83 teljes fizikai ellenőrzése még nincs lezárva. A DAC-hang kihagyásának vizsgálata folytatódik, ezért általános hangstabilitást nem állítunk.
+A SMALL fejlesztői változata **V166-R83 BETA**: csoportosított óra/ébresztőmenü, heti időzítés, hangerő- és fényerő-felfutás/lecsengés, helyi „ti-ti-ti” tartalékhang. A célbuild és az offline ellenőrzések sikeresek; az R83 teljes fizikai ellenőrzése még nincs lezárva. A DAC-hang kihagyásának okát még keresem, ezért ezt a változatot nem nevezem stabil kiadásnak.
 
 **Az internetes rádió → BT-kimenet a jelenlegi fejlesztői ágban tiltva marad.** A WebUI és az internetes rádió → DAC külön funkció. Az SD → DAC, SD → BT és telefon → BT-IN → DAC út külön ellenőrzendő.
 
-Az alábbi letölthető **R33 történeti BETA** csomag nem az R83 és nem a nagy kijelzős demó; ebben a dokumentációfrissítésben a telepítőt nem cseréltük le.
+Az alábbi letölthető **R33 történeti BETA** csomag nem az R83 és nem a nagy kijelzős demó; ebben a dokumentációfrissítésben a telepítőt nem cseréltem le.
 
 ## Letölthető történeti csomag — V166-R33 BETA
 

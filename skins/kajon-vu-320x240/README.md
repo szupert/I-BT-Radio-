@@ -8,7 +8,7 @@ V166-R33: Beállítások → Kijelző → Felület → KAJON VU. Saját menü é
 
 RGB565: 32 bites csatornaműveletek, teljes pixelszám, visszaolvasás és sérülési negatív tesztek PASS. Fizikai kijelző/audio/VU: NOT_RUN. Háttér 153600B, két mérőlap 40960B, sávpuffer 2048B.
 
-Eredet: a rendelkezésre bocsátott KAJON_VU_PLAYER.rar és make_assets.py. Az archívumban nem található a saját grafika közzétételi licence; könyvtári licencek nem vonatkoznak automatikusan erre. A feltöltött grafika eredete és felhasználási engedélye nincs függetlenül igazolva; ehhez a grafikához nem adunk új felhasználási vagy terjesztési licencet. A yoRadio kód licence ezt nem rendezi.
+Eredet: a rendelkezésre bocsátott KAJON_VU_PLAYER.rar és make_assets.py. Az archívumban nem található a saját grafika közzétételi licence; könyvtári licencek nem vonatkoznak automatikusan erre. A feltöltött grafika eredete és felhasználási engedélye nincs függetlenül igazolva; ehhez a grafikához nem adok új felhasználási vagy terjesztési licencet. A yoRadio kód licence ezt nem rendezi.
 
 ## Elfogadott mutatóforma
 

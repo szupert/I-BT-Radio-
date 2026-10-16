@@ -10,7 +10,7 @@ A gyári érzékelő titkosított MiBeacon-adásához MAC-cím és 16 bájtos (3
 4. Siker esetén a Mi Bind Key mező értékét mentsd privát helyre. Ismételt aktiválás után a legutóbbi értéket használd.
 5. Disconnect: a rádió ezután passzívan fogadhatja az adást.
 
-A 2026-10-16-i felhasználói Telink napló LYWSD03MMC, Fw_version 1.0.0_0001 mellett sikeres aktiválást és bejelentkezést rögzített. Ez a kulcskinyerési folyamatot igazolja, nem a rádiós vételt. Újabb gyári verziók eltérhetnek.
+A böngészős aktiválást 2026. október 16-án egy gyári 1.0.0_0001 firmware-es LYWSD03MMC-vel is kipróbáltam: az aktiválás és a bejelentkezés sikerült. A kulcsot így ki tudtam nyerni; a rádiós mérési adatok vételét ettől külön kell ellenőrizni. Újabb gyári verziók eltérhetnek.
 
 Az aktiválás új kulcsot állíthat be: a Xiaomi Home újrapárosítást igényelhet. Ha a módszer nem támogatott, Xiaomi Home-hozzárendelés után a Xiaomi Cloud Tokens Extractor használható.
 
@@ -27,7 +27,7 @@ Ne publikálj valódi kulcsot, tokent, Xiaomi-azonosítót vagy személyes MAC-c
 3. Másold ki a MAC Address mezőt. Az AA-BB-CC-DD-EE-FF alak a rádió számára AA:BB:CC:DD:EE:FF formára írható át.
 4. RSSI alapján megkülönböztethetők a közeli jelöltek, de az önmagában nem bizonyítja a tulajdonost. A saját bindkeyvel hitelesített mérés igazolja az egyezést.
 
-Ez a MAC azonosítására szolgál, a bindkeyt nem nyeri ki. A Scan Response típusú bejegyzés is használható a cím megkeresésére. A felhasználó 2026-10-16-án ezzel találta meg az érzékelőt; a személyes címet nem közöljük.
+Ez a MAC azonosítására szolgál, a bindkeyt nem nyeri ki. A Scan Response típusú bejegyzés is használható a cím megkeresésére. A saját érzékelőm címét 2026. október 16-án ezzel találtam meg; a személyes MAC-címet nem teszem közzé.
 
 ## R115 BETA rádiós integráció
 
@@ -46,6 +46,6 @@ A BLE hőmérő szakaszban külön MAC-cím és Mi Bind Key mező, Érzékelő m
 
 A korábban elmentett saját érzékelő új keresés nélkül is szerepel a rádió listájában „mentett / vételre vár” állapottal. Ez nem azonos friss észleléssel vagy hitelesített mérési adattal. Az adatmegőrző firmware-frissítés megtartja a kötést; teljes formázás törli.
 
-R115-ön a tényleges helyi próba APPLIED és SAVED választ adott a cím és kulcs alkalmazására és NVS-írására; ez még nem igazolja az újraindítás utáni visszaolvasást, de a generikus dekódertask foglalása után 32196 bájt belső RAM maradt a szükséges32768 helyett. A vétel ezért helyesen halasztott. R116 a célzott Xiaomi adatot külön JSON-dekódertask nélkül, korlátozott idle-feldolgozással kezeli. A biztonsági memóriahatárok változatlanok. Az R116 fizikai vételi eredménye még NOT_RUN; sikeres fordításból nem következik működő érzékelő.
+Az R115 kipróbálásakor APPLIED és SAVED választ kaptam a cím és kulcs alkalmazására és NVS-írására; ez még nem igazolja az újraindítás utáni visszaolvasást, de a generikus dekódertask foglalása után 32196 bájt belső RAM maradt a szükséges32768 helyett. A vétel ezért helyesen halasztott. R116 a célzott Xiaomi adatot külön JSON-dekódertask nélkül, korlátozott idle-feldolgozással kezeli. A biztonsági memóriahatárok változatlanok. Az R116 fizikai vételi eredménye még NOT_RUN; sikeres fordításból nem következik működő érzékelő.
 
-A felhasználó jelezte, hogy az R115 listájában nem látszik a mentett érzékelő. R116 ezért mentés után azonnal visszaolvassa és összeveti a teljes cím–kulcs rekordot, és induláskor külön LOADED állapotot naplóz. A tartós megőrzést új hardveres bootnaplóval kell igazolni.
+Az R115 kipróbálásakor a mentett érzékelő nem jelent meg a listában. R116 ezért mentés után azonnal visszaolvassa és összeveti a teljes cím–kulcs rekordot, és induláskor külön LOADED állapotot naplóz. Azt, hogy a mentés újraindítás után is megmarad-e, még külön ellenőriznem kell.

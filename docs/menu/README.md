@@ -31,4 +31,4 @@ A rajzolási scan nem aktiválja a menüpontokat. A táblázat ezért külön je
 
 `21_MENU_ELLENORZO_SELFTEST.bat` a 19-es MENU10 FIX3 tesztet indítja WebUI nélkül. A 20-as indító WebUI-terheléssel mér. Automatikus állapotlekérdezés/indulás és lejátszás-előkészítés; 10 perc mérési cél, indulás és visszaállítás ezen felül. Q: leállítás. Windows PowerShell szükséges, firmware-feltöltés nincs.
 
-Az új RETURN_TO_EVA ZIP-et kell visszaadni. Naplómásolat SYSTEM/LOGS alatt is megmarad. Az eredeti mérésekhez nem írunk vissza; a sikeres menübejárás és a teljes kör lezárása külön eredmény.
+Az új RETURN_TO_EVA ZIP-et kell visszaadni. Naplómásolat SYSTEM/LOGS alatt is megmarad. Az eredeti méréseket nem módosítom; a sikeres menübejárás és a teljes kör lezárása külön eredmény.

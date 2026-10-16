@@ -4,17 +4,19 @@
 
 > **BETA — testing only.** Limited functionality; not recommended for integration, daily use, or unattended playback.
 
+I am building I-BT-Radio as my own ESP32 radio, based on yoRadio, with custom controls and skins. Here I document the wiring, what I have tried on the device, and the issues I still need to fix.
+
 ## Development status — 13 October 2026
 
-**The interface now runs on the large display too.** The user confirmed that the **MENU8048C-R4** menu/interface demo works on the 7-inch ESP32-8048S070C, with an 800 × 480 capacitive touchscreen. It includes 55 menu pages, 287 rows and 9 selectable views, with touch navigation, back navigation and scrolling. This is the approved large-display baseline.
+**The interface works on the large display too.** I tested the **MENU8048C-R4** menu demo on the 7-inch ESP32-8048S070C with its 800 × 480 capacitive touchscreen. Touch navigation, scrolling and back navigation worked on the device. The demo has 55 menu pages, 287 rows and 9 views; I am using it as the starting point for the large-display interface.
 
 This is an **interface demo**. Radio playback, SD audio, Bluetooth, EQ and alarm execution have not yet been ported to this board. Some displayed lists and values are examples. It is not a full radio release or a second processor attached to SMALL.
 
-The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. Target builds and offline checks passed; full physical validation of R83 is still pending. DAC playback gaps remain under investigation.
+The SMALL development version is **V166-R83 BETA**, with grouped clock/alarm menus, weekly scheduling, volume and brightness ramps, and a local fallback alarm tone. Target builds and offline checks passed; full physical validation of R83 is still pending. I am still investigating the DAC playback gaps.
 
 **Internet radio → Bluetooth output remains disabled in the current development line.** WebUI and internet radio → DAC remain separate functions. SD → DAC, SD → BT and phone → BT-IN → DAC require separate validation.
 
-The downloadable **R33 historical BETA** below is neither R83 nor the large-display demo. Its installer has not been replaced by this documentation update.
+The downloadable **R33 historical BETA** below is neither R83 nor the large-display demo. I have not replaced its installer in this documentation update.
 
 ## Downloadable historical BETA — V166-R33
 
@@ -47,7 +49,7 @@ One-click installer; existing compatible 16 MB layout required. Wi-Fi→BT is 32
 
 Development firmware: **Settings → Display → Appearance**. Rendering depends on the source and audio route; Bluetooth may use a reduced display. [Asset provenance and hashes](skin-version.json).
 
-**Kajon-Jon-bt-vu skin:** twin VU meters with softly edged pointers that taper from a wider base to a fine tip. This is the approved visual design; integration into the firmware renderer is still pending. The V166-R33 installer is unchanged.
+**Kajon-Jon-bt-vu skin:** twin VU meters with softly edged pointers that taper from a wider base to a fine tip. This is the design I chose; I still need to integrate it into the firmware renderer. The V166-R33 installer is unchanged.
 
 ![Kajon-Jon-bt-vu skin — tapered pointer preview](skins/kajon-vu-320x240/player_tapered_preview.png)
 

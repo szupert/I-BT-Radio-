@@ -4,19 +4,19 @@
 
 > **BETA — ausschließlich zum Testen.** Die Software funktioniert nur eingeschränkt. Nicht für den festen Einbau, den unbeaufsichtigten Betrieb oder als zuverlässiges Alltagsgerät empfohlen.
 
-I-BT-Radio ist ein ESP32-Internetradio auf Basis von [yoRadio](https://github.com/e2002/yoradio). Vielen Dank an dessen Entwickler. Das Projekt verwendet GPL-3.0-lizenzierten Quellcode.
+Ich entwickle I-BT-Radio als mein eigenes ESP32-Internetradio auf Basis von [yoRadio](https://github.com/e2002/yoradio), mit eigener Bedienoberfläche und eigenen Skins. Hier beschreibe ich die Anschlüsse, meine Versuche am Gerät und die noch offenen Fehler. Vielen Dank an die yoRadio-Entwickler. Das Projekt verwendet GPL-3.0-lizenzierten Quellcode.
 
 ## Entwicklungsstand — 13. Oktober 2026
 
-**Die Oberfläche läuft jetzt auch auf dem großen Display.** Der Nutzer hat die Funktion der Menü-/Oberflächendemo **MENU8048C-R4** auf dem 7-Zoll-ESP32-8048S070C mit kapazitivem 800 × 480-Touchscreen bestätigt. Die Demo enthält 55 Menüseiten, 287 Menüzeilen und 9 auswählbare Ansichten mit Touchbedienung, Zurücknavigation und Scrollen. Dies ist die freigegebene Grundlage für das große Display.
+**Die Oberfläche funktioniert auch auf dem großen Display.** Ich habe die Menüdemonstration **MENU8048C-R4** auf dem 7-Zoll-ESP32-8048S070C mit kapazitivem 800 × 480-Touchscreen ausprobiert. Touchbedienung, Scrollen und Zurücknavigation funktionierten auf dem Gerät. Die Demo enthält 55 Menüseiten, 287 Menüzeilen und 9 Ansichten; darauf baue ich die Oberfläche für das große Display auf.
 
 Es handelt sich um eine **Oberflächendemo**. Radio, SD-Audio, Bluetooth, EQ und die Ausführung der Weckfunktion sind noch nicht auf diese Platine portiert. Einige Listen und Werte sind Beispiele. Dies ist weder eine vollständige Radiofreigabe noch ein zweiter Prozessor für SMALL.
 
-Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Zielbuild und Offline-Prüfungen bestanden; die vollständige physische Prüfung von R83 steht noch aus. Aussetzer bei der DAC-Wiedergabe werden weiter untersucht.
+Die SMALL-Entwicklungsversion ist **V166-R83 BETA**: gruppierte Uhr-/Weckmenüs, Wochenplan, Lautstärke- und Helligkeitsrampen sowie ein lokaler Ersatzweckton. Zielbuild und Offline-Prüfungen bestanden; die vollständige physische Prüfung von R83 steht noch aus. Die Ursache der Aussetzer bei der DAC-Wiedergabe untersuche ich noch.
 
 **Internetradio → Bluetooth-Ausgang bleibt in der aktuellen Entwicklung deaktiviert.** WebUI und Internetradio → DAC bleiben eigenständige Funktionen. SD → DAC, SD → BT und Telefon → BT-IN → DAC müssen getrennt geprüft werden.
 
-Das unten angebotene **historische R33-BETA-Paket** ist weder R83 noch die Großdisplay-Demo. Der Installer wurde bei dieser Dokumentationsaktualisierung nicht ersetzt.
+Das unten angebotene **historische R33-BETA-Paket** ist weder R83 noch die Großdisplay-Demo. Den Installer habe ich bei dieser Dokumentationsaktualisierung nicht ersetzt.
 
 ## Historische BETA zum Download — V166-R33
 
@@ -49,7 +49,7 @@ One-Click-Installer; vorhandene kompatible 16-MB-Partition erforderlich. WLAN→
 
 Entwicklungsfirmware: **Einstellungen → Anzeige → Oberfläche**. Darstellung abhängig von Quelle und Audioweg; bei Bluetooth kann eine reduzierte Ansicht erscheinen. [Bilddaten und Prüfsummen](skin-version.json).
 
-**Kajon-Jon-bt-vu Skin:** zwei VU-Meter mit weich gezeichneten Zeigern, die sich von einer breiteren Basis zu einer feinen Spitze verjüngen. Dies ist der freigegebene Grafikentwurf; die Umsetzung im Firmware-Renderer steht noch aus. Der V166-R33-Installer bleibt unverändert.
+**Kajon-Jon-bt-vu Skin:** zwei VU-Meter mit weich gezeichneten Zeigern, die sich von einer breiteren Basis zu einer feinen Spitze verjüngen. Diesen Entwurf habe ich ausgewählt; die Umsetzung im Firmware-Renderer steht noch aus. Der V166-R33-Installer bleibt unverändert.
 
 ![Kajon-Jon-bt-vu Skin — Entwurf mit spitzen Zeigern](skins/kajon-vu-320x240/player_tapered_preview.png)
 
