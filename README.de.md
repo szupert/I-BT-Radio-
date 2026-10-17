@@ -26,19 +26,19 @@ Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht wer
 
 <p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-<p align="center"><em>Frühere Layout-Vorschau.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Frühere Layout-Vorschau.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Cassette</h3>
 
 <p align="center"><img src="skins/cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-<p align="center"><em>Statischer Hintergrund; Metadaten erscheinen bei der Wiedergabe.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Statischer Hintergrund; Metadaten erscheinen bei der Wiedergabe.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Kajon-Jon-bt-vu</h3>
 
 <p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Service</h3>
 
@@ -50,43 +50,43 @@ Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht wer
 
 <p align="center"><img src="skins/classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Vintage HiFi</h3>
 
 <p align="center"><img src="skins/vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
 
-<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Retro Neon</h3>
 
 <p align="center"><img src="skins/retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
 
-<p align="center"><em>Statischer Hintergrund; das separate Vintage-Thema.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Statischer Hintergrund; das separate Vintage-Thema.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Neon</h3>
 
 <p align="center"><img src="skins/neon-320x240/player.png" width="320" alt="Neon" /></p>
 
-<p align="center"><em>Vorschau mit R137-Zeichencode, Beispieldaten und illustrativem Spektrum.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>Vorschau mit R137-Zeichencode, Beispieldaten und illustrativem Spektrum.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Ébresztőóra / Alarm clock</h3>
 
 <p align="center"><img src="skins/alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
 
-<p align="center"><em>R124-Uhrvorschau mit Beispieldaten und aktiviertem Fotohintergrund.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>R124-Uhrvorschau mit Beispieldaten und aktiviertem Fotohintergrund.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Időjárás / Weather</h3>
 
 <p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
-<p align="center"><em>R130-Nachtvorschau mit Beispieldaten; keine aktuelle Wettermessung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>R130-Nachtvorschau mit Beispieldaten; keine aktuelle Wettermessung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Alapnézet / Basic player</h3>
 
 <p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
 
-<p align="center"><em>R137-Basisansicht mit Beispieldaten.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+<p align="center"><em>R137-Basisansicht mit Beispieldaten.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 

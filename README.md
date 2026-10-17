@@ -28,19 +28,19 @@ A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebbe
 
 <p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-<p align="center"><em>Korábbi grafikai előnézet.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Korábbi grafikai előnézet.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Cassette</h3>
 
 <p align="center"><img src="skins/cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-<p align="center"><em>Statikus háttér; a feliratok lejátszáskor kerülnek rá.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Statikus háttér; a feliratok lejátszáskor kerülnek rá.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Kajon-Jon-bt-vu</h3>
 
 <p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Korábbi mutatós elrendezési terv.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Korábbi mutatós elrendezési terv.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Service</h3>
 
@@ -52,43 +52,43 @@ A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebbe
 
 <p align="center"><img src="skins/classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Vintage HiFi</h3>
 
 <p align="center"><img src="skins/vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
 
-<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Retro Neon</h3>
 
 <p align="center"><img src="skins/retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
 
-<p align="center"><em>Statikus háttér; ez a külön vintage téma.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Statikus háttér; ez a külön vintage téma.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Neon</h3>
 
 <p align="center"><img src="skins/neon-320x240/player.png" width="320" alt="Neon" /></p>
 
-<p align="center"><em>Az R137 rajzolókódjával készült előnézet, példaadatokkal és szemléltető spektrummal.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>Az R137 rajzolókódjával készült előnézet, példaadatokkal és szemléltető spektrummal.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Ébresztőóra / Alarm clock</h3>
 
 <p align="center"><img src="skins/alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
 
-<p align="center"><em>R124 óralap-előnézet példaadatokkal, bekapcsolt fényképes háttérrel.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>R124 óralap-előnézet példaadatokkal, bekapcsolt fényképes háttérrel.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Időjárás / Weather</h3>
 
 <p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
-<p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Alapnézet / Basic player</h3>
 
 <p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
 
-<p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.<br>A szkin forráskódját privátként tartom meg.</em></p>
+<p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 
