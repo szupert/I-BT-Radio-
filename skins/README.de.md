@@ -4,7 +4,7 @@ Aktualisiert: 17. Oktober 2026 · V166-R137 Entwicklung
 
 Ich zeige elf Skins und die beiden einfachen Systemansichten: Basisplayer und BT-IN. Die Vorschauen sind zentriert und 320 Pixel breit. Frühere Layout-Vorschauen, statische Hintergründe und mit Zeichencode erzeugte Ansichten kennzeichne ich getrennt. Sie ersetzen keinen Anzeigetest am Gerät.
 
-Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
+Winamp, BT-IN, Service und Kajon-Jon-bt-vu sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -28,7 +28,7 @@ Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht wer
 
 <p align="center"><img src="kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
+<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.</em></p>
 
 <h3 align="center">Service</h3>
 

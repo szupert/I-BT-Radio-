@@ -4,7 +4,7 @@
 
 Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
 
-Im R136-DAC-Test derselben 15 Beispieldateien erreichte die PCM-Erzeugung 98,44–99,60% der Echtzeit. Opus belastete Core1 noch mit 94,1%. In R137 habe ich die überflüssige Einzelkonvertierung bei der PCM16-Übergabe entfernt. Build und Hosttests sind erfolgreich; Core1 unter 90%, PCM-Durchsatz und hörbare Qualität sind am Gerät noch zu prüfen. Die Sicherheitsgrenzen bleiben unverändert.
+Im R136-DAC-Test derselben 15 Beispieldateien erreichte die PCM-Erzeugung 98,44–99,60% der Echtzeit. Opus belastete Core1 noch mit 94,1%. In R137 habe ich die überflüssige Einzelkonvertierung bei der PCM16-Übergabe entfernt. Build und Hosttests sind erfolgreich; im R137-Test derselben 15 Dateien lag Opus Core1 bei 87,5%, die PCM-Erzeugung bei 99,40%. Pro Datei liegt ein sauberes CPU-Fenster von etwa 9 Sekunden vor; das belegt weder Dauerlast noch hörbare Qualität. ALAC24 erreichte 91,3% Core1 und 97,33% PCM und bleibt zu untersuchen. Die Sicherheitsgrenzen bleiben unverändert.
 
 Radio → DAC, SD → DAC und zuvor Telefon → BT-IN → DAC funktionierten am Gerät. SD → BT lief auch mit JBL; Pufferaussetzer und hohe Prozessorlast bleiben offen. WLAN-Audio → BT und EQ-Signalverarbeitung bleiben abgeschaltet. Wecker, BLE und Wetter brauchen weitere Tests. Die Touch-Menüdemo auf dem 800×480-Panel ESP32-8048S070C lief; sie ist noch kein vollständiger Radio-Port.
 
@@ -14,7 +14,7 @@ Aktualisiert: 17. Oktober 2026 · V166-R137 Entwicklung
 
 Ich zeige elf Skins und die beiden einfachen Systemansichten: Basisplayer und BT-IN. Die Vorschauen sind zentriert und 320 Pixel breit. Frühere Layout-Vorschauen, statische Hintergründe und mit Zeichencode erzeugte Ansichten kennzeichne ich getrennt. Sie ersetzen keinen Anzeigetest am Gerät.
 
-Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
+Winamp, BT-IN, Service und Kajon-Jon-bt-vu sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -38,7 +38,7 @@ Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht wer
 
 <p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
+<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.</em></p>
 
 <h3 align="center">Service</h3>
 

@@ -4,7 +4,7 @@ Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
 A teljes galériába tizenegy szkin és a két egyszerű rendszeroldal — az alapnézet és a BT-IN — előnézetét tettem. A képeket középre rendeztem, 320 pixel szélességgel. A régebbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm; egyik sem helyettesíti a készülékes kijelzőtesztet.
 
-A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebben a galériafrissítésben csak képeket és leírásokat teszek közzé.
+A Winamp, a BT-IN, a Service és a Kajon-Jon-bt-vu forrásának közzététele engedélyezett. Ebben a galériafrissítésben csak képeket és leírásokat teszek közzé.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -28,7 +28,7 @@ A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebbe
 
 <p align="center"><img src="kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Korábbi mutatós elrendezési terv.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Korábbi mutatós elrendezési terv.</em></p>
 
 <h3 align="center">Service</h3>
 

@@ -1,5 +1,7 @@
 # Kajon-Jon-bt-vu
 
-![Kajon-Jon-bt-vu](player_tapered_preview.png)
+<p align="center"><img src="player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Kajon-Jon-bt-vu ist eine Ausnahme: Sein Quellcode darf veröffentlicht werden.</em></p>
+
+Frühere Layout-Vorschau, kein aktuelles Gerätefoto.

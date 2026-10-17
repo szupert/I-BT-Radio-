@@ -6,7 +6,7 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 **[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-Az R136-tal ugyanazon 15 mintafájl DAC-próbájában 98,44–99,60%-os PCM-előállítási ütemet mértem a valós időhöz képest. Az Opus Core1-terhelése még 94,1% volt. Az R137-ben a kész 16 bites PCM átadásából vettem ki a fölösleges mintánkénti átalakítást; a fordítás és a hosttesztek sikeresek. A 90% alatti Core1-terhelés és a hangminőség készülékes ellenőrzése még hátravan. A biztonsági határok változatlanok.
+Az R136-tal ugyanazon 15 mintafájl DAC-próbájában 98,44–99,60%-os PCM-előállítási ütemet mértem a valós időhöz képest. Az Opus Core1-terhelése még 94,1% volt. Az R137-ben a kész 16 bites PCM átadásából vettem ki a fölösleges mintánkénti átalakítást; a fordítás és a hosttesztek sikeresek. Az azonos 15 fájlos R137 DAC-próbában az Opus Core1 87,5%-ra csökkent, a PCM-előállítás 99,40% maradt. Ez fájlonként körülbelül 9 másodperces tiszta CPU-ablakból származó rövid mérés; hallható minőséget és hosszú stabilitást nem igazol. ALAC24-nél 91,3% Core1 és 97,33% PCM adódott, ezt tovább vizsgálom. A biztonsági határok változatlanok.
 
 A rádió → DAC, SD → DAC és korábban a telefon → BT-IN → DAC már működött a készüléken. Az SD → BT a JBL-lel is működött, de a pufferkihagyások és a nagy terhelés javítása még nyitott. **A Wi-Fi-hang → BT tiltott, az EQ hangfeldolgozás kikapcsolt.** Az óra, az ébresztés, a BLE és az időjárás további ellenőrzést igényel. A 800×480-as ESP32-8048S070C panelen az érintéses menüdemót is elindítottam; ez még nem teljes rádióport.
 
@@ -16,7 +16,7 @@ Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
 A teljes galériába tizenegy szkin és a két egyszerű rendszeroldal — az alapnézet és a BT-IN — előnézetét tettem. A képeket középre rendeztem, 320 pixel szélességgel. A régebbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm; egyik sem helyettesíti a készülékes kijelzőtesztet.
 
-A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebben a galériafrissítésben csak képeket és leírásokat teszek közzé.
+A Winamp, a BT-IN, a Service és a Kajon-Jon-bt-vu forrásának közzététele engedélyezett. Ebben a galériafrissítésben csak képeket és leírásokat teszek közzé.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -40,7 +40,7 @@ A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebbe
 
 <p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Korábbi mutatós elrendezési terv.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Korábbi mutatós elrendezési terv.</em></p>
 
 <h3 align="center">Service</h3>
 

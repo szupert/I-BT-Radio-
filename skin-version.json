@@ -7,7 +7,8 @@
     "public_allowed": [
       "Winamp / Classic",
       "Bluetooth IN",
-      "Service"
+      "Service",
+      "Kajon-Jon-bt-vu"
     ],
     "private": "All other skins. Preview publication does not publish implementation.",
     "history": "This gallery update does not rewrite repository history."
@@ -36,7 +37,7 @@
       "path": "skins/kajon-vu-320x240/player_tapered_preview.png",
       "name": "Kajon-Jon-bt-vu",
       "preview_kind": "Earlier needle-meter layout preview.",
-      "source_publication_allowed": false
+      "source_publication_allowed": true
     },
     {
       "path": "skins/service-320x240/preview.png",

@@ -1,5 +1,7 @@
 # Kajon-Jon-bt-vu
 
-![Kajon-Jon-bt-vu](player_tapered_preview.png)
+<p align="center"><img src="player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-The source code is private at the owner's request.
+<p align="center"><em>Kajon-Jon-bt-vu is an exception: its source may be published.</em></p>
+
+Earlier layout preview, not a current device photograph.

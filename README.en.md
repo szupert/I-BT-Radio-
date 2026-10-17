@@ -4,7 +4,7 @@
 
 I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-In the R136 DAC test of the same 15 sample files, PCM production reached 98.44–99.60% of real time. Opus Core1 load was still 94.1%. In R137 I removed redundant per-sample conversion from the signed PCM16 handoff. Build and host checks passed; device verification of Core1 below 90%, PCM throughput and audible quality is still pending. Safety limits are unchanged.
+In the R136 DAC test of the same 15 sample files, PCM production reached 98.44–99.60% of real time. Opus Core1 load was still 94.1%. In R137 I removed redundant per-sample conversion from the signed PCM16 handoff. Build and host checks passed; the R137 test of the same 15 files measured Opus Core1 at 87.5% and PCM production at 99.40%. Each file has one clean approximately 9-second CPU window, so this does not prove sustained load or audible quality. ALAC24 measured 91.3% Core1 and 97.33% PCM and needs further investigation. Safety limits are unchanged.
 
 Radio → DAC, SD → DAC and earlier phone → BT-IN → DAC playback worked on the device. SD → BT also worked with JBL, but underruns and CPU load remain open. Wi-Fi audio → BT and EQ audio processing remain disabled. Alarm, BLE and weather validation is ongoing. The 800×480 ESP32-8048S070C touch-menu demo worked; it is not a full radio port.
 
@@ -14,7 +14,7 @@ Updated: 17 October 2026 · V166-R137 development
 
 I have included eleven skins and the two simple system screens: the basic player and BT-IN. Previews are centered at 320 pixels wide. I distinguish older layout previews, static backgrounds and previews rendered from drawing code. These images do not replace device display testing.
 
-Winamp, BT-IN and Service are exceptions: their source may be published. This gallery update publishes images and descriptions only.
+Winamp, BT-IN, Service and Kajon-Jon-bt-vu are exceptions: their source may be published. This gallery update publishes images and descriptions only.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -38,7 +38,7 @@ Winamp, BT-IN and Service are exceptions: their source may be published. This ga
 
 <p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Earlier needle-meter layout preview.<br>At the client's request, I am keeping the source code private for an unspecified period. I will publish it upon a separate request, with the owner's permission.</em></p>
+<p align="center"><em>Earlier needle-meter layout preview.</em></p>
 
 <h3 align="center">Service</h3>
 

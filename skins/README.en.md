@@ -4,7 +4,7 @@ Updated: 17 October 2026 · V166-R137 development
 
 I have included eleven skins and the two simple system screens: the basic player and BT-IN. Previews are centered at 320 pixels wide. I distinguish older layout previews, static backgrounds and previews rendered from drawing code. These images do not replace device display testing.
 
-Winamp, BT-IN and Service are exceptions: their source may be published. This gallery update publishes images and descriptions only.
+Winamp, BT-IN, Service and Kajon-Jon-bt-vu are exceptions: their source may be published. This gallery update publishes images and descriptions only.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -28,7 +28,7 @@ Winamp, BT-IN and Service are exceptions: their source may be published. This ga
 
 <p align="center"><img src="kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-<p align="center"><em>Earlier needle-meter layout preview.<br>At the client's request, I am keeping the source code private for an unspecified period. I will publish it upon a separate request, with the owner's permission.</em></p>
+<p align="center"><em>Earlier needle-meter layout preview.</em></p>
 
 <h3 align="center">Service</h3>
 
