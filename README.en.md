@@ -1,68 +1,100 @@
-# I-BT-Radio — V166-R125 BETA · 16 October 2026
+# I-BT-Radio — V166-R137 BETA · 17 October 2026
 
 [Magyar](README.md) · [Deutsch](README.de.md)
 
-I am building my own yoRadio-based ESP32-WROOM + PSRAM radio. SMALL is the active target. [Feature status](docs/Features.md) and [menu guide](docs/menu/README.md) distinguish completed checks from work still ahead; these detailed pages are in Hungarian.
+I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-## Working, under test, planned
+In the R136 DAC test of the same 15 sample files, PCM production reached 98.44–99.60% of real time. Opus Core1 load was still 94.1%. In R137 I removed redundant per-sample conversion from the signed PCM16 handoff. Build and host checks passed; device verification of Core1 below 90%, PCM throughput and audible quality is still pending. Safety limits are unchanged.
 
-| Status | Features |
-|---|---|
-| Tried on the device | Internet radio→DAC, SD→DAC, earlier phone→BT-IN→DAC playback, local navigation. R124 completed two short Budapest Rock/DAC phases, with and without menu navigation. |
-| Implemented; verification ongoing | Weekly alarm, volume/brightness ramps, local fallback tone, NTP and timezone settings, WebUI, weather and Xiaomi sensor support, adaptive display refresh up to 20fps. This is not a claim that every combination has passed a device test. |
-| R125, host checks passed | Immediate test failure after terminal BT→DAC fallback; queued reconnect distinguished from previous failure; ACL/authentication/A2DP diagnostics; scan and direct BLE acquisition share a minimum 60-second interval. R125 device tests are still pending. |
-| Known limitation | SD→BT failed during A2DP service discovery in R124. Bluetooth buffer performance was therefore not measured. Wi-Fi audio→BT is disabled. EQ audio processing is disabled; Winamp EQ is decorative. |
-| Planned | Resolve BT connection and remaining stability issues; full alarm/snooze tests; brightness and battery validation; Radio Browser; a low-traffic Android remote; further CPU/RAM optimization. |
-
-The ESP32-8048S070C 800×480 touch menu demo worked on the device; it is not a full radio port. I am not publishing a new firmware download in this documentation update.
+Radio → DAC, SD → DAC and earlier phone → BT-IN → DAC playback worked on the device. SD → BT also worked with JBL, but underruns and CPU load remain open. Wi-Fi audio → BT and EQ audio processing remain disabled. Alarm, BLE and weather validation is ongoing. The 800×480 ESP32-8048S070C touch-menu demo worked; it is not a full radio port.
 
 ## Skins
 
-All skin previews are visible. Winamp and Service remain public; I am not publishing source code for the other skins. These are visual previews, not proof that every R125 feature has passed a device test. I am not publishing a new firmware download here.
+Updated: 17 October 2026 · V166-R137 development
 
-### Winamp / Classic
+I have included eleven skins and the two simple system screens: the basic player and BT-IN. Previews are centered at 320 pixels wide. I distinguish older layout previews, static backgrounds and previews rendered from drawing code. These images do not replace device display testing.
 
-![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
+Winamp, BT-IN and Service are exceptions: their source may be published. This gallery update publishes images and descriptions only.
 
-### Media Player
+<h3 align="center">Winamp / Classic</h3>
 
-![Media Player](skins/media-player-320x240/player.png)
+<p align="center"><img src="skins/classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
 
-The source code is private at the owner's request.
+<p align="center"><em>Earlier layout preview.</em></p>
 
-### Cassette
+<h3 align="center">Media Player</h3>
 
-![Cassette](skins/cassette-320x213/cassette.png)
+<p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-The source code is private at the owner's request.
+<p align="center"><em>Earlier layout preview.<br>I am keeping this skin's source code private.</em></p>
 
-### Kajon-Jon-bt-vu
+<h3 align="center">Cassette</h3>
 
-![Kajon-Jon-bt-vu](skins/kajon-vu-320x240/player_tapered_preview.png)
+<p align="center"><img src="skins/cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-The source code is private at the owner's request.
+<p align="center"><em>Static background; metadata is drawn during playback.<br>I am keeping this skin's source code private.</em></p>
 
-### Service
+<h3 align="center">Kajon-Jon-bt-vu</h3>
 
-![Service](skins/service-320x240/preview.png)
+<p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-### Classic Wood
+<p align="center"><em>Earlier needle-meter layout preview.<br>I am keeping this skin's source code private.</em></p>
 
-![Classic Wood](skins/classic-wood-320x240/background.png)
+<h3 align="center">Service</h3>
 
-The source code is private at the owner's request.
+<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
 
-### Vintage HiFi
+<p align="center"><em>Signal generator and diagnostics; not a calibrated instrument.</em></p>
 
-![Vintage HiFi](skins/vintage-hifi-320x240/background.png)
+<h3 align="center">Classic Wood</h3>
 
-The source code is private at the owner's request.
+<p align="center"><img src="skins/classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-### Retro Neon
+<p align="center"><em>Static background without live labels.<br>I am keeping this skin's source code private.</em></p>
 
-![Retro Neon](skins/retro-neon-320x240/background.png)
+<h3 align="center">Vintage HiFi</h3>
 
-The source code is private at the owner's request.
+<p align="center"><img src="skins/vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
+
+<p align="center"><em>Static background without live labels.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Retro Neon</h3>
+
+<p align="center"><img src="skins/retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
+
+<p align="center"><em>Static background; a separate vintage theme.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Neon</h3>
+
+<p align="center"><img src="skins/neon-320x240/player.png" width="320" alt="Neon" /></p>
+
+<p align="center"><em>Preview rendered with the R137 drawing code, example metadata and illustrative spectrum.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Ébresztőóra / Alarm clock</h3>
+
+<p align="center"><img src="skins/alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
+
+<p align="center"><em>R124 clock-face preview with example values and photographic background enabled.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Időjárás / Weather</h3>
+
+<p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
+
+<p align="center"><em>R130 night preview with example data; not a live weather reading.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Alapnézet / Basic player</h3>
+
+<p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
+
+<p align="center"><em>R137 basic-player drawing code with example values.<br>I am keeping this skin's source code private.</em></p>
+
+<h3 align="center">Bluetooth IN</h3>
+
+<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+
+<p align="center"><em>R137 BT-IN screen section with example values, without cover artwork.</em></p>
+
+Wi-Fi audio → BT remains disabled, as does EQ audio processing. The Winamp EQ curve is decorative. This gallery update is not a new public firmware release.
 
 ## Hardware and wiring
 

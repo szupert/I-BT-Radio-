@@ -1,64 +1,102 @@
-# I-BT-Radio — V166-R125 BETA · 2026. október 16.
+# I-BT-Radio — V166-R137 BETA · 2026. október 17.
 
 [English](README.en.md) · [Deutsch](README.de.md)
 
-Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A SMALL változaton dolgozom; a működő és a még hátralévő részeket külön vezetem.
+Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A SMALL változaton dolgozom.
 
-**[Funkciólista: működő, tesztelendő, tervezett](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
+**[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-R124 alatt a Budapest Rock→DAC rövid kontrollja menüvel is lefutott. R125-ben a sikertelen BT-kapcsolódás utáni fölösleges várakozást javítottam, kapcsolati diagnosztikát és közös BLE-percenkénti korlátot adtam hozzá. Az új build és hosttesztek sikeresek; az R125 készülékes próbája még hátravan. Nem nevezem végleges stabil kiadásnak.
+Az R136-tal ugyanazon 15 mintafájl DAC-próbájában 98,44–99,60%-os PCM-előállítási ütemet mértem a valós időhöz képest. Az Opus Core1-terhelése még 94,1% volt. Az R137-ben a kész 16 bites PCM átadásából vettem ki a fölösleges mintánkénti átalakítást; a fordítás és a hosttesztek sikeresek. A 90% alatti Core1-terhelés és a hangminőség készülékes ellenőrzése még hátravan. A biztonsági határok változatlanok.
 
-A rádió→DAC és SD→DAC már működött a készüléken; telefon→BT-IN→DAC is működött korábban. Az SD→BT jelenleg kapcsolódási hiba miatt külön vizsgálatot igényel. **A Wi-Fi-hang→BT út tiltott, az EQ hangfeldolgozás teljesen kikapcsolt.** Óra/ébresztő, heti időzítés, NTP, WebUI, szenzorok és időjárás részletes állapota a funkciólistában található. Android-vezérlő, Radio Browser és további optimalizálás tervezett munka.
-
-A 800×480-as ESP32-8048S070C panelen az érintéses menüdemó működött. Ez még nem teljes rádióport.
+A rádió → DAC, SD → DAC és korábban a telefon → BT-IN → DAC már működött a készüléken. Az SD → BT a JBL-lel is működött, de a pufferkihagyások és a nagy terhelés javítása még nyitott. **A Wi-Fi-hang → BT tiltott, az EQ hangfeldolgozás kikapcsolt.** Az óra, az ébresztés, a BLE és az időjárás további ellenőrzést igényel. A 800×480-as ESP32-8048S070C panelen az érintéses menüdemót is elindítottam; ez még nem teljes rádióport.
 
 ## Skinek
 
-Minden skin előnézete látható. A Winamp és a Service nyilvános marad; a többi skin forráskódját nem teszem közzé. A képek grafikai előnézetek, nem az összes R125-funkció készülékes igazolásai. Új firmware-letöltést most nem publikálok.
+Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
-### Winamp / Classic
+A teljes galériába tizenegy szkin és a két egyszerű rendszeroldal — az alapnézet és a BT-IN — előnézetét tettem. A képeket középre rendeztem, 320 pixel szélességgel. A régebbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm; egyik sem helyettesíti a készülékes kijelzőtesztet.
 
-![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
+A Winamp, a BT-IN és a Service forrásának közzététele engedélyezett. Ebben a galériafrissítésben csak képeket és leírásokat teszek közzé.
 
-### Media Player
+<h3 align="center">Winamp / Classic</h3>
 
-![Media Player](skins/media-player-320x240/player.png)
+<p align="center"><img src="skins/classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><em>Korábbi grafikai előnézet.</em></p>
 
-### Cassette
+<h3 align="center">Media Player</h3>
 
-![Cassette](skins/cassette-320x213/cassette.png)
+<p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><em>Korábbi grafikai előnézet.<br>A szkin forráskódját privátként tartom meg.</em></p>
 
-### Kajon-Jon-bt-vu
+<h3 align="center">Cassette</h3>
 
-![Kajon-Jon-bt-vu](skins/kajon-vu-320x240/player_tapered_preview.png)
+<p align="center"><img src="skins/cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><em>Statikus háttér; a feliratok lejátszáskor kerülnek rá.<br>A szkin forráskódját privátként tartom meg.</em></p>
 
-### Service
+<h3 align="center">Kajon-Jon-bt-vu</h3>
 
-![Service](skins/service-320x240/preview.png)
+<p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-### Classic Wood
+<p align="center"><em>Korábbi mutatós elrendezési terv.<br>A szkin forráskódját privátként tartom meg.</em></p>
 
-![Classic Wood](skins/classic-wood-320x240/background.png)
+<h3 align="center">Service</h3>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
 
-### Vintage HiFi
+<p align="center"><em>Jelgenerátor és diagnosztika; nem kalibrált műszer.</em></p>
 
-![Vintage HiFi](skins/vintage-hifi-320x240/background.png)
+<h3 align="center">Classic Wood</h3>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><img src="skins/classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-### Retro Neon
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A szkin forráskódját privátként tartom meg.</em></p>
 
-![Retro Neon](skins/retro-neon-320x240/background.png)
+<h3 align="center">Vintage HiFi</h3>
 
-A tulajdonos kérésére a forráskód privát.
+<p align="center"><img src="skins/vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
+
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Retro Neon</h3>
+
+<p align="center"><img src="skins/retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
+
+<p align="center"><em>Statikus háttér; ez a külön vintage téma.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Neon</h3>
+
+<p align="center"><img src="skins/neon-320x240/player.png" width="320" alt="Neon" /></p>
+
+<p align="center"><em>Az R137 rajzolókódjával készült előnézet, példaadatokkal és szemléltető spektrummal.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Ébresztőóra / Alarm clock</h3>
+
+<p align="center"><img src="skins/alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
+
+<p align="center"><em>R124 óralap-előnézet példaadatokkal, bekapcsolt fényképes háttérrel.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Időjárás / Weather</h3>
+
+<p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
+
+<p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Alapnézet / Basic player</h3>
+
+<p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
+
+<p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.<br>A szkin forráskódját privátként tartom meg.</em></p>
+
+<h3 align="center">Bluetooth IN</h3>
+
+<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+
+<p align="center"><em>R137 BT-IN képernyőrész, példaadatokkal; borító nélküli állapot.</em></p>
+
+A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A Winamp EQ-görbéje látványelem. A galéria nem új nyilvános firmware-kiadás.
 
 ## Hardver és bekötés
 

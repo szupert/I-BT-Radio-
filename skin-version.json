@@ -1,78 +1,101 @@
 {
-  "version": "0.6.1-public-previews",
-  "source": "Public Winamp preview retained; development firmware V166-R125, 2026-10-16",
-  "validation": "Vintage PNG to firmware RGB565 equality PASS; binary/PNG pairs PASS. Physical SMALL display validation NOT_RUN. Gallery update is not a firmware release.",
-  "classic_changes": "MENU overlay from renderer; legacy corner emblem neutralised in public previews",
-  "assets": {
-    "skins/classic-player-320x240/player_eq.png": {
-      "array": "playerSkinEq",
-      "source_sha256": "c0eebe9a7b58452b5fd383818993767a282ad480da348de9957973a67113768a",
-      "png_sha256": "afaa6bea1a25a6b169e9e396a9a7e94464fc491be765eec09b16b06e0feb07d7",
-      "rgb565_sha256": "80ca036519582523cd2d867f00d5be506ca943a8552a4c13f3bb87521a65b200",
-      "size": [
-        320,
-        240
-      ]
-    },
-    "skins/classic-player-320x240/playlist.png": {
-      "array": "playerSkinPlaylist",
-      "source_sha256": "c0eebe9a7b58452b5fd383818993767a282ad480da348de9957973a67113768a",
-      "png_sha256": "e9e399fdce2402e03aa250069b83f8bb5414787926ecf9e3dbe71d3b140f546c",
-      "rgb565_sha256": "f1cb60bffcf549eaaf9a38c8a5ad802a768b88b42e3c53bbec60a251a1cb5e7e",
-      "size": [
-        320,
-        240
-      ]
-    },
-    "skins/cassette-320x213/cassette.png": {
-      "png_sha256": "2f6ff2165582a023b1ffb3f41c19bb4282371af958c955a238448a58e422b6c9",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/classic-wood-320x240/background.png": {
-      "png_sha256": "ce5758b4b6410f3bb6c79c34f81f870891b7157da46e27c35fbbdc25b899788d",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/kajon-vu-320x240/background.png": {
-      "png_sha256": "38973d6a8c4c82a70619f2780511121c086b6e326e24510461214427489641e3",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/kajon-vu-320x240/menu.png": {
-      "png_sha256": "98812ecf845536a95d74ccd57a3eb6b4c677b4208c2e8dde54b41424aa695b51",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/kajon-vu-320x240/player.png": {
-      "png_sha256": "022e2460a348f2f06956f619543936ec1da27615bf73bb0afa9e2432314bd95e",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/kajon-vu-320x240/player_tapered_preview.png": {
-      "png_sha256": "e222568e874b2295aa61befb19c426868700b8cf4a64c57466bde2861ef5ee53",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/kajon-vu-320x240/playlist.png": {
-      "png_sha256": "e54ada01c8aed067aafc25b24d516b1bbe1b6ce7dbacc2b28f6c177b3473ce66",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/media-player-320x240/background.png": {
-      "png_sha256": "9cd6dee205356d0c18ea808fbb19234f0365524ccdfd8991e1a005b0ca52e260",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/media-player-320x240/player.png": {
-      "png_sha256": "0af2d82d752b9904fe538e9309067064af0fd947bf6bde71fdecc0eec5940e7a",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/retro-neon-320x240/background.png": {
-      "png_sha256": "b1dde4a9303986cd7d29615b398c10341f27a0f31d565be089ec52ef8686646f",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/service-320x240/preview.png": {
-      "png_sha256": "2f701eb8417c54b903a2164e9f3dcac25459351f806c52e3e83be30438b60350",
-      "kind": "public preview; source private except Winamp/Service"
-    },
-    "skins/vintage-hifi-320x240/background.png": {
-      "png_sha256": "4ff9637a22b6311d12c76dfb0320b6f972e7decf24777c0afd6498ead565ec01",
-      "kind": "public preview; source private except Winamp/Service"
-    }
+  "version": "0.6.0-previews",
+  "updated": "2026-10-17",
+  "development_firmware": "V166-R137",
+  "content": "Preview images and documentation only; no skin source added.",
+  "source_policy": {
+    "public_allowed": [
+      "Winamp / Classic",
+      "Bluetooth IN",
+      "Service"
+    ],
+    "private": "All other skins. Preview publication does not publish implementation.",
+    "history": "This gallery update does not rewrite repository history."
   },
-  "updated": "2026-10-13",
-  "visibility": "All skin preview images public; source private at owner request except Winamp and Service; history unchanged"
+  "validation": "Native 320px previews; source-rendered views use example metadata. Older layouts and static backgrounds are labelled individually. Not hardware screenshots or physical stability proof.",
+  "assets": [
+    {
+      "path": "skins/classic-player-320x240/player_eq.png",
+      "name": "Winamp / Classic",
+      "preview_kind": "Earlier layout preview.",
+      "source_publication_allowed": true
+    },
+    {
+      "path": "skins/media-player-320x240/player.png",
+      "name": "Media Player",
+      "preview_kind": "Earlier layout preview.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/cassette-320x213/cassette.png",
+      "name": "Cassette",
+      "preview_kind": "Static background; metadata is drawn during playback.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/kajon-vu-320x240/player_tapered_preview.png",
+      "name": "Kajon-Jon-bt-vu",
+      "preview_kind": "Earlier needle-meter layout preview.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/service-320x240/preview.png",
+      "name": "Service",
+      "preview_kind": "Signal generator and diagnostics; not a calibrated instrument.",
+      "source_publication_allowed": true
+    },
+    {
+      "path": "skins/classic-wood-320x240/background.png",
+      "name": "Classic Wood",
+      "preview_kind": "Static background without live labels.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/vintage-hifi-320x240/background.png",
+      "name": "Vintage HiFi",
+      "preview_kind": "Static background without live labels.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/retro-neon-320x240/background.png",
+      "name": "Retro Neon",
+      "preview_kind": "Static background; a separate vintage theme.",
+      "source_publication_allowed": false
+    },
+    {
+      "path": "skins/neon-320x240/player.png",
+      "name": "Neon",
+      "preview_kind": "Preview rendered with the R137 drawing code, example metadata and illustrative spectrum.",
+      "source_publication_allowed": false,
+      "sha256": "f2951bed60b4be52ea9ef2bb886c2b2a11841601e1784b601b677f9c382dd030"
+    },
+    {
+      "path": "skins/alarm-clock-320x240/player.png",
+      "name": "Ébresztőóra / Alarm clock",
+      "preview_kind": "R124 clock-face preview with example values and photographic background enabled.",
+      "source_publication_allowed": false,
+      "sha256": "6d3c535e1b3681be3647820466ee4aba7049df8c4bb98d5c6fabed742b60bc5a"
+    },
+    {
+      "path": "skins/weather-dac-320x240/player.png",
+      "name": "Időjárás / Weather",
+      "preview_kind": "R130 night preview with example data; not a live weather reading.",
+      "source_publication_allowed": false,
+      "sha256": "fdedd722ac6c1f00cf3c5763e4afc9fa6937777b59be8d559396183870dafee1"
+    },
+    {
+      "path": "skins/plain-320x240/player.png",
+      "name": "Alapnézet / Basic player",
+      "preview_kind": "R137 basic-player drawing code with example values.",
+      "source_publication_allowed": false,
+      "sha256": "c176539b2e934e5fd6dc9342d17b98d2aea95101b15b3c265fc47941ce4c8662"
+    },
+    {
+      "path": "skins/bluetooth-in-320x240/player.png",
+      "name": "Bluetooth IN",
+      "preview_kind": "R137 BT-IN screen section with example values, without cover artwork.",
+      "source_publication_allowed": true,
+      "sha256": "365ff1a310a2f3cfb83ba6971b9d3e75be50dc27a3600155f42f35afa3a8c150"
+    }
+  ]
 }

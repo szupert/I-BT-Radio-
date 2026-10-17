@@ -1,68 +1,100 @@
-# I-BT-Radio — V166-R125 BETA · 16. Oktober 2026
+# I-BT-Radio — V166-R137 BETA · 17. Oktober 2026
 
 [Magyar](README.md) · [English](README.en.md)
 
-Ich entwickle mein eigenes, auf yoRadio basierendes Radio mit ESP32-WROOM und PSRAM. SMALL ist das aktive Ziel. [Funktionsstand](docs/Features.md) und [Menübeschreibung](docs/menu/README.md) trennen geprüfte Funktionen von offenen Aufgaben; diese Detailseiten sind auf Ungarisch.
+Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
 
-## Funktioniert, wird geprüft, geplant
+Im R136-DAC-Test derselben 15 Beispieldateien erreichte die PCM-Erzeugung 98,44–99,60% der Echtzeit. Opus belastete Core1 noch mit 94,1%. In R137 habe ich die überflüssige Einzelkonvertierung bei der PCM16-Übergabe entfernt. Build und Hosttests sind erfolgreich; Core1 unter 90%, PCM-Durchsatz und hörbare Qualität sind am Gerät noch zu prüfen. Die Sicherheitsgrenzen bleiben unverändert.
 
-| Stand | Funktionen |
-|---|---|
-| Am Gerät erprobt | Internetradio→DAC, SD→DAC, früher auch Telefon→BT-IN→DAC und lokale Bedienung. R124 absolvierte zwei kurze Budapest-Rock/DAC-Phasen mit und ohne Menünavigation. |
-| Implementiert, Prüfung läuft | Wochenwecker, Lautstärke-/Helligkeitsrampen, lokaler Ersatzton, NTP/Zeitzone, WebUI, Wetter und Xiaomi-Sensoren, adaptive Anzeige bis 20fps. Nicht jede Kombination ist bereits am Gerät geprüft. |
-| R125, Hosttests erfolgreich | Kein unnötiges Warten nach endgültigem BT-Fehler und DAC-Rückfall; neue Verbindungsanfrage getrennt vom alten Fehler; ACL-/Authentifizierungs-/A2DP-Diagnose. BLE-Scan und direkte Abfrage starten zusammen höchstens einmal pro Minute. Gerätetest von R125 steht aus. |
-| Bekannte Grenzen | SD→BT scheiterte in R124 bei der A2DP-Dienstsuche, daher keine gültige BT-Puffermessung. WLAN-Audio→BT ist gesperrt. EQ-Signalverarbeitung ist abgeschaltet; Winamp-EQ dient nur der Darstellung. |
-| Geplant | BT-Verbindung und verbleibende Stabilitätsfehler beheben; vollständige Wecker-/Schlummertests; Helligkeit und Akku prüfen; Radio Browser; sparsame Android-Fernbedienung; weitere CPU-/RAM-Optimierung. |
-
-Die 800×480-Touch-Menüdemo auf dem ESP32-8048S070C funktionierte am Gerät. Sie ist noch kein vollständiger Radioport. Mit diesem Dokumentationsupdate veröffentliche ich keine neue Firmware.
+Radio → DAC, SD → DAC und zuvor Telefon → BT-IN → DAC funktionierten am Gerät. SD → BT lief auch mit JBL; Pufferaussetzer und hohe Prozessorlast bleiben offen. WLAN-Audio → BT und EQ-Signalverarbeitung bleiben abgeschaltet. Wecker, BLE und Wetter brauchen weitere Tests. Die Touch-Menüdemo auf dem 800×480-Panel ESP32-8048S070C lief; sie ist noch kein vollständiger Radio-Port.
 
 ## Skins
 
-Alle Skin-Vorschaubilder sind sichtbar. Winamp und Service bleiben öffentlich; den Quellcode der anderen Skins veröffentliche ich nicht. Die Bilder sind Vorschauen und kein Nachweis vollständig geprüfter R125-Funktionen. Hier veröffentliche ich keine neue Firmware.
+Aktualisiert: 17. Oktober 2026 · V166-R137 Entwicklung
 
-### Winamp / Classic
+Ich zeige elf Skins und die beiden einfachen Systemansichten: Basisplayer und BT-IN. Die Vorschauen sind zentriert und 320 Pixel breit. Frühere Layout-Vorschauen, statische Hintergründe und mit Zeichencode erzeugte Ansichten kennzeichne ich getrennt. Sie ersetzen keinen Anzeigetest am Gerät.
 
-![Winamp / Classic](skins/classic-player-320x240/player_eq.png)
+Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
 
-### Media Player
+<h3 align="center">Winamp / Classic</h3>
 
-![Media Player](skins/media-player-320x240/player.png)
+<p align="center"><img src="skins/classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Frühere Layout-Vorschau.</em></p>
 
-### Cassette
+<h3 align="center">Media Player</h3>
 
-![Cassette](skins/cassette-320x213/cassette.png)
+<p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Frühere Layout-Vorschau.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-### Kajon-Jon-bt-vu
+<h3 align="center">Cassette</h3>
 
-![Kajon-Jon-bt-vu](skins/kajon-vu-320x240/player_tapered_preview.png)
+<p align="center"><img src="skins/cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Statischer Hintergrund; Metadaten erscheinen bei der Wiedergabe.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-### Service
+<h3 align="center">Kajon-Jon-bt-vu</h3>
 
-![Service](skins/service-320x240/preview.png)
+<p align="center"><img src="skins/kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-### Classic Wood
+<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-![Classic Wood](skins/classic-wood-320x240/background.png)
+<h3 align="center">Service</h3>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
 
-### Vintage HiFi
+<p align="center"><em>Signalgenerator und Diagnose; kein kalibriertes Messgerät.</em></p>
 
-![Vintage HiFi](skins/vintage-hifi-320x240/background.png)
+<h3 align="center">Classic Wood</h3>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><img src="skins/classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-### Retro Neon
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-![Retro Neon](skins/retro-neon-320x240/background.png)
+<h3 align="center">Vintage HiFi</h3>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><img src="skins/vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
+
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Retro Neon</h3>
+
+<p align="center"><img src="skins/retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
+
+<p align="center"><em>Statischer Hintergrund; das separate Vintage-Thema.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Neon</h3>
+
+<p align="center"><img src="skins/neon-320x240/player.png" width="320" alt="Neon" /></p>
+
+<p align="center"><em>Vorschau mit R137-Zeichencode, Beispieldaten und illustrativem Spektrum.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Ébresztőóra / Alarm clock</h3>
+
+<p align="center"><img src="skins/alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
+
+<p align="center"><em>R124-Uhrvorschau mit Beispieldaten und aktiviertem Fotohintergrund.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Időjárás / Weather</h3>
+
+<p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
+
+<p align="center"><em>R130-Nachtvorschau mit Beispieldaten; keine aktuelle Wettermessung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Alapnézet / Basic player</h3>
+
+<p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
+
+<p align="center"><em>R137-Basisansicht mit Beispieldaten.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Bluetooth IN</h3>
+
+<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+
+<p align="center"><em>R137-BT-IN-Bildschirm mit Beispieldaten, ohne Cover.</em></p>
+
+WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die Winamp-EQ-Kurve ist dekorativ. Dieses Galerie-Update ist keine neue öffentliche Firmware-Veröffentlichung.
 
 ## Hardware und Anschlüsse
 

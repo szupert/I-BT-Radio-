@@ -1,49 +1,88 @@
 # Skins
 
-2026-10-16 · V166-R125 development
+Aktualisiert: 17. Oktober 2026 · V166-R137 Entwicklung
 
-Alle Skin-Vorschaubilder sind sichtbar. Winamp und Service bleiben öffentlich; den Quellcode der anderen Skins veröffentliche ich nicht. Die Bilder sind Vorschauen und kein Nachweis vollständig geprüfter R125-Funktionen. Hier veröffentliche ich keine neue Firmware.
+Ich zeige elf Skins und die beiden einfachen Systemansichten: Basisplayer und BT-IN. Die Vorschauen sind zentriert und 320 Pixel breit. Frühere Layout-Vorschauen, statische Hintergründe und mit Zeichencode erzeugte Ansichten kennzeichne ich getrennt. Sie ersetzen keinen Anzeigetest am Gerät.
 
-### Winamp / Classic
+Winamp, BT-IN und Service sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
 
-![Winamp / Classic](classic-player-320x240/player_eq.png)
+<h3 align="center">Winamp / Classic</h3>
 
-### Media Player
+<p align="center"><img src="classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
 
-![Media Player](media-player-320x240/player.png)
+<p align="center"><em>Frühere Layout-Vorschau.</em></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<h3 align="center">Media Player</h3>
 
-### Cassette
+<p align="center"><img src="media-player-320x240/player.png" width="320" alt="Media Player" /></p>
 
-![Cassette](cassette-320x213/cassette.png)
+<p align="center"><em>Frühere Layout-Vorschau.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<h3 align="center">Cassette</h3>
 
-### Kajon-Jon-bt-vu
+<p align="center"><img src="cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-![Kajon-Jon-bt-vu](kajon-vu-320x240/player_tapered_preview.png)
+<p align="center"><em>Statischer Hintergrund; Metadaten erscheinen bei der Wiedergabe.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<h3 align="center">Kajon-Jon-bt-vu</h3>
 
-### Service
+<p align="center"><img src="kajon-vu-320x240/player_tapered_preview.png" width="320" alt="Kajon-Jon-bt-vu" /></p>
 
-![Service](service-320x240/preview.png)
+<p align="center"><em>Frühere Layout-Vorschau mit Zeigeranzeigen.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-### Classic Wood
+<h3 align="center">Service</h3>
 
-![Classic Wood](classic-wood-320x240/background.png)
+<p align="center"><img src="service-320x240/preview.png" width="320" alt="Service" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Signalgenerator und Diagnose; kein kalibriertes Messgerät.</em></p>
 
-### Vintage HiFi
+<h3 align="center">Classic Wood</h3>
 
-![Vintage HiFi](vintage-hifi-320x240/background.png)
+<p align="center"><img src="classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
 
-### Retro Neon
+<h3 align="center">Vintage HiFi</h3>
 
-![Retro Neon](retro-neon-320x240/background.png)
+<p align="center"><img src="vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
 
-Auf Wunsch des Eigentümers ist der Quellcode privat.
+<p align="center"><em>Statischer Hintergrund ohne dynamische Beschriftung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Retro Neon</h3>
+
+<p align="center"><img src="retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
+
+<p align="center"><em>Statischer Hintergrund; das separate Vintage-Thema.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Neon</h3>
+
+<p align="center"><img src="neon-320x240/player.png" width="320" alt="Neon" /></p>
+
+<p align="center"><em>Vorschau mit R137-Zeichencode, Beispieldaten und illustrativem Spektrum.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Ébresztőóra / Alarm clock</h3>
+
+<p align="center"><img src="alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
+
+<p align="center"><em>R124-Uhrvorschau mit Beispieldaten und aktiviertem Fotohintergrund.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Időjárás / Weather</h3>
+
+<p align="center"><img src="weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
+
+<p align="center"><em>R130-Nachtvorschau mit Beispieldaten; keine aktuelle Wettermessung.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Alapnézet / Basic player</h3>
+
+<p align="center"><img src="plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
+
+<p align="center"><em>R137-Basisansicht mit Beispieldaten.<br>Den Quellcode dieses Skins halte ich privat.</em></p>
+
+<h3 align="center">Bluetooth IN</h3>
+
+<p align="center"><img src="bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+
+<p align="center"><em>R137-BT-IN-Bildschirm mit Beispieldaten, ohne Cover.</em></p>
+
+WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die Winamp-EQ-Kurve ist dekorativ. Dieses Galerie-Update ist keine neue öffentliche Firmware-Veröffentlichung.
+

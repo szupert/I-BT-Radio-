@@ -1,10 +1,11 @@
-# Klasszikus · 320 × 240
+# Winamp / Classic
 
-V166-R29 bitmapből készült előnézet; BT-OUT gomb és a firmware MENU-felirata. A régi sarokemblémát a nyilvános képen semlegesítettem. A lista képe statikus háttér, a tételek futás közben kerülnek rá. A statikus képen az EQ-görbe illusztráció. Az R83 fejlesztői firmware DAC-útján a 10 sávos EQ tényleges jelfeldolgozás; ezt a kép önmagában nem igazolja.
+Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
-A PNG-k és RGB565LE párjaik pixelre egyeznek; egy RGB565LE kép 153 600 bájt. A régi layout.json történeti koordinátaleírás, nem a V166 vezérlésének specifikációja. A pontos érintésvezérlést a firmware határozza meg. [Forrás és hash](../../skin-version.json).
+<p align="center"><img src="player_eq.png" width="320" alt="Winamp / Classic" /></p>
 
+<p align="center"><em>Korábbi grafikai előnézet.</em></p>
 
-## Aktuális állapot — 2026-10-16
+A forrás közzététele a tulajdonosi engedély alapján megengedett; ez a frissítés csak előnézetet és leírást tartalmaz.
 
-Ez az egyetlen nyilvános skin. EQ: csak látványelem, DSP minden hangúton kikapcsolva. A képek előnézetek, nem az R125 teljes készülékfotói.
+[Teljes galéria](../README.md). Grafikai előnézet, nem készülékfotó vagy teljes funkcionális teszt.

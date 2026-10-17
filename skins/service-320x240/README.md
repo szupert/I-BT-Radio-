@@ -1,5 +1,11 @@
 # Service
 
-![Service](preview.png)
+Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
-A Service felület nyilvános. Diagnosztikai célra készült, nem kalibrált mérőműszer.
+<p align="center"><img src="preview.png" width="320" alt="Service" /></p>
+
+<p align="center"><em>Jelgenerátor és diagnosztika; nem kalibrált műszer.</em></p>
+
+A forrás közzététele a tulajdonosi engedély alapján megengedett; ez a frissítés csak előnézetet és leírást tartalmaz.
+
+[Teljes galéria](../README.md). Grafikai előnézet, nem készülékfotó vagy teljes funkcionális teszt.
