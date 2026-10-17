@@ -1,6 +1,6 @@
 {
   "version": "0.6.0-previews",
-  "updated": "2026-10-17",
+  "updated": "2026-10-18",
   "development_firmware": "V166-R137",
   "content": "Preview images and documentation only; no skin source added.",
   "source_policy": {
@@ -8,7 +8,8 @@
       "Winamp / Classic",
       "Bluetooth IN",
       "Service",
-      "Kajon-Jon-bt-vu"
+      "Kajon-Jon-bt-vu",
+      "Alapnézet / Basic player"
     ],
     "private": "All other skins. Preview publication does not publish implementation.",
     "history": "This gallery update does not rewrite repository history."
@@ -88,7 +89,7 @@
       "path": "skins/plain-320x240/player.png",
       "name": "Alapnézet / Basic player",
       "preview_kind": "R137 basic-player drawing code with example values.",
-      "source_publication_allowed": false,
+      "source_publication_allowed": true,
       "sha256": "c176539b2e934e5fd6dc9342d17b98d2aea95101b15b3c265fc47941ce4c8662"
     },
     {

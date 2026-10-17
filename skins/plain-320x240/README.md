@@ -6,6 +6,6 @@ Frissítve: 2026. október 17. · V166-R137 fejlesztői állapot
 
 <p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.</em></p>
 
-Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.
+Az Alapnézet / Basic player forrásának közzétételét engedélyeztem. Ez a galéria képeket és leírást tartalmaz; ebben a frissítésben nem került fel új forráskód.
 
 [Teljes galéria](../README.md). Grafikai előnézet, nem készülékfotó vagy teljes funkcionális teszt.

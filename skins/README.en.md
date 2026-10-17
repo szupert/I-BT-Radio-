@@ -4,7 +4,7 @@ Updated: 17 October 2026 · V166-R137 development
 
 I have included eleven skins and the two simple system screens: the basic player and BT-IN. Previews are centered at 320 pixels wide. I distinguish older layout previews, static backgrounds and previews rendered from drawing code. These images do not replace device display testing.
 
-Winamp, BT-IN, Service and Kajon-Jon-bt-vu are exceptions: their source may be published. This gallery update publishes images and descriptions only.
+Winamp, BT-IN, Service, Kajon-Jon-bt-vu and Alapnézet / Basic player are exceptions: their source may be published. This gallery update publishes images and descriptions only.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -76,7 +76,7 @@ Winamp, BT-IN, Service and Kajon-Jon-bt-vu are exceptions: their source may be p
 
 <p align="center"><img src="plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
 
-<p align="center"><em>R137 basic-player drawing code with example values.<br>At the client's request, I am keeping the source code private for an unspecified period. I will publish it upon a separate request, with the owner's permission.</em></p>
+<p align="center"><em>R137 basic-player drawing code with example values.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 
