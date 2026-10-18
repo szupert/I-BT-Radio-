@@ -1,6 +1,6 @@
 # Videoton RT 6303 S
 
-Ich habe das auf R141 getestete silberne Videoton-Layout beibehalten. Die Vorschau zeigt gezielte Korrekturen der Tastenbeschriftungen, LEDs und Modellbezeichnung mit Beispieldaten. Die neue Grafik ist noch am Gerät zu prüfen; dies ist keine Firmware-Veröffentlichung.
+Ich habe das freigegebene originale Videoton-Layout mit der Reihenfolge Beschriftung → LED → unbeschriftete Taste und dem Schriftzug RT 6303 S beibehalten. R143 entfernt die grünen Textreste im Bootbild und zeichnet den Ladebalken sauber. Die BT-Taste wechselte ohne Menü direkt in den IN-Modus; die Audiowiedergabe vom Telefon lief durchgehend. Im kurzen Zeichentest mit 36 Menüseiten und 255 Zeilen trat kein weiterer Stacküberlauf auf. Die Vorschau zeigt Beispieldaten; die vollständige Prüfung der übrigen Funktionen läuft weiter.
 
 <p align="center"><img src="player.png" width="320" alt="Videoton RT 6303 S" /></p>
 

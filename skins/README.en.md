@@ -1,10 +1,10 @@
 # Skins
 
-Updated: 17 October 2026 · V166-R137 development
+Updated: 18 October 2026 · V166-R143 development
 
-I have included eleven skins and the two simple system screens: the basic player and BT-IN. Previews are centered at 320 pixels wide. I distinguish older layout previews, static backgrounds and previews rendered from drawing code. These images do not replace device display testing.
+I show previews of 14 interfaces, including the Videoton player and boot image, the basic player and BT-IN screen. Images are centered at 320 pixels wide. Older layout studies, static backgrounds and drawing-code previews are labelled separately.
 
-Winamp, BT-IN, Service, Kajon-Jon-bt-vu and Alapnézet / Basic player are exceptions: their source may be published. This gallery update publishes images and descriptions only.
+This update publishes preview images and descriptions only. I am not uploading source code or firmware.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -90,7 +90,7 @@ Wi-Fi audio → BT remains disabled, as does EQ audio processing. The Winamp EQ 
 
 <p align="center"><img src="videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
 
-<p align="center"><em>I retained the silver Videoton layout tested on R141. This preview shows targeted button-label, LED and model-label corrections with example data. The revised graphics still need a device check; this is not a firmware release.<br>At the client's request, I keep the source code private for an indefinite period. I publish it on separate request with the owner's permission.</em></p>
+<p align="center"><em>I kept the approved original Videoton layout, with label → LED → blank button order and RT 6303 S lettering. R143 removes the green text remnants from the boot image and redraws the loading bar cleanly. The BT button switched directly to IN mode without opening a menu, and phone audio played continuously. The short rendering test covered 36 menu pages and 255 rows without another stack overflow. The preview uses example data; full validation of the remaining functions is ongoing.<br>At the client's request, I keep the source code private for an indefinite period. I publish it on separate request with the owner's permission.</em></p>
 
 <p align="center"><img src="videoton-rt6303s-320x240/boot.png" width="320" alt="Boot screen – startup preview" /></p>
 

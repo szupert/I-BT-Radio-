@@ -1,6 +1,6 @@
 # Videoton RT 6303 S
 
-I retained the silver Videoton layout tested on R141. This preview shows targeted button-label, LED and model-label corrections with example data. The revised graphics still need a device check; this is not a firmware release.
+I kept the approved original Videoton layout, with label → LED → blank button order and RT 6303 S lettering. R143 removes the green text remnants from the boot image and redraws the loading bar cleanly. The BT button switched directly to IN mode without opening a menu, and phone audio played continuously. The short rendering test covered 36 menu pages and 255 rows without another stack overflow. The preview uses example data; full validation of the remaining functions is ongoing.
 
 <p align="center"><img src="player.png" width="320" alt="Videoton RT 6303 S" /></p>
 

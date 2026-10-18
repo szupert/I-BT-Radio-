@@ -1,10 +1,10 @@
 # Skins
 
-Aktualisiert: 17. Oktober 2026 · V166-R137 Entwicklung
+Aktualisiert: 18. Oktober 2026 · V166-R143 Entwicklung
 
-Ich zeige elf Skins und die beiden einfachen Systemansichten: Basisplayer und BT-IN. Die Vorschauen sind zentriert und 320 Pixel breit. Frühere Layout-Vorschauen, statische Hintergründe und mit Zeichencode erzeugte Ansichten kennzeichne ich getrennt. Sie ersetzen keinen Anzeigetest am Gerät.
+Ich zeige Vorschauen von 14 Oberflächen, darunter Videoton-Player und Bootbild, Basisplayer und BT-IN. Die Bilder sind zentriert und 320 Pixel breit. Frühere Layoutstudien, statische Hintergründe und mit Zeichencode erzeugte Vorschauen kennzeichne ich getrennt.
 
-Winamp, BT-IN, Service, Kajon-Jon-bt-vu und Alapnézet / Basic player sind Ausnahmen: Ihr Quellcode darf veröffentlicht werden. Dieses Galerie-Update enthält nur Bilder und Beschreibungen.
+In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschreibungen, keinen Quellcode und keine Firmware.
 
 <h3 align="center">Winamp / Classic</h3>
 
@@ -90,7 +90,7 @@ WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die W
 
 <p align="center"><img src="videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
 
-<p align="center"><em>Ich habe das auf R141 getestete silberne Videoton-Layout beibehalten. Die Vorschau zeigt gezielte Korrekturen der Tastenbeschriftungen, LEDs und Modellbezeichnung mit Beispieldaten. Die neue Grafik ist noch am Gerät zu prüfen; dies ist keine Firmware-Veröffentlichung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Zustimmung des Eigentümers.</em></p>
+<p align="center"><em>Ich habe das freigegebene originale Videoton-Layout mit der Reihenfolge Beschriftung → LED → unbeschriftete Taste und dem Schriftzug RT 6303 S beibehalten. R143 entfernt die grünen Textreste im Bootbild und zeichnet den Ladebalken sauber. Die BT-Taste wechselte ohne Menü direkt in den IN-Modus; die Audiowiedergabe vom Telefon lief durchgehend. Im kurzen Zeichentest mit 36 Menüseiten und 255 Zeilen trat kein weiterer Stacküberlauf auf. Die Vorschau zeigt Beispieldaten; die vollständige Prüfung der übrigen Funktionen läuft weiter.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Zustimmung des Eigentümers.</em></p>
 
 <p align="center"><img src="videoton-rt6303s-320x240/boot.png" width="320" alt="Bootbild – Startvorschau" /></p>
 
