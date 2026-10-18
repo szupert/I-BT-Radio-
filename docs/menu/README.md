@@ -1,25 +1,44 @@
-# Menü és kezelés — V166-R125 BETA
+# Menü és kezelés · 2026.10.19.
 
-2026. október 16. A funkciók kipróbált és tervezett állapotát a [funkciólistában](../Features.md) vezetem. A menüpont megjelenése önmagában nem jelent kész funkciót.
+Az R147 skinlapozása a készüléken jól működött. A Basic playert és a szürke régi Bluetooth-felületet eltávolítottam. A következő firmware menüjét az alábbi szerkezetre rendeztem át. **Ez előkészített változat: hostteszt és célprocesszoros szintaktikai ellenőrzés sikeres, teljes build és fizikai menüteszt még nincs. A rádión továbbra is az R147 fut.**
 
-| Terület | Mire szolgál? |
+<p align="center"><a href="../../hardware/MENU_MAP.jpg"><img src="../../hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menütérkép 2026.10.19."></a></p>
+
+[A teljes méretű JPG megnyitása](../../hardware/MENU_MAP.jpg)
+
+## Főmenü
+
+Forrás és lejátszás · Hang · Bluetooth · Beállítások · Rádió / Óralap.
+
+A hangforrást és a hangkimenetet külön választom: például SD → DAC vagy SD → BT. A Wi-Fi-hang → BT továbbra is tiltva van, az EQ hangfeldolgozása kikapcsolva marad. Az ébresztőóra nem fogad és nem küld BT-hangot. A BLE-hőmérő csak óra- és időjárásképernyőn működhet, a hang és a memóriaőr elsőbbségével.
+
+## Beállításcsoportok
+
+| Csoport | Mit találok benne? |
 |---|---|
-| Állomások és lejátszási lista | Rádióadó, SD-fájl választása, keresés és listanavigáció. A Radio Browser külön tervezett bővítés. |
-| Forrás és hangút | Rádió/SD, DAC vagy megengedett BT-irány. Az internetes rádió→BT tiltott; SD→BT külön ellenőrzendő. |
-| Hang | Hangerő és balansz. Az EQ hangfeldolgozását kikapcsoltam. |
-| Bluetooth | BT-IN/OUT, keresés, mentett partner, újracsatlakozás, kapcsolati állapot. A sikertelen kapcsolódás visszaeshet DAC-ra. |
-| Óra és ébresztő | Időpont, heti napok, engedélyezés, forrás, lejátszási mód, hangerő/fényerő felfutása és lefutása, óralap. |
-| Hálózat és idő | Wi-Fi, DNS, NTP-szerverek, időzóna; a menü fejlécében IP-cím. |
-| Kijelző | Felület, fényerő, óra/szöveg színe és stílusa, érintéses skinlapozás beállítása. |
-| Szenzor és időjárás | Saját BLE-hőmérő, kulcs/MAC, hőmérséklet/pára és időjárási beállítások. Minden adatút fizikai ellenőrzése még nem kész. |
-| Service és diagnosztika | Célzott mérések, kapcsolati/puffer/memórianapló, tesztek. Nem kalibrált mérőműszer és nem biztonsági felülbírálás. |
+| Wi-Fi és hálózat | Kapcsolat, mentett hálózatok, keresés, DNS, online és offline mód |
+| Kijelző és skinek | Téma, forgatás, fényerő, skin, bootkép, borító, puffer, térerő, akkumulátor, VU-frissítés |
+| Kezelés | Rotary, érintőkalibráció, gombkiosztás, skinlapozás, menübezárási idő; IR előkészítve |
+| Óra és ébresztő | Időzítés, hét napjai, rádió/SD hangforrás, hangerő- és fényerőgörbe, óralap, négy NTP-szerver |
+| Érzékelők és hardver | Alaplapi fény- vagy akkumulátormérés, BLE-hőmérők, akkukalibráció |
+| Tárhely és SD | PSRAM/HiMem, SD, borítógyorsítótár és fájlrendszer állapota |
+| Rendszer | Nyelv, firmware-információ, webes frissítés, újraindítás, SD-mentés és visszaállítás |
+| Diagnosztika | Debug, memória, hálózat, rotary és PSRAM-teszt |
 
-Érintéssel a Menü és a Vissza vezérelhető; listán fel/le húzással lehet görgetni. Rotaryval a kijelölt sor változik, nyomással lehet választani. A rövid, majd hosszú nyomás a menübe visz, óramódban is. A részletes gombfunkció állapotfüggő.
+A skinlista 13 megmaradó felületet tartalmaz. A Service és a BT-Speaker külön felület; a régi szürke BT-kép és a Basic nem tér vissza a választóba. A skinlapozási kapcsoló a Felület listában is elérhető ugyanannak a beállításnak a gyorskapcsolójaként.
 
-Az óralap felső sávja nyugalomban érzékelőadatot mutathat; interakcióra a menügombok jelennek meg. A régi olvasási idő és hiba nem állandó főképernyős felirat. Az ébresztőikon a teljes ébresztés kapcsolására, a napjelölések a heti napok beállítására szolgálnak; ezek teljes készülékes ellenőrzése még folyamatban.
+## Visszalépés és kezelés
 
-## Legutóbbi célzott mérés
+A bal felső Menü és a jobb felső Vissza mellett minden csoportnak saját Vissza sora van. A visszalépés a megfelelő szülőmenü megfelelő sorára visz: a bootképtől a Kijelzőhöz, a menübezárási időtől a Kezeléshez. A BLE-listából oda jutok vissza, ahonnan megnyitottam. A Diagnosztika korábban nem választható Vissza sorát javítottam.
 
-R124, Budapest Rock→DAC: menü nélkül Core0/Core1 átlag65,95/76,08%, menüvel69,76/77,38%. A lejátszási generáció nem váltott. Menü: 236/237 kérés kirajzolva, teljes bejárás nem történt. A BT-mérés kapcsolódási hiba miatt nem indult el. R125: hostteszt és fordítás sikeres; az új készülékes kontroll még hátravan.
+Az érintés és a rotary ugyanazokat a menüpontokat éri el. A skinváltáshoz egy oldalirányú húzás egy váltást jelent; a húzás felengedése nem válhat playlist-koppintássá. Az óra/percszerkesztő és a szöveges NTP-szerkesztő külön Mentés és Mégse műveletet használ. Újraindításhoz és visszaállításhoz megmarad a megerősítés.
 
-A scan a kirajzolást ellenőrzi; nem nyom meg minden veszélyes menüpontot és nem bizonyítja az összes funkció működését. A korábbi R33 eredményei a results mappában történeti adatok, nem a jelenlegi firmware mérései.
+## Mi van ténylegesen ellenőrizve?
+
+- R147: a skinlapozás a készüléken jól működött. A rövid megfigyelésben a kijelző legkisebb veremtartaléka 1552 B volt; új reset és memóriahiba nem jelent meg. A hallható hangminőséget most nem tudtam ellenőrizni.
+- Új menüváltozat: 3855 fordítási/határértékes szövegkiírás és a mozgatott menüpontok oda-vissza útja hoston ellenőrizve. A célprocesszoros szintaktikai ellenőrzés sikeres. Ez nem teljes firmware-build vagy készülékteszt.
+- A négyórás R147 DAC-teszt külön mérés, BT-IN és BT-OUT nélkül. A futás közben elkészült menüváltozat nem módosítja a rádión lévő firmware-t.
+
+A korábbi [2026.10.11-i menüvizsgálat](results/STRESS_20261011_151229_617.json) történeti előzmény. A régi runner és WEB→BT-kísérlet nem írja felül a jelenlegi tiltásokat és nem igazolja az új menü fizikai működését. A kirajzolt sor, a végrehajtott művelet és a hallható hang három külön ellenőrzés.
+
+Csak képet és leírást publikálok; ez a frissítés nem tartalmaz skinforrást vagy firmware-t.

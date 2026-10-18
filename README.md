@@ -1,4 +1,4 @@
-# I-BT-Radio — V166-R146 BETA · 2026. október 19.
+# I-BT-Radio — V166-R147 BETA · 2026. október 19.
 
 [English](README.en.md) · [Deutsch](README.de.md)
 
@@ -6,9 +6,9 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 **[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-Az R146 új Service és BT-Speaker látványtervét és a 320×240-es rajzoló előnézetét tettem a galériába. Az előadó végén maradó ajánlóelválasztót és a VU terhelési küszöbének mértékegységét javítottam. A fizikai ellenőrzés még folyamatban van; a VU memória- és hangvédelme megmaradt. Az induláskori állomáslista-indexelés watchdog-jelzése továbbra is nyitott. Ez képes dokumentációfrissítés, nem nyilvános firmware-kiadás.
+Az R147-ben kivettem a Basic playert és a régi szürke Bluetooth-tartaléknézetet, és javítottam a húzásból megnyíló playlistet. A főképernyős skinlapozás a készüléken rendben működött. A rövid állapotfigyelésben 1552 bájt kijelző-veremtartalékot mértem, új reset vagy memóriahiba nélkül; a hallható hangminőséget most nem tudtam ellenőrizni.
 
-Az Alapnézet / Basic player galériabejegyzését eltávolítottam. A skin és a régi szürke Bluetooth-tartaléknézet firmware-ből való kivételén, illetve a húzásból keletkező téves playlist-nyitás javításán az R147-ben dolgozom; a készüléken ezek még nem ellenőrzött változtatások.
+Az átláthatóbb menüt a következő firmware-hez készítem elő. Nyolc beállításcsoportot használok, a bootképet és VU-frissítést a Kijelző, a lapozást és menübezárást a Kezelés alá rendeztem. A visszalépési célokat és a Diagnosztika korábban nem választható Vissza sorát javítottam. A hostteszt és a célprocesszoros szintaktikai ellenőrzés sikeres; teljes firmware-fordítás és készülékteszt még nincs. A **2026.10.19-i menütérkép ezt az előkészített menüt mutatja**, miközben a rádión változatlan R147 fut.
 
 Korábbi dekóderméréseim (R136–R137):
 
@@ -195,7 +195,7 @@ Ez a rajz kizárólag 3,3 V-os **ESP-PSRAM64H** chiphez való. Az ESP-PSRAM64 1,
 
 ### Menürendszer állapottérképe
 
-![Menürendszer V156 állapot- és működési térképe](hardware/MENU_MAP_V156.jpg)
+<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menu map 2026-10-19; next firmware menu preparation"></a></p>
 
 A zöld jelölés az adott funkcióval kapcsolatban rendelkezésre álló működési visszajelzést, a piros a kikapcsolt, hibás vagy még teljes fizikai tesztet igénylő részt jelöli. A térkép nem jelent teljes stabilitási igazolást. A GPIO-k, a PSRAM-részletek és a panelrevíziókra vonatkozó ellenőrzések a [részletes hardverleírásban](hardware/README.md) találhatók.
 

@@ -1,12 +1,12 @@
-# I-BT-Radio — V166-R146 BETA · 19 October 2026
+# I-BT-Radio — V166-R147 BETA · 19 October 2026
 
 [Magyar](README.md) · [Deutsch](README.de.md)
 
 I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-I updated the gallery with the R146 Service and BT-Speaker design references and 320×240 renderer previews. I fixed a recommendation separator left at the end of artist names and the units used by the VU load threshold. Device checks are still in progress; the VU memory and audio guards remain in place. The startup playlist-index watchdog warning remains open. This is an illustrated documentation update, not a public firmware release.
+In R147 I removed the Basic player and the old grey Bluetooth fallback, and fixed the playlist opening after a swipe. Home-screen skin swiping worked on the device. In the short observation I measured a minimum display stack margin of 1552 bytes, with no new reset or memory error; I could not check audible quality this time.
 
-I removed the Basic player gallery entry. In R147 I am removing that skin and the old grey Bluetooth fallback from the firmware and fixing accidental playlist activation after a swipe. These changes have not yet been checked on the device.
+I am preparing a clearer menu for the next firmware. I use eight settings groups, with boot image and VU refresh under Display, and skin swiping and menu timeout under Controls. I corrected return destinations and the previously unselectable Diagnostics Back row. Host tests and target-processor syntax checking passed; a full firmware build and device check are still pending. The **2026-10-19 menu map shows this prepared structure**. The radio continues to run unchanged R147.
 
 Earlier decoder measurements (R136–R137):
 
@@ -191,7 +191,7 @@ No IR receiver GPIO is assigned in the current firmware.
 
 ### Menu status
 
-![V156 menu status map](hardware/MENU_MAP_V156.jpg)
+<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menu map 2026-10-19; next firmware menu preparation"></a></p>
 
 Green indicates positive operating feedback; red indicates disabled, faulty or not fully tested functions. This map is not a stability certification. See the [detailed hardware guide](hardware/README.md) for the original ESP32-WROOM-32 pinout and board-revision notes.
 

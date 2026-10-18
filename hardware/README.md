@@ -8,7 +8,7 @@ A bekötési példa az általam használt PCM5102A DAC-hoz, HW-040 rotaryhoz és
 
 Az eredeti, változatlan PNG-t a [Last Minute Engineers ESP32-WROOM-32 pinout oldaláról](https://lastminuteengineers.com/esp32-wroom-32-pinout-reference/) ([közvetlen képfájl](https://lastminuteengineers.com/wp-content/uploads/iot/ESP32-WROOM-32-Pinout.png)) töltöttük le. A [helyi kép](ESP32-WROOM-32-Pinout-ORIGINAL.png) 728 × 567 pixeles, SHA256: `c15a9c579854a1923d9e9f8fd7b0db0412832a557cf94e7520b564461e441259`. Ez az **ESP32-WROOM-32 modul** lábkiosztása, nem a teljes Yellow Board külső csatlakozóinak elhelyezkedése. A konkrét DAC/rotary/PSRAM jeleket az alábbi táblázatok adják meg.
 
-A jelenlegi felület külön, piros/zöld állapotú térképe: [MENU_MAP_V156.jpg](MENU_MAP_V156.jpg).
+A 2026.10.19-i, következő firmware-hez előkészített menüszerkezet térképe: [MENU_MAP.jpg](MENU_MAP.jpg). Ez menüszervezési térkép, nem minden funkcióra kiterjedő fizikai PASS.
 
 Állapot: 2026-10-05. Ez a **jelenlegi ESP32-as, 320 × 240-es Small/Yellow Board** firmware-kiosztása, a V156 forrás és a V026 hardver-checkpoint alapján. Nem ESP32-S3 vagy 800 × 480-as lap kiosztása. A GPIO szám az ESP32 jele; a panel csatlakozóinak fizikai sorrendje panelrevíziótól függ, ezért a csatlakozón a feliratot/kapcsolási rajzot is ellenőrizni kell. A 16 MB flash a PSRAM-tól független alkatrész.
 
