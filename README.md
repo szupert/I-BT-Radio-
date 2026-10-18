@@ -8,6 +8,8 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 Az R146 új Service és BT-Speaker látványtervét és a 320×240-es rajzoló előnézetét tettem a galériába. Az előadó végén maradó ajánlóelválasztót és a VU terhelési küszöbének mértékegységét javítottam. A fizikai ellenőrzés még folyamatban van; a VU memória- és hangvédelme megmaradt. Az induláskori állomáslista-indexelés watchdog-jelzése továbbra is nyitott. Ez képes dokumentációfrissítés, nem nyilvános firmware-kiadás.
 
+Az Alapnézet / Basic player galériabejegyzését eltávolítottam. A skin és a régi szürke Bluetooth-tartaléknézet firmware-ből való kivételén, illetve a húzásból keletkező téves playlist-nyitás javításán az R147-ben dolgozom; a készüléken ezek még nem ellenőrzött változtatások.
+
 Korábbi dekóderméréseim (R136–R137):
 
 Az R136-tal ugyanazon 15 mintafájl DAC-próbájában 98,44–99,60%-os PCM-előállítási ütemet mértem a valós időhöz képest. Az Opus Core1-terhelése még 94,1% volt. Az R137-ben a kész 16 bites PCM átadásából vettem ki a fölösleges mintánkénti átalakítást; a fordítás és a hosttesztek sikeresek. Az azonos 15 fájlos R137 DAC-próbában az Opus Core1 87,5%-ra csökkent, a PCM-előállítás 99,40% maradt. Ez fájlonként körülbelül 9 másodperces tiszta CPU-ablakból származó rövid mérés; hallható minőséget és hosszú stabilitást nem igazol. ALAC24-nél 91,3% Core1 és 97,33% PCM adódott, ezt tovább vizsgálom. A biztonsági határok változatlanok.
@@ -18,7 +20,7 @@ A rádió → DAC, SD → DAC és korábban a telefon → BT-IN → DAC már mű
 
 Frissítve: 2026. október 19. · V166-R146 fejlesztői állapot
 
-A galériában 14 felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, az alapnézetet és a BT-IN képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. A korábbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm.
+A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
 
 Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publikálok; forráskódot és firmware-t nem töltök fel.
 
@@ -87,12 +89,6 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 <p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
 <p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
-
-<h3 align="center">Alapnézet / Basic player</h3>
-
-<p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
-
-<p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 

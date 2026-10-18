@@ -6,6 +6,8 @@ I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL.
 
 I updated the gallery with the R146 Service and BT-Speaker design references and 320×240 renderer previews. I fixed a recommendation separator left at the end of artist names and the units used by the VU load threshold. Device checks are still in progress; the VU memory and audio guards remain in place. The startup playlist-index watchdog warning remains open. This is an illustrated documentation update, not a public firmware release.
 
+I removed the Basic player gallery entry. In R147 I am removing that skin and the old grey Bluetooth fallback from the firmware and fixing accidental playlist activation after a swipe. These changes have not yet been checked on the device.
+
 Earlier decoder measurements (R136–R137):
 
 In the R136 DAC test of the same 15 sample files, PCM production reached 98.44–99.60% of real time. Opus Core1 load was still 94.1%. In R137 I removed redundant per-sample conversion from the signed PCM16 handoff. Build and host checks passed; the R137 test of the same 15 files measured Opus Core1 at 87.5% and PCM production at 99.40%. Each file has one clean approximately 9-second CPU window, so this does not prove sustained load or audible quality. ALAC24 measured 91.3% Core1 and 97.33% PCM and needs further investigation. Safety limits are unchanged.
@@ -16,7 +18,7 @@ Radio → DAC, SD → DAC and earlier phone → BT-IN → DAC playback worked on
 
 Updated: 19 October 2026 · V166-R146 development
 
-I show previews of 14 interfaces, including the Videoton player and boot image, the basic player and BT-IN screen. Images are centered at 320 pixels wide. Older layout studies, static backgrounds and drawing-code previews are labelled separately.
+I show previews of the 13 remaining interfaces, including the Videoton player and boot image, Service and the new BT-Speaker screen. Images are centered at 320 pixels wide. I removed the Basic player previews as requested. Design references, static backgrounds and host renders are labelled separately.
 
 This update publishes preview images and descriptions only. I am not uploading source code or firmware.
 
@@ -85,12 +87,6 @@ This update publishes preview images and descriptions only. I am not uploading s
 <p align="center"><img src="skins/weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
 <p align="center"><em>R130 night preview with example data; not a live weather reading.<br>At the client's request, I am keeping the source code private for an unspecified period. I will publish it upon a separate request, with the owner's permission.</em></p>
-
-<h3 align="center">Alapnézet / Basic player</h3>
-
-<p align="center"><img src="skins/plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
-
-<p align="center"><em>R137 basic-player drawing code with example values.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 

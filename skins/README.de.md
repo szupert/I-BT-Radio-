@@ -2,7 +2,7 @@
 
 Aktualisiert: 19. Oktober 2026 · V166-R146 Entwicklung
 
-Ich zeige Vorschauen von 14 Oberflächen, darunter Videoton-Player und Bootbild, Basisplayer und BT-IN. Die Bilder sind zentriert und 320 Pixel breit. Frühere Layoutstudien, statische Hintergründe und mit Zeichencode erzeugte Vorschauen kennzeichne ich getrennt.
+Ich zeige Vorschauen der 13 verbleibenden Oberflächen, darunter Videoton-Player und Bootbild, Service und den neuen BT-Speaker. Die Bilder sind zentriert und 320 Pixel breit. Die Vorschau des Basic Players habe ich auf Wunsch entfernt. Entwürfe, statische Hintergründe und Host-Zeichnungen kennzeichne ich getrennt.
 
 In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschreibungen, keinen Quellcode und keine Firmware.
 
@@ -71,12 +71,6 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 <p align="center"><img src="weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
 <p align="center"><em>R130-Nachtvorschau mit Beispieldaten; keine aktuelle Wettermessung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
-
-<h3 align="center">Alapnézet / Basic player</h3>
-
-<p align="center"><img src="plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
-
-<p align="center"><em>R137-Basisansicht mit Beispieldaten.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 

@@ -2,7 +2,7 @@
 
 Frissítve: 2026. október 19. · V166-R146 fejlesztői állapot
 
-A galériában 14 felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, az alapnézetet és a BT-IN képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. A korábbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm.
+A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
 
 Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publikálok; forráskódot és firmware-t nem töltök fel.
 
@@ -71,12 +71,6 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 <p align="center"><img src="weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
 <p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
-
-<h3 align="center">Alapnézet / Basic player</h3>
-
-<p align="center"><img src="plain-320x240/player.png" width="320" alt="Alapnézet / Basic player" /></p>
-
-<p align="center"><em>R137 alapnézet rajzolókódja, példaadatokkal.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 
