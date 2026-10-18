@@ -1,6 +1,6 @@
 # Skins
 
-Aktualisiert: 18. Oktober 2026 · V166-R143 Entwicklung
+Aktualisiert: 19. Oktober 2026 · V166-R146 Entwicklung
 
 Ich zeige Vorschauen von 14 Oberflächen, darunter Videoton-Player und Bootbild, Basisplayer und BT-IN. Die Bilder sind zentriert und 320 Pixel breit. Frühere Layoutstudien, statische Hintergründe und mit Zeichencode erzeugte Vorschauen kennzeichne ich getrennt.
 
@@ -32,9 +32,9 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Signalgenerator und Diagnose; kein kalibriertes Messgerät.</em></p>
+<p align="center"><em>R146-Service-Entwurf mit Beispielwerten; kein Gerätefoto und kein kalibriertes Messgerät.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -80,9 +80,9 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137-BT-IN-Bildschirm mit Beispieldaten, ohne Cover.</em></p>
+<p align="center"><em>R146-BT-Speaker-Entwurf mit Beispieldaten; kein Gerätefoto.</em></p>
 
 WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die Winamp-EQ-Kurve ist dekorativ. Dieses Galerie-Update ist keine neue öffentliche Firmware-Veröffentlichung.
 

@@ -1,10 +1,10 @@
-# I-BT-Radio — V166-R143 BETA · 18. Oktober 2026
+# I-BT-Radio — V166-R146 BETA · 19. Oktober 2026
 
 [Magyar](README.md) · [English](README.en.md)
 
 Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
 
-Ich habe die Galerie mit den korrigierten Videoton-Vorschauen aus R143 aktualisiert. Bootbild, direkter BT-IN-Wechsel und Telefonwiedergabe funktionierten am Gerät. Es war ein kurzer Test; die Watchdog-Warnung beim Indizieren der Senderliste und die Core0-Lastspitze im Menü untersuche ich weiter. Dieses Bilderupdate ist keine neue öffentliche Firmware-Version.
+Ich habe die Galerie um die R146-Entwürfe und die 320×240-Zeichenvorschauen für Service und BT-Speaker aktualisiert. Den zurückbleibenden Empfehlungstrenner am Interpretenende und die Einheit der VU-Lastgrenze habe ich korrigiert. Die Geräteprüfung läuft noch; Speicher- und Audioschutz bleiben erhalten. Die Watchdog-Warnung beim Indizieren der Senderliste ist weiterhin offen. Dies ist ein Bilder- und Dokumentationsupdate, keine öffentliche Firmware-Version.
 
 Frühere Decoder-Messungen (R136–R137):
 
@@ -14,7 +14,7 @@ Radio → DAC, SD → DAC und zuvor Telefon → BT-IN → DAC funktionierten am 
 
 ## Skins
 
-Aktualisiert: 18. Oktober 2026 · V166-R143 Entwicklung
+Aktualisiert: 19. Oktober 2026 · V166-R146 Entwicklung
 
 Ich zeige Vorschauen von 14 Oberflächen, darunter Videoton-Player und Bootbild, Basisplayer und BT-IN. Die Bilder sind zentriert und 320 Pixel breit. Frühere Layoutstudien, statische Hintergründe und mit Zeichencode erzeugte Vorschauen kennzeichne ich getrennt.
 
@@ -46,9 +46,9 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="skins/service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Signalgenerator und Diagnose; kein kalibriertes Messgerät.</em></p>
+<p align="center"><em>R146-Service-Entwurf mit Beispielwerten; kein Gerätefoto und kein kalibriertes Messgerät.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -94,9 +94,9 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="skins/bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137-BT-IN-Bildschirm mit Beispieldaten, ohne Cover.</em></p>
+<p align="center"><em>R146-BT-Speaker-Entwurf mit Beispieldaten; kein Gerätefoto.</em></p>
 
 WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die Winamp-EQ-Kurve ist dekorativ. Dieses Galerie-Update ist keine neue öffentliche Firmware-Veröffentlichung.
 

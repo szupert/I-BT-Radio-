@@ -1,4 +1,4 @@
-# I-BT-Radio — V166-R143 BETA · 2026. október 18.
+# I-BT-Radio — V166-R146 BETA · 2026. október 19.
 
 [English](README.en.md) · [Deutsch](README.de.md)
 
@@ -6,7 +6,7 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 **[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-Az R143 javított Videoton-előnézeteit tettem a galériába. A bootkép, a közvetlen BT-IN váltás és a telefonos lejátszás a készüléken is működött. Ez rövid próbát jelent: az induláskori állomáslista-indexelés watchdog-jelzését és a menü Core0-terhelési csúcsát még vizsgálom. Ez a képes frissítés nem új nyilvános firmware-kiadás.
+Az R146 új Service és BT-Speaker látványtervét és a 320×240-es rajzoló előnézetét tettem a galériába. Az előadó végén maradó ajánlóelválasztót és a VU terhelési küszöbének mértékegységét javítottam. A fizikai ellenőrzés még folyamatban van; a VU memória- és hangvédelme megmaradt. Az induláskori állomáslista-indexelés watchdog-jelzése továbbra is nyitott. Ez képes dokumentációfrissítés, nem nyilvános firmware-kiadás.
 
 Korábbi dekóderméréseim (R136–R137):
 
@@ -16,7 +16,7 @@ A rádió → DAC, SD → DAC és korábban a telefon → BT-IN → DAC már mű
 
 ## Skinek
 
-Frissítve: 2026. október 18. · V166-R143 fejlesztői állapot
+Frissítve: 2026. október 19. · V166-R146 fejlesztői állapot
 
 A galériában 14 felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, az alapnézetet és a BT-IN képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. A korábbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm.
 
@@ -48,9 +48,9 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="skins/service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Jelgenerátor és diagnosztika; nem kalibrált műszer.</em></p>
+<p align="center"><em>R146 Service látványterv, példaértékekkel; nem készülékfotó vagy kalibrált műszer.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -96,9 +96,9 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="skins/bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137 BT-IN képernyőrész, példaadatokkal; borító nélküli állapot.</em></p>
+<p align="center"><em>R146 BT-Speaker látványterv, példaadatokkal; nem készülékfotó.</em></p>
 
 A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A Winamp EQ-görbéje látványelem. A galéria nem új nyilvános firmware-kiadás.
 

@@ -1,6 +1,6 @@
 # Skins
 
-Updated: 18 October 2026 · V166-R143 development
+Updated: 19 October 2026 · V166-R146 development
 
 I show previews of 14 interfaces, including the Videoton player and boot image, the basic player and BT-IN screen. Images are centered at 320 pixels wide. Older layout studies, static backgrounds and drawing-code previews are labelled separately.
 
@@ -32,9 +32,9 @@ This update publishes preview images and descriptions only. I am not uploading s
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Signal generator and diagnostics; not a calibrated instrument.</em></p>
+<p align="center"><em>R146 Service design reference with example values; not a device photo or calibrated instrument.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -80,9 +80,9 @@ This update publishes preview images and descriptions only. I am not uploading s
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137 BT-IN screen section with example values, without cover artwork.</em></p>
+<p align="center"><em>R146 BT-Speaker design reference with example data; not a device photo.</em></p>
 
 Wi-Fi audio → BT remains disabled, as does EQ audio processing. The Winamp EQ curve is decorative. This gallery update is not a new public firmware release.
 

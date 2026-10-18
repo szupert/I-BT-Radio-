@@ -1,6 +1,6 @@
 # Skinek
 
-Frissítve: 2026. október 18. · V166-R143 fejlesztői állapot
+Frissítve: 2026. október 19. · V166-R146 fejlesztői állapot
 
 A galériában 14 felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, az alapnézetet és a BT-IN képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. A korábbi elrendezési terveket, a statikus háttereket és a rajzolókóddal készült előnézeteket külön jelölöm.
 
@@ -32,9 +32,9 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Jelgenerátor és diagnosztika; nem kalibrált műszer.</em></p>
+<p align="center"><em>R146 Service látványterv, példaértékekkel; nem készülékfotó vagy kalibrált műszer.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -80,9 +80,9 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137 BT-IN képernyőrész, példaadatokkal; borító nélküli állapot.</em></p>
+<p align="center"><em>R146 BT-Speaker látványterv, példaadatokkal; nem készülékfotó.</em></p>
 
 A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A Winamp EQ-görbéje látványelem. A galéria nem új nyilvános firmware-kiadás.
 

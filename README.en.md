@@ -1,10 +1,10 @@
-# I-BT-Radio — V166-R143 BETA · 18 October 2026
+# I-BT-Radio — V166-R146 BETA · 19 October 2026
 
 [Magyar](README.md) · [Deutsch](README.de.md)
 
 I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-I updated the gallery with the corrected R143 Videoton previews. The boot image, direct BT-IN switch and phone playback worked on the device. This was a short check: I am still investigating the startup playlist-index watchdog warning and the menu Core0 load peak. This image update is not a new public firmware release.
+I updated the gallery with the R146 Service and BT-Speaker design references and 320×240 renderer previews. I fixed a recommendation separator left at the end of artist names and the units used by the VU load threshold. Device checks are still in progress; the VU memory and audio guards remain in place. The startup playlist-index watchdog warning remains open. This is an illustrated documentation update, not a public firmware release.
 
 Earlier decoder measurements (R136–R137):
 
@@ -14,7 +14,7 @@ Radio → DAC, SD → DAC and earlier phone → BT-IN → DAC playback worked on
 
 ## Skins
 
-Updated: 18 October 2026 · V166-R143 development
+Updated: 19 October 2026 · V166-R146 development
 
 I show previews of 14 interfaces, including the Videoton player and boot image, the basic player and BT-IN screen. Images are centered at 320 pixels wide. Older layout studies, static backgrounds and drawing-code previews are labelled separately.
 
@@ -46,9 +46,9 @@ This update publishes preview images and descriptions only. I am not uploading s
 
 <h3 align="center">Service</h3>
 
-<p align="center"><img src="skins/service-320x240/preview.png" width="320" alt="Service" /></p>
+<p align="center"><img src="skins/service-320x240/concept.png" width="320" alt="Service" /></p>
 
-<p align="center"><em>Signal generator and diagnostics; not a calibrated instrument.</em></p>
+<p align="center"><em>R146 Service design reference with example values; not a device photo or calibrated instrument.</em></p>
 
 <h3 align="center">Classic Wood</h3>
 
@@ -94,9 +94,9 @@ This update publishes preview images and descriptions only. I am not uploading s
 
 <h3 align="center">Bluetooth IN</h3>
 
-<p align="center"><img src="skins/bluetooth-in-320x240/player.png" width="320" alt="Bluetooth IN" /></p>
+<p align="center"><img src="skins/bluetooth-in-320x240/concept.png" width="320" alt="Bluetooth IN" /></p>
 
-<p align="center"><em>R137 BT-IN screen section with example values, without cover artwork.</em></p>
+<p align="center"><em>R146 BT-Speaker design reference with example data; not a device photo.</em></p>
 
 Wi-Fi audio → BT remains disabled, as does EQ audio processing. The Winamp EQ curve is decorative. This gallery update is not a new public firmware release.
 
