@@ -98,6 +98,17 @@ A Winamp, a BT-IN, a Service, a Kajon-Jon-bt-vu és az Alapnézet / Basic player
 
 A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A Winamp EQ-görbéje látványelem. A galéria nem új nyilvános firmware-kiadás.
 
+
+<h3 align="center">Videoton RT 6303 S</h3>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
+
+<p align="center"><em>A kipróbált R141 ezüst Videoton-felületét tartottam meg. Itt a gombfeliratok, a LED-ek és a típusfelirat célzott grafikai javítását mutatom, példaadatokkal. Az új rajz készülékes ellenőrzése még hátravan; ez nem firmware-kiadás.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Bootképernyő – indulás közbeni előnézet" /></p>
+
+<p align="center"><em>Bootképernyő – indulás közbeni előnézet · 2026-10-18</em></p>
+
 ## Hardver és bekötés
 
 Az alábbi kiosztás az ESP32 Small/Yellow Board 320 × 240-es változatához és a V156 firmware GPIO-beállításaihoz készült. A memórialapka tokján `ESP PSRAM64H` olvasható; az Espressif pontos típusszáma **ESP-PSRAM64H**, 64 Mbit (8 MB), SOP-8-150 mil, 3,3 V.

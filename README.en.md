@@ -96,6 +96,17 @@ Winamp, BT-IN, Service, Kajon-Jon-bt-vu and Alapnézet / Basic player are except
 
 Wi-Fi audio → BT remains disabled, as does EQ audio processing. The Winamp EQ curve is decorative. This gallery update is not a new public firmware release.
 
+
+<h3 align="center">Videoton RT 6303 S</h3>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
+
+<p align="center"><em>I retained the silver Videoton layout tested on R141. This preview shows targeted button-label, LED and model-label corrections with example data. The revised graphics still need a device check; this is not a firmware release.<br>At the client's request, I keep the source code private for an indefinite period. I publish it on separate request with the owner's permission.</em></p>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Boot screen – startup preview" /></p>
+
+<p align="center"><em>Boot screen – startup preview · 2026-10-18</em></p>
+
 ## Hardware and wiring
 
 This wiring matches the ESP32 Small/Yellow Board V156 configuration. Check the labels and supply voltage on the actual board and modules before soldering.

@@ -96,6 +96,17 @@ Winamp, BT-IN, Service, Kajon-Jon-bt-vu und Alapnézet / Basic player sind Ausna
 
 WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die Winamp-EQ-Kurve ist dekorativ. Dieses Galerie-Update ist keine neue öffentliche Firmware-Veröffentlichung.
 
+
+<h3 align="center">Videoton RT 6303 S</h3>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
+
+<p align="center"><em>Ich habe das auf R141 getestete silberne Videoton-Layout beibehalten. Die Vorschau zeigt gezielte Korrekturen der Tastenbeschriftungen, LEDs und Modellbezeichnung mit Beispieldaten. Die neue Grafik ist noch am Gerät zu prüfen; dies ist keine Firmware-Veröffentlichung.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Zustimmung des Eigentümers.</em></p>
+
+<p align="center"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Bootbild – Startvorschau" /></p>
+
+<p align="center"><em>Bootbild – Startvorschau · 2026-10-18</em></p>
+
 ## Hardware und Anschlüsse
 
 Die folgende Belegung entspricht der dokumentierten Small/Yellow-Board-Ausführung mit 320 × 240 Pixeln. Platinenrevision vor dem Löten vergleichen.
