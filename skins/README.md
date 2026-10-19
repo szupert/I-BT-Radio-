@@ -1,22 +1,34 @@
 # Skinek
 
-Frissítve: 2026. október 19. · V166-R146 fejlesztői állapot
+Frissítve: 2026. október 19. · R161 indulási előnézetek
 
-A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
+A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 260–320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
 
 Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publikálok; forráskódot és firmware-t nem töltök fel.
 
 <h3 align="center">Winamp / Classic</h3>
 
-<p align="center"><img src="classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
+<table align="center">
+<tr><th align="center">Betöltő</th><th align="center">Asztal · 2 mp</th><th align="center">Lejátszó</th></tr>
+<tr><td align="center"><a href="classic-player-320x240/boot-xp-r161.jpg"><img src="classic-player-320x240/boot-xp-r161.jpg" width="260" alt="Winamp / Classic — Betöltő" /></a></td><td align="center"><a href="classic-player-320x240/desktop-xp-r161.png"><img src="classic-player-320x240/desktop-xp-r161.png" width="260" alt="Winamp / Classic — Asztal · 2 mp" /></a></td><td align="center"><a href="classic-player-320x240/player_eq.png"><img src="classic-player-320x240/player_eq.png" width="260" alt="Winamp / Classic — Lejátszó" /></a></td></tr>
+</table>
 
 <p align="center"><em>Korábbi grafikai előnézet.</em></p>
 
+
+<p align="center"><em>Az R161 indulási sorrendjét egymás mellett mutatom. Az asztalon 15 korabeli program és játék ikonja szerepel, köztük Red Alert 2, Need for Speed és GTA: San Andreas. A képek előnézetek; az R161 készülékes képi és hangpróbája még hátravan.</em></p>
+
 <h3 align="center">Media Player</h3>
 
-<p align="center"><img src="media-player-320x240/player.png" width="320" alt="Media Player" /></p>
+<table align="center">
+<tr><th align="center">Betöltő</th><th align="center">Asztal · 2 mp</th><th align="center">Lejátszó</th></tr>
+<tr><td align="center"><a href="media-player-320x240/boot-win7-r161.jpg"><img src="media-player-320x240/boot-win7-r161.jpg" width="260" alt="Media Player — Betöltő" /></a></td><td align="center"><a href="media-player-320x240/desktop-win7-r161.png"><img src="media-player-320x240/desktop-win7-r161.png" width="260" alt="Media Player — Asztal · 2 mp" /></a></td><td align="center"><a href="media-player-320x240/player.png"><img src="media-player-320x240/player.png" width="260" alt="Media Player — Lejátszó" /></a></td></tr>
+</table>
 
 <p align="center"><em>Korábbi grafikai előnézet.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+
+
+<p align="center"><em>Az R161 indulási sorrendjét egymás mellett mutatom. Az asztalon 15 korabeli program és játék ikonja szerepel, köztük Red Alert 2, Need for Speed és GTA: San Andreas. A képek előnézetek; az R161 készülékes képi és hangpróbája még hátravan.</em></p>
 
 <h3 align="center">Cassette</h3>
 
@@ -82,10 +94,13 @@ A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A W
 
 <h3 align="center">Videoton RT 6303 S</h3>
 
-<p align="center"><img src="videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
+<table align="center">
+<tr><th align="center">Betöltő</th><th align="center">Lejátszó</th></tr>
+<tr><td align="center"><a href="videoton-rt6303s-320x240/boot.png"><img src="videoton-rt6303s-320x240/boot.png" width="320" alt="Videoton RT 6303 S — Betöltő" /></a></td><td align="center"><a href="videoton-rt6303s-320x240/player.png"><img src="videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S — Lejátszó" /></a></td></tr>
+</table>
 
 <p align="center"><em>Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → üres gomb sorrenddel és RT 6303 S típusfelirattal. Az R143-ban a bootképből eltűntek a zöld szövegmaradványok, a betöltősáv tisztán rajzolódik. A BT gomb menü nélkül IN módra váltott, a telefonról folyamatosan szólt a hang. A 36 oldalas, 255 menüsort érintő rövid rajzolási próbában nem tért vissza a veremtúlcsordulás. Az előnézeten példaadatok látszanak; a többi funkció teljes ellenőrzése még folyamatban van.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
 
-<p align="center"><img src="videoton-rt6303s-320x240/boot.png" width="320" alt="Bootképernyő – indulás közbeni előnézet" /></p>
 
-<p align="center"><em>Bootképernyő – indulás közbeni előnézet · 2026-10-18</em></p>
+
+

@@ -22,23 +22,35 @@ Radio → DAC, SD → DAC und zuvor Telefon → BT-IN → DAC funktionierten am 
 
 ## Skins
 
-Aktualisiert: 19. Oktober 2026 · V166-R146 Entwicklung
+Aktualisiert: 19. Oktober 2026 · R161-Startvorschauen
 
-Ich zeige Vorschauen der 13 verbleibenden Oberflächen, darunter Videoton-Player und Bootbild, Service und den neuen BT-Speaker. Die Bilder sind zentriert und 320 Pixel breit. Die Vorschau des Basic Players habe ich auf Wunsch entfernt. Entwürfe, statische Hintergründe und Host-Zeichnungen kennzeichne ich getrennt.
+Ich zeige Vorschauen der 13 verbleibenden Oberflächen, darunter Videoton-Player und Bootbild, Service und den neuen BT-Speaker. Die Bilder sind zentriert und 260–320 Pixel breit. Die Vorschau des Basic Players habe ich auf Wunsch entfernt. Entwürfe, statische Hintergründe und Host-Zeichnungen kennzeichne ich getrennt.
 
 In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschreibungen, keinen Quellcode und keine Firmware.
 
 <h3 align="center">Winamp / Classic</h3>
 
-<p align="center"><img src="skins/classic-player-320x240/player_eq.png" width="320" alt="Winamp / Classic" /></p>
+<table align="center">
+<tr><th align="center">Startbild</th><th align="center">Desktop · 2 s</th><th align="center">Player</th></tr>
+<tr><td align="center"><a href="skins/classic-player-320x240/boot-xp-r161.jpg"><img src="skins/classic-player-320x240/boot-xp-r161.jpg" width="260" alt="Winamp / Classic — Startbild" /></a></td><td align="center"><a href="skins/classic-player-320x240/desktop-xp-r161.png"><img src="skins/classic-player-320x240/desktop-xp-r161.png" width="260" alt="Winamp / Classic — Desktop · 2 s" /></a></td><td align="center"><a href="skins/classic-player-320x240/player_eq.png"><img src="skins/classic-player-320x240/player_eq.png" width="260" alt="Winamp / Classic — Player" /></a></td></tr>
+</table>
 
 <p align="center"><em>Frühere Layout-Vorschau.</em></p>
 
+
+<p align="center"><em>Ich zeige den R161-Startablauf nebeneinander. Auf dem Desktop stehen 15 zeittypische Programm- und Spielsymbole, darunter Red Alert 2, Need for Speed und GTA: San Andreas. Dies sind Vorschauen; Bild und Ton von R161 müssen noch am Gerät geprüft werden.</em></p>
+
 <h3 align="center">Media Player</h3>
 
-<p align="center"><img src="skins/media-player-320x240/player.png" width="320" alt="Media Player" /></p>
+<table align="center">
+<tr><th align="center">Startbild</th><th align="center">Desktop · 2 s</th><th align="center">Player</th></tr>
+<tr><td align="center"><a href="skins/media-player-320x240/boot-win7-r161.jpg"><img src="skins/media-player-320x240/boot-win7-r161.jpg" width="260" alt="Media Player — Startbild" /></a></td><td align="center"><a href="skins/media-player-320x240/desktop-win7-r161.png"><img src="skins/media-player-320x240/desktop-win7-r161.png" width="260" alt="Media Player — Desktop · 2 s" /></a></td><td align="center"><a href="skins/media-player-320x240/player.png"><img src="skins/media-player-320x240/player.png" width="260" alt="Media Player — Player" /></a></td></tr>
+</table>
 
 <p align="center"><em>Frühere Layout-Vorschau.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Erlaubnis des Eigentümers.</em></p>
+
+
+<p align="center"><em>Ich zeige den R161-Startablauf nebeneinander. Auf dem Desktop stehen 15 zeittypische Programm- und Spielsymbole, darunter Red Alert 2, Need for Speed und GTA: San Andreas. Dies sind Vorschauen; Bild und Ton von R161 müssen noch am Gerät geprüft werden.</em></p>
 
 <h3 align="center">Cassette</h3>
 
@@ -105,13 +117,16 @@ WLAN-Audio → BT bleibt gesperrt, die EQ-Signalverarbeitung abgeschaltet. Die W
 
 <h3 align="center">Videoton RT 6303 S</h3>
 
-<p align="center"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S" /></p>
+<table align="center">
+<tr><th align="center">Startbild</th><th align="center">Player</th></tr>
+<tr><td align="center"><a href="skins/videoton-rt6303s-320x240/boot.png"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Videoton RT 6303 S — Startbild" /></a></td><td align="center"><a href="skins/videoton-rt6303s-320x240/player.png"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S — Player" /></a></td></tr>
+</table>
 
 <p align="center"><em>Ich habe das freigegebene originale Videoton-Layout mit der Reihenfolge Beschriftung → LED → unbeschriftete Taste und dem Schriftzug RT 6303 S beibehalten. R143 entfernt die grünen Textreste im Bootbild und zeichnet den Ladebalken sauber. Die BT-Taste wechselte ohne Menü direkt in den IN-Modus; die Audiowiedergabe vom Telefon lief durchgehend. Im kurzen Zeichentest mit 36 Menüseiten und 255 Zeilen trat kein weiterer Stacküberlauf auf. Die Vorschau zeigt Beispieldaten; die vollständige Prüfung der übrigen Funktionen läuft weiter.<br>Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Zustimmung des Eigentümers.</em></p>
 
-<p align="center"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Bootbild – Startvorschau" /></p>
 
-<p align="center"><em>Bootbild – Startvorschau · 2026-10-18</em></p>
+
+
 
 ## Hardware und Anschlüsse
 
