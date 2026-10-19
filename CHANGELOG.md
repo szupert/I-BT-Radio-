@@ -1,5 +1,14 @@
 ## 2026-10-16 — skinláthatóság pontosítása
 
+## V166-R151 BETA · 2026-10-19
+
+- Nyilvános, egyfájlos Windows x64 telepítő a beta/V166_R151 mappában, firmware- és skinforrás nélkül.
+- Saját futtatókörnyezet, élő COM/BOOT/százalék, adatmegőrző frissítés; teljes törlés csak IGEN-nel; hiba után kézi R/Q, automatikus stresszteszt nélkül.
+- R148–R150 rendezett menü, webes linkjavítás és késleltetett oldal-újrapróba bekerült a kiadásba.
+- R151: egy kijelölt webfeldolgozó, hangfeladat szinkron webhívásainak eltávolítása, közös válaszpufferek csökkentése, önmagára váró válaszsor javítása. Az 500 ms-os hangvédelem és a többi biztonsági határ változatlan.
+- Build/host és önálló EXE-ellenőrzés PASS; R151 készülékes feltöltés, hang, hosszú stabilitás NOT_RUN. R150 korábbi fizikai eredménye külön kezelendő.
+
+
 Minden skin előnézeti képe megjelenik. A Winamp és Service nyilvános marad. A többi kép alatt: „A tulajdonos kérésére a forráskód privát.” A privát RGB565/layout/forrásadatokat és vegyes forráscsomagokat nem teszem vissza.
 
 ## 2026-10-16 — V166-R125 dokumentáció

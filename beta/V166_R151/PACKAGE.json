@@ -1,0 +1,30 @@
+{
+  "release": "V166-R151-BETA",
+  "firmware": "V166-R151",
+  "fresh_install": "SMALL_16MB_V1",
+  "flash_mb": 16,
+  "physical": "NOT_RUN_R151",
+  "default_tests": "none",
+  "files": {
+    "bootloader.bin": {
+      "bytes": 26128,
+      "sha256": "08d1cd5b64b5d9a9cd3655537a2bc0c982b1309a001340e14726dc8c83b63454"
+    },
+    "boot_app0.bin": {
+      "bytes": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    "firmware.bin": {
+      "bytes": 6281264,
+      "sha256": "f5be0111164a73062ee7cfc050453eca5ac085b84eadb28fb5f52a1d5e2f031a"
+    },
+    "partitions.bin": {
+      "bytes": 3072,
+      "sha256": "abc23963addcba872803e202f58c4a6f739e40ba87fcb3fac430494fa045df81"
+    },
+    "spiffs.bin": {
+      "bytes": 4128768,
+      "sha256": "8a498a40270c55d6afbc4c11c7f181d12cf293c0d303727d500f9f967608b7ab"
+    }
+  }
+}

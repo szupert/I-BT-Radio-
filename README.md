@@ -1,4 +1,4 @@
-# I-BT-Radio — V166-R147 BETA · 2026. október 19.
+# I-BT-Radio — V166-R151 BETA · 2026. október 19.
 
 [English](README.en.md) · [Deutsch](README.de.md)
 
@@ -6,9 +6,15 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 **[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-Az R147-ben kivettem a Basic playert és a régi szürke Bluetooth-tartaléknézetet, és javítottam a húzásból megnyíló playlistet. A főképernyős skinlapozás a készüléken rendben működött. A rövid állapotfigyelésben 1552 bájt kijelző-veremtartalékot mértem, új reset vagy memóriahiba nélkül; a hallható hangminőséget most nem tudtam ellenőrizni.
+## Letölthető Windows béta · R151
 
-Az átláthatóbb menüt a következő firmware-hez készítem elő. Nyolc beállításcsoportot használok, a bootképet és VU-frissítést a Kijelző, a lapozást és menübezárást a Kezelés alá rendeztem. A visszalépési célokat és a Diagnosztika korábban nem választható Vissza sorát javítottam. A hostteszt és a célprocesszoros szintaktikai ellenőrzés sikeres; teljes firmware-fordítás és készülékteszt még nincs. A **2026.10.19-i menütérkép ezt az előkészített menüt mutatja**, miközben a rádión változatlan R147 fut.
+**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · **[Telepítési útmutató és ellenőrzőösszegek](beta/V166_R151/README.md)**
+
+Az EXE-be beépítettem a futtatókörnyezetet és a firmware-t, külön Python nem kell. A kiadás a SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelzős, külső DAC-os összeállításhoz készült, a [dokumentált bekötéssel](hardware/README.md). Nem általános ESP32-telepítő. Meglévő megfelelő partíciót frissítéskor megőriz; teljes törlést csak külön IGEN megerősítéssel végez. Automatikus stresszteszt nincs.
+
+A rendezett menü és a javított webes hivatkozások már benne vannak. Az R150-ben a webes menü hiányzó oldalainak késleltetett újratöltése készüléken működött; a 10 perces kombinált mérésben 257/257 menüsor és két 34/34 oldalas webes betöltés teljesült. Az R151-ben a webes feldolgozást egyetlen kijelölt feladathoz kötöttem, a hangfeladat szinkron webhívásait és a válaszsor önmagára várását megszüntettem. A hangvédelmi és memóriahatárok maradtak.
+
+**Kísérleti béta:** az R151 fordítása és gépi ellenőrzése sikeres, a valódi R151 feltöltés, hang és hosszú stabilitás még nincs ellenőrizve. A korábbi méréseket nem tekintem az új változat készüléktesztjének. A csomagban nincs firmware- vagy skinforrás, személyes beállítás és ELF/MAP hibakeresési fájl. Hibajelzést az [Issues](https://github.com/szupert/I-BT-Radio-/issues) oldalon várok.
 
 Korábbi dekóderméréseim (R136–R137):
 

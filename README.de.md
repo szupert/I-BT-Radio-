@@ -1,12 +1,18 @@
-# I-BT-Radio — V166-R147 BETA · 19. Oktober 2026
+# I-BT-Radio — V166-R151 BETA · 19. Oktober 2026
 
 [Magyar](README.md) · [English](README.en.md)
 
 Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
 
-In R147 habe ich den Basic Player und die alte graue Bluetooth-Ersatzansicht entfernt und das versehentliche Öffnen der Playlist nach einer Wischgeste korrigiert. Der Skinwechsel auf dem Hauptbildschirm funktionierte am Gerät. Bei der kurzen Beobachtung habe ich mindestens 1552 Byte Display-Stackreserve gemessen, ohne neuen Reset oder Speicherfehler; die hörbare Qualität konnte ich diesmal nicht prüfen.
+## Windows-Beta zum Herunterladen · R151
 
-Für die nächste Firmware bereite ich ein übersichtlicheres Menü mit acht Einstellungsgruppen vor. Bootbild und VU-Aktualisierung stehen unter Anzeige, Skinwechsel und Menü-Schließzeit unter Bedienung. Rücksprungziele und die bisher nicht auswählbare Zurück-Zeile der Diagnose habe ich korrigiert. Hosttests und Syntaxprüfung für den Zielprozessor waren erfolgreich; vollständiger Firmware-Build und Gerätetest stehen noch aus. Die **Menükarte vom 19.10.2026 zeigt diese vorbereitete Struktur**. Auf dem Radio läuft unverändert R147.
+**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Anleitung und Prüfsummen](beta/V166_R151/README.md)
+
+Ich habe Laufzeitumgebung und Firmware in einer EXE gebündelt; eine separate Python-Installation ist nicht nötig. Die Beta ist ausschließlich für den dokumentierten SMALL ESP32-WROOM mit PSRAM, 16 MB Flash, 320×240-Display und externem DAC vorgesehen. Normale Updates erhalten eine passende Partitionierung. Vollständiges Löschen erfordert die ausdrückliche Bestätigung IGEN. Es startet kein automatischer Stresstest.
+
+Das gruppierte Menü und die korrigierten WebUI-Links sind enthalten. R150 absolvierte einen zehnminütigen Gerätetest mit 257/257 Menüzeilen und zweimal 34/34 WebUI-Seiten. In R151 habe ich synchrone WebUI-Arbeit aus dem Audiotask entfernt und das Warten der Antwortwarteschlange auf sich selbst beseitigt. Audio- und Speichergrenzen bleiben unverändert.
+
+**Experimentelle Beta:** R151 wurde erfolgreich kompiliert und auf dem PC geprüft. Das tatsächliche Flashen, der Ton und die Langzeitstabilität von R151 sind noch nicht am Gerät geprüft. Frühere Messungen sind kein Nachweis für diese Revision. Firmware- und Skinquellen, persönliche Einstellungen sowie ELF/MAP-Dateien sind nicht enthalten. Fehler bitte unter [Issues](https://github.com/szupert/I-BT-Radio-/issues) melden.
 
 Frühere Decoder-Messungen (R136–R137):
 

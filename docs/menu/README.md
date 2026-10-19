@@ -1,6 +1,6 @@
 # Menü és kezelés · 2026.10.19.
 
-Az R147 skinlapozása a készüléken jól működött. A Basic playert és a szürke régi Bluetooth-felületet eltávolítottam. A következő firmware menüjét az alábbi szerkezetre rendeztem át. **Ez előkészített változat: hostteszt és célprocesszoros szintaktikai ellenőrzés sikeres, teljes build és fizikai menüteszt még nincs. A rádión továbbra is az R147 fut.**
+A nyolc csoportba rendezett menü az R148 óta beépített funkció. Az R150 kombinált készülékpróbájában mind a 257 menüsor kirajzolása és két 34/34 oldalas webes betöltés teljesült. Ez nem minden menüművelet, touch/rotary útvonal és hangminőség teljes tesztje. Az R151 ezt a menüt tartalmazza, de maga az új firmware még nem kapott készüléktesztet.
 
 <p align="center"><a href="../../hardware/MENU_MAP.jpg"><img src="../../hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menütérkép 2026.10.19."></a></p>
 
@@ -36,9 +36,9 @@ Az érintés és a rotary ugyanazokat a menüpontokat éri el. A skinváltáshoz
 ## Mi van ténylegesen ellenőrizve?
 
 - R147: a skinlapozás a készüléken jól működött. A rövid megfigyelésben a kijelző legkisebb veremtartaléka 1552 B volt; új reset és memóriahiba nem jelent meg. A hallható hangminőséget most nem tudtam ellenőrizni.
-- Új menüváltozat: 3855 fordítási/határértékes szövegkiírás és a mozgatott menüpontok oda-vissza útja hoston ellenőrizve. A célprocesszoros szintaktikai ellenőrzés sikeres. Ez nem teljes firmware-build vagy készülékteszt.
+- A menü beépítése előtti ellenőrzés (történeti állapot): 3855 fordítási/határértékes szövegkiírás és a mozgatott menüpontok oda-vissza útja hoston ellenőrizve. A célprocesszoros szintaktikai ellenőrzés sikeres. Ez nem teljes firmware-build vagy készülékteszt.
 - A négyórás R147 DAC-teszt külön mérés, BT-IN és BT-OUT nélkül. A futás közben elkészült menüváltozat nem módosítja a rádión lévő firmware-t.
 
 A korábbi [2026.10.11-i menüvizsgálat](results/STRESS_20261011_151229_617.json) történeti előzmény. A régi runner és WEB→BT-kísérlet nem írja felül a jelenlegi tiltásokat és nem igazolja az új menü fizikai működését. A kirajzolt sor, a végrehajtott művelet és a hallható hang három külön ellenőrzés.
 
-Csak képet és leírást publikálok; ez a frissítés nem tartalmaz skinforrást vagy firmware-t.
+Az [R151 nyilvános béta telepítője](../../beta/V166_R151/README.md) már letölthető; firmware- és skinforrást nem tartalmaz.

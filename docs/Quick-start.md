@@ -1,7 +1,11 @@
-# Beállítás és frissítés
+# Telepítés és első indítás · R151 BETA
 
-A jelenlegi fejlesztői állapot V166-R125 BETA. Ebben a nyilvános dokumentációfrissítésben nincs új firmware-letöltés. A régi vegyes skin-csomagokat visszavontam a jelenlegi ágból.
+Az aktuális nyilvános telepítő és a részletes útmutató a **[beta/V166_R151](../beta/V166_R151/README.md)** mappában található. Egyetlen Windows x64 EXE, beépített Python/esptool és firmware, külön függőségtelepítés nélkül.
 
-A saját helyi csomagomban az 1_FELTOLTES.bat az alap, adatmegőrző feltöltő. Élő COM/BOOT és valódi százalékjelzés, csomag- és partícióellenőrzés. Teljes törlés csak külön, egyértelmű megerősítéssel történhet. A megfelelő SMALL hardver/PSRAM és16MB flashkiosztás előfeltétel.
+Csak a [dokumentált SMALL hardverhez](../hardware/README.md): ESP32-WROOM, 16 MB flash, PSRAM, 320×240 kijelző és külső DAC. A saját panelmódosításokat és GPIO-kat feltöltés előtt ellenőrizni kell.
 
-A TESZT_CELZOTT_8PERC.bat rádió-DAC kontrollt és SD-BT próbát végez. A sikertelen BT nem hangteszt-PASS. A teljes teszt- és funkcióállapot a [funkciólistában](Features.md) található.
+Adatmegőrző frissítés megfelelő partíció esetén; teljes telepítés üres vagy eltérő flashre, külön IGEN megerősítéssel. Élő COM/BOOT és valódi százalékjelzés, hash- és bootellenőrzés. Hiba után kézi újrapróba; automatikus stresszteszt nincs.
+
+Teljes telepítés után I-BT-Radio-Setup Wi-Fi, majd http://192.168.4.1/ és a saját hálózat beállítása. Az állomáslistát külön kell hozzáadni. A naplók helye: %LOCALAPPDATA%\I-BT-Radio\Logs.
+
+R151: fordítás és hostteszt sikeres; fizikai feltöltés/hang/stabilitás még NOT_RUN. Hibajelzéshez verzió, hardver, skin, forrás/kimenet és pontos reprodukció szükséges. Személyes adatot ne tegyél a nyilvános hibajegybe.

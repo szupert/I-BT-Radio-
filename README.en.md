@@ -1,12 +1,18 @@
-# I-BT-Radio — V166-R147 BETA · 19 October 2026
+# I-BT-Radio — V166-R151 BETA · 19 October 2026
 
 [Magyar](README.md) · [Deutsch](README.de.md)
 
 I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-In R147 I removed the Basic player and the old grey Bluetooth fallback, and fixed the playlist opening after a swipe. Home-screen skin swiping worked on the device. In the short observation I measured a minimum display stack margin of 1552 bytes, with no new reset or memory error; I could not check audible quality this time.
+## Downloadable Windows beta · R151
 
-I am preparing a clearer menu for the next firmware. I use eight settings groups, with boot image and VU refresh under Display, and skin swiping and menu timeout under Controls. I corrected return destinations and the previously unselectable Diagnostics Back row. Host tests and target-processor syntax checking passed; a full firmware build and device check are still pending. The **2026-10-19 menu map shows this prepared structure**. The radio continues to run unchanged R147.
+**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Instructions and checksums](beta/V166_R151/README.md)
+
+I bundled the runtime and firmware in one EXE; no separate Python installation is needed. This beta is only for the documented SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 display and external DAC configuration. Normal updates preserve a matching partition layout; full erasure requires an explicit IGEN confirmation. No automatic stress test starts.
+
+The grouped menu and corrected WebUI links are included. R150 completed a 10-minute combined hardware test with 257/257 menu rows and two 34/34 WebUI loads. R151 removes synchronous WebUI work from the audio task and prevents the web reply queue from waiting on itself. Audio and memory safeguards remain unchanged.
+
+**Experimental beta:** R151 build and host checks passed; R151 hardware flashing, sound and long-term stability are not yet verified. Earlier measurements are not proof for this revision. Firmware and skin sources, personal settings, ELF and MAP files are not included. Please report reproducible issues through [Issues](https://github.com/szupert/I-BT-Radio-/issues).
 
 Earlier decoder measurements (R136–R137):
 
