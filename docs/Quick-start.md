@@ -1,11 +1,9 @@
-# Telepítés és első indítás · R151 BETA
+# Telepítés és első indítás · R163 BETA
 
-Az aktuális nyilvános telepítő és a részletes útmutató a **[beta/V166_R151](../beta/V166_R151/README.md)** mappában található. Egyetlen Windows x64 EXE, beépített Python/esptool és firmware, külön függőségtelepítés nélkül.
+**[Aktuális telepítő és részletes útmutató](../beta/V166_R163/README.md)** · [Hardver és bekötés](../hardware/README.md)
 
-Csak a [dokumentált SMALL hardverhez](../hardware/README.md): ESP32-WROOM, 16 MB flash, PSRAM, 320×240 kijelző és külső DAC. A saját panelmódosításokat és GPIO-kat feltöltés előtt ellenőrizni kell.
+Egyetlen Windows x64 EXE, beépített futtatókörnyezettel. Csak SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelző és külső DAC. Nem általános ESP32/S3/4 MB telepítő.
 
-Adatmegőrző frissítés megfelelő partíció esetén; teljes telepítés üres vagy eltérő flashre, külön IGEN megerősítéssel. Élő COM/BOOT és valódi százalékjelzés, hash- és bootellenőrzés. Hiba után kézi újrapróba; automatikus stresszteszt nincs.
+Ismert hibás tesztkiadás: a Wi-Fi → DAC hang menü nélkül is szaggat, menüjárás alatt a stream újracsatlakozhat. A Windows 7 bootanimáció villogása nyitott. Hosszú stabilitás nincs igazolva.
 
-Teljes telepítés után I-BT-Radio-Setup Wi-Fi, majd http://192.168.4.1/ és a saját hálózat beállítása. Az állomáslistát külön kell hozzáadni. A naplók helye: %LOCALAPPDATA%\I-BT-Radio\Logs.
-
-R151: fordítás és hostteszt sikeres; fizikai feltöltés/hang/stabilitás még NOT_RUN. Hibajelzéshez verzió, hardver, skin, forrás/kimenet és pontos reprodukció szükséges. Személyes adatot ne tegyél a nyilvános hibajegybe.
+A feltöltő élő COM/BOOT/százalékjelzést ad. Megfelelő partíció mellett megőrzi a beállításokat; teljes törlés csak IGEN megerősítéssel. Hiba után kézi újrapróba, automatikus stresszteszt nélkül. Teljes telepítés után I-BT-Radio-Setup hálózat és http://192.168.4.1/; saját állomáslistát kell hozzáadni. Naplók: %LOCALAPPDATA%\I-BT-Radio\Logs.

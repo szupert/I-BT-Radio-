@@ -1,10 +1,23 @@
 # I-BT-Radio — V166-R151 BETA · 19 October 2026
 
+## Current Windows beta · R163 · 2026-10-19
+
+**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Instructions and checksums](beta/V166_R163/README.md)
+
+For the documented SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 display and external DAC only. Runtime included; no separate Python required. No firmware/skin sources, ELF/MAP files or personal configuration are bundled. Matching partitions allow an update that preserves settings; full erasure requires explicit IGEN confirmation. No automatic stress test.
+
+**Known-bug testing beta, not a stable release:** Wi-Fi → DAC audibly stutters both with and without menu traversal. The stream buffer emptied and reconnected during menu traversal. Windows 7 boot animation flicker is also unresolved.
+
+I fixed the station-index watchdog path: 480 rows completed in 814 ms on hardware without a new watchdog or memory error in the short observation. The 500 ms audio guard and all safety limits remain unchanged. Long-term R163 stability is unverified. Please report reproducible issues through [Issues](https://github.com/szupert/I-BT-Radio-/issues).
+
+---
+
+
 [Magyar](README.md) · [Deutsch](README.de.md)
 
 I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
 
-## Downloadable Windows beta · R151
+## Earlier Windows beta · R151
 
 **[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Instructions and checksums](beta/V166_R151/README.md)
 

@@ -1,4 +1,14 @@
 ## 2026-10-16 — skinláthatóság pontosítása
+ 
+## V166-R163 BETA · 2026-10-19
+
+- Forráskód nélküli, egyfájlos Windows x64 telepítő a beta/V166_R163 mappában.
+- Blokkos állomáslista-indexelés tényleges CPU-átadással. A készüléken 480 sor/814 ms, új watchdog és memóriahiba nélkül a rövid próbában.
+- A korábbi SD-/menüjavítások, webes tömörítés és XP/Win7 bootnézetek benne vannak; MP3 forró kódrész IRAM-ban, ritkított háttér-memóriavizsgálat.
+- Ismert hiba: Wi-Fi-DAC hang szaggat menü nélkül és menüjárással is; a menüs résztesztben LOW_BUFFER utáni újracsatlakozás történt. A csökkent CPU-terhelés nem folytonos hang-PASS.
+- Win7 bootvillogás nyitott. Hosszú stabilitás és az új önálló EXE fizikai feltöltése NOT_RUN.
+- 500 ms-os hangvédelem és minden biztonsági határ változatlan. Automatikus stresszteszt nincs.
+
 
 ## V166-R151 BETA · 2026-10-19
 

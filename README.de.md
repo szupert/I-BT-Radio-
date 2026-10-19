@@ -1,10 +1,23 @@
 # I-BT-Radio — V166-R151 BETA · 19. Oktober 2026
 
+## Aktuelle Windows-Beta · R163 · 19.10.2026
+
+**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Anleitung und Prüfsummen](beta/V166_R163/README.md)
+
+Nur für die dokumentierte SMALL-Konfiguration mit ESP32-WROOM, PSRAM, 16 MB Flash, 320×240-Display und externem DAC. Laufzeitumgebung enthalten, kein separates Python nötig. Keine Firmware-/Skinquellen, ELF/MAP-Dateien oder persönlichen Einstellungen. Passende Partitionen ermöglichen ein Update mit Erhalt der Einstellungen; vollständiges Löschen nur nach ausdrücklichem IGEN. Kein automatischer Stresstest.
+
+**Test-Beta mit bekannten Fehlern, keine stabile Version:** Wi-Fi → DAC stottert hörbar mit und ohne Menüdurchlauf. Beim Menüdurchlauf leerte sich der Streampuffer und die Verbindung wurde neu aufgebaut. Das Flackern der Windows-7-Bootanimation ist ebenfalls offen.
+
+Den Watchdog-Pfad der Senderindexierung habe ich korrigiert: 480 Zeilen in 814 ms am Gerät, ohne neuen Watchdog oder Speicherfehler während der kurzen Beobachtung. Der 500-ms-Audioschutz und alle Sicherheitsgrenzen bleiben erhalten. Die Langzeitstabilität von R163 ist nicht geprüft. Reproduzierbare Fehler bitte unter [Issues](https://github.com/szupert/I-BT-Radio-/issues) melden.
+
+---
+
+
 [Magyar](README.md) · [English](README.en.md)
 
 Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
 
-## Windows-Beta zum Herunterladen · R151
+## Frühere Windows-Beta · R151
 
 **[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Anleitung und Prüfsummen](beta/V166_R151/README.md)
 

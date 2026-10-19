@@ -1,12 +1,25 @@
 # I-BT-Radio — V166-R151 BETA · 2026. október 19.
 
+## Aktuális Windows béta · R163 · 2026.10.19.
+
+**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Útmutató és ellenőrzőösszegek](beta/V166_R163/README.md)
+
+Kizárólag a dokumentált SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelző és külső DAC összeállításhoz. A telepítőben benne van a futtatókörnyezet; külön Python nem kell. Firmware- és skinforráskód, ELF/MAP és saját beállítás nincs a csomagban. Megfelelő partíció esetén adatmegőrző frissítés, teljes törlés csak külön IGEN megerősítéssel. Automatikus stresszteszt nincs.
+
+**Ismert hibás, tesztelésre szánt béta:** Wi-Fi → DAC alatt menü nélkül és menüjárással is hallható szaggatást tapasztaltam. Menüjárás közben a stream puffere kiürült és újracsatlakozott. A Windows 7 bootanimáció villogása is nyitott. Nem stabil kiadás.
+
+Az állomáslista-indexelő korábbi watchdogját javítottam: a készüléken 480 sor 814 ms alatt lefutott, új watchdog és memóriahiba nélkül. Az 500 ms-os hangvédelem és minden biztonsági határ maradt. A rövid próba nem hosszú stabilitási teszt. Reprodukálható hibákat az [Issues](https://github.com/szupert/I-BT-Radio-/issues) oldalon várok.
+
+---
+
+
 [English](README.en.md) · [Deutsch](README.de.md)
 
 Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A SMALL változaton dolgozom.
 
 **[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
 
-## Letölthető Windows béta · R151
+## Korábbi Windows béta · R151
 
 **[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · **[Telepítési útmutató és ellenőrzőösszegek](beta/V166_R151/README.md)**
 
