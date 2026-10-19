@@ -1,0 +1,184 @@
+{
+  "firmware_snapshot": "V166-R165",
+  "source_sha256": "9a2fd91c74541d5844be003e367d383de36ebf0bd62f711655ff2ea6b0428ad6",
+  "files": {
+    "skins/source/ui/alarm_layout.h": {
+      "bytes": 2123,
+      "sha256": "320fabeed39c64a8f844337bc685c99a1a306f669c053418e1aebcd51c0cb1dc"
+    },
+    "skins/source/ui/bt_speaker_layout.h": {
+      "bytes": 684,
+      "sha256": "8b8555174455e7fc29df493af5c3b52ae2afee825ae53f54a920d53d92488c39"
+    },
+    "skins/source/ui/cassette_layout.h": {
+      "bytes": 1419,
+      "sha256": "a6a709d05cd2c1cbff0a98b84b33cc3a1ac986a547b780d18dcb9f82d0a47c31"
+    },
+    "skins/source/ui/content.h": {
+      "bytes": 37359,
+      "sha256": "b8d967771250e3eb4ee124e10889174ea3bb5cecf1ea7aa1519bd494e205f603"
+    },
+    "skins/source/ui/fonts.h": {
+      "bytes": 30458,
+      "sha256": "5dd5d614e49fef761185492c0a00ce22c0fa4dfd9b8464ce89924bf64d842e45"
+    },
+    "skins/source/ui/frontend.h": {
+      "bytes": 1177,
+      "sha256": "280f18220c0412918ee3350ae5962bd131ccb99fe85f104dc2e0c2484464d16c"
+    },
+    "skins/source/ui/interaction_policy.h": {
+      "bytes": 1313,
+      "sha256": "76317cc80a52e790ceabf208402e03581c49c0c964d8ba5ca295cfd87b2e734c"
+    },
+    "skins/source/ui/kajon_layout.h": {
+      "bytes": 1500,
+      "sha256": "526f8c44931791ef526637808d2984ca559cb855f7a95b70fb3ff65c3ba5da85"
+    },
+    "skins/source/ui/menu_structure.h": {
+      "bytes": 2110,
+      "sha256": "38c9e14a9cbb9e3423a6ace71ca385d23dc1a1c93a7b895969fea58d9458168f"
+    },
+    "skins/source/ui/setup_layout.h": {
+      "bytes": 640,
+      "sha256": "a18e965a39b2c70e12b54448c9f8df79a21ad4cb802b9bc39eab8e204a077e80"
+    },
+    "skins/source/ui/small/boot_rgba32.h": {
+      "bytes": 96441,
+      "sha256": "fc7a171715a10b948b1909728347c187e166be1f3e01823eee4bc54ea001d1e8"
+    },
+    "skins/source/ui/small/bootlogo_rle.h": {
+      "bytes": 21816,
+      "sha256": "93462fb9f0ac3372b7303c7e4bbf73f98a706abf0b859d253509b33dd1aa3718"
+    },
+    "skins/source/ui/small/bt_speaker_asset.h": {
+      "bytes": 52843,
+      "sha256": "bf79b24db293e2f1cdb6219fde0c8e30ee15db704b762797c3007d0f932074eb"
+    },
+    "skins/source/ui/small/bt_speaker_photo.h": {
+      "bytes": 1557,
+      "sha256": "bf3cdf9f51f7b38beff9f20bcf3566ee8dc744168c79a2521a371f464736481a"
+    },
+    "skins/source/ui/small/bt_thin_fonts.h": {
+      "bytes": 17636,
+      "sha256": "81d3b55832b48bca8e48fb8c228b4b5513d1e116aae4cbc9f83b82f708a858e8"
+    },
+    "skins/source/ui/small/cassette_photo.h": {
+      "bytes": 485810,
+      "sha256": "3047025f2f85d35676cce423f7e4b2fe63be5194e0f1d0da833088d2164df32f"
+    },
+    "skins/source/ui/small/clock_art_font.h": {
+      "bytes": 379751,
+      "sha256": "ff26e7974ad14dac8eeae1aebc0045476ae72756ce79d00431d23079ab3723db"
+    },
+    "skins/source/ui/small/clock_design.h": {
+      "bytes": 8163,
+      "sha256": "23efcfa6a841d21364a2aed82ed2613cab55246a75417dfc0d467c600ebcd124"
+    },
+    "skins/source/ui/small/clock_layer_assets.h": {
+      "bytes": 223611,
+      "sha256": "7644d71dc3887786efccf0d26ea69b8fae682a888ba7211700a881f724708a5b"
+    },
+    "skins/source/ui/small/clock_native_digits.h": {
+      "bytes": 306782,
+      "sha256": "ea91a196afa799730c3c35f705bc5e371dc5ddd54891d128c5087a619dfde705"
+    },
+    "skins/source/ui/small/clock_sensor_icons.h": {
+      "bytes": 2594,
+      "sha256": "6d65b682986423c9c9765947e4e06dc805ca5b7445b9f34798c66b19b2efb52e"
+    },
+    "skins/source/ui/small/frontend_small.cpp": {
+      "bytes": 152468,
+      "sha256": "74b8508684ac7a126d082eef96cdcf8dd549878d8abccc9054b167a61ce3a7b7"
+    },
+    "skins/source/ui/small/kajon_assets_320.h": {
+      "bytes": 705752,
+      "sha256": "9185528927941c1af4d6e34af2829b031f09895baa8b1c95ac38c2117ce440e1"
+    },
+    "skins/source/ui/small/media_player_asset.h": {
+      "bytes": 226637,
+      "sha256": "c5aee197375cf27a42533cb58d15668a2ff52a4ff8639f2c269b1c53fab8cbab"
+    },
+    "skins/source/ui/small/neon_asset.h": {
+      "bytes": 189352,
+      "sha256": "28429571fedb55cd6c084ba75c4312f9c81912be09598f75f9fd7e85976b4a61"
+    },
+    "skins/source/ui/small/os_boot.h": {
+      "bytes": 4374,
+      "sha256": "828ca77301979cf96d0ced07f9c9e84c0879feee7ece1fb60e4c47831137d530"
+    },
+    "skins/source/ui/small/os_boot_assets.h": {
+      "bytes": 48778,
+      "sha256": "959906ecec40a1d7171d235849dde0582320b764400ff48178b10b345c9c4143"
+    },
+    "skins/source/ui/small/os_desktop_assets.h": {
+      "bytes": 164438,
+      "sha256": "94af448cba0be06d0f01090f5af82f2625804bb35e3627f1df906d90d7003bb7"
+    },
+    "skins/source/ui/small/packed_pixels.h": {
+      "bytes": 3466,
+      "sha256": "17d040d110202e4a03445d02f92f08171fb99d24e4284706b5d784ed9237b5d4"
+    },
+    "skins/source/ui/small/player_skin_assets.h": {
+      "bytes": 1083453,
+      "sha256": "c0eebe9a7b58452b5fd383818993767a282ad480da348de9957973a67113768a"
+    },
+    "skins/source/ui/small/retro_palette.h": {
+      "bytes": 1133,
+      "sha256": "887df82fef601d5d798693e20dad9c1591f4ba8032338f6ee84b2e393284bb6f"
+    },
+    "skins/source/ui/small/rgba_pixel.h": {
+      "bytes": 395,
+      "sha256": "0facbd3f55ae1a53b6377f7e401a20960e0f1d2a7d25e7073c5339331dc4ef76"
+    },
+    "skins/source/ui/small/service_asset.h": {
+      "bytes": 66279,
+      "sha256": "8f1815d6af000384ecb34927b07eb0b936a8b3b54c57142393e942966d0737b7"
+    },
+    "skins/source/ui/small/service_photo.h": {
+      "bytes": 2363,
+      "sha256": "ab44a9f8fff6292fe414051683575efc2a0713285bbf7b4b613dbe29f1c5cf49"
+    },
+    "skins/source/ui/small/skin_assets.h": {
+      "bytes": 1293224,
+      "sha256": "4cd7202026e663ee9a7ea9e8915dfa27510f0010386077d30fdc04ab7c46e50f"
+    },
+    "skins/source/ui/small/skin_gallery.h": {
+      "bytes": 636,
+      "sha256": "8be61c4c0524bbfdb41b2950db60b42ed1054da0ad91159f875c2745bbc9558c"
+    },
+    "skins/source/ui/small/videoton_assets.h": {
+      "bytes": 352814,
+      "sha256": "9e0d920b7a9778b74a5e816a18f8a69e3d9b6682f22af17c6a2c431340a1f01b"
+    },
+    "skins/source/ui/small/videoton_boot.h": {
+      "bytes": 3484,
+      "sha256": "da58cd52054eadd11b5fd3cafd65caab8245cf912c0c02cf1435351b6b901b5a"
+    },
+    "skins/source/ui/small/videoton_face.h": {
+      "bytes": 3415,
+      "sha256": "0a05a1623bd64454eb1b35c170a54311b5820e0f7bfd2fe166b1e4bfcd4d583d"
+    },
+    "skins/source/ui/small/videoton_font.h": {
+      "bytes": 58759,
+      "sha256": "a7e1393de84e76d3b3b0a60165ce4aa0caf32c4be915f191640bc768f0ec1fca"
+    },
+    "skins/source/ui/small/weather_asset.h": {
+      "bytes": 946445,
+      "sha256": "213505e1f22fda90a6937e585b02bc6b66abda23b947467864545b3fa18f0275"
+    },
+    "skins/source/ui/small/weather_cloud.h": {
+      "bytes": 19596,
+      "sha256": "c6a2dbef3a0993599ef52b818420c7ee1b6c712a4ce396db0b0c585e28164d00"
+    },
+    "skins/source/ui/small/weather_face.h": {
+      "bytes": 6555,
+      "sha256": "ceee6d6ae55a9d290cba1fc5b2a65fa6dc1cc766f7e59ace908dc6bd894693e1"
+    },
+    "skins/source/ui/videoton_layout.h": {
+      "bytes": 1193,
+      "sha256": "45b9b86e0a985459b240325f351fe4e0a33d406745887ba3b990fac18040c475"
+    }
+  },
+  "personal_configuration": false,
+  "full_firmware_build": false
+}

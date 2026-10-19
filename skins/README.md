@@ -25,7 +25,7 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 <tr><td align="center"><a href="media-player-320x240/boot-win7-r161.jpg"><img src="media-player-320x240/boot-win7-r161.jpg" width="260" alt="Media Player — Betöltő" /></a></td><td align="center"><a href="media-player-320x240/desktop-win7-r161.png"><img src="media-player-320x240/desktop-win7-r161.png" width="260" alt="Media Player — Asztal · 2 mp" /></a></td><td align="center"><a href="media-player-320x240/player.png"><img src="media-player-320x240/player.png" width="260" alt="Media Player — Lejátszó" /></a></td></tr>
 </table>
 
-<p align="center"><em>Korábbi grafikai előnézet.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Korábbi grafikai előnézet.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 
 <p align="center"><em>Az R161 indulási sorrendjét egymás mellett mutatom. Az asztalon 15 korabeli program és játék ikonja szerepel, köztük Red Alert 2, Need for Speed és GTA: San Andreas. A képek előnézetek; az R161 készülékes képi és hangpróbája még hátravan.</em></p>
@@ -34,7 +34,7 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <p align="center"><img src="cassette-320x213/cassette.png" width="320" alt="Cassette" /></p>
 
-<p align="center"><em>Statikus háttér; a feliratok lejátszáskor kerülnek rá.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Statikus háttér; a feliratok lejátszáskor kerülnek rá.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Kajon-Jon-bt-vu</h3>
 
@@ -52,37 +52,37 @@ Ebben a frissítésben kizárólag előnézeti képeket és leírásokat publik�
 
 <p align="center"><img src="classic-wood-320x240/background.png" width="320" alt="Classic Wood" /></p>
 
-<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Vintage HiFi</h3>
 
 <p align="center"><img src="vintage-hifi-320x240/background.png" width="320" alt="Vintage HiFi" /></p>
 
-<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Statikus háttér; élő feliratok nélkül.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Retro Neon</h3>
 
 <p align="center"><img src="retro-neon-320x240/background.png" width="320" alt="Retro Neon" /></p>
 
-<p align="center"><em>Statikus háttér; ez a külön vintage téma.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Statikus háttér; ez a külön vintage téma.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Neon</h3>
 
 <p align="center"><img src="neon-320x240/player.png" width="320" alt="Neon" /></p>
 
-<p align="center"><em>Az R137 rajzolókódjával készült előnézet, példaadatokkal és szemléltető spektrummal.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Az R137 rajzolókódjával készült előnézet, példaadatokkal és szemléltető spektrummal.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Ébresztőóra / Alarm clock</h3>
 
 <p align="center"><img src="alarm-clock-320x240/player.png" width="320" alt="Ébresztőóra / Alarm clock" /></p>
 
-<p align="center"><em>R124 óralap-előnézet példaadatokkal, bekapcsolt fényképes háttérrel.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>R124 óralap-előnézet példaadatokkal, bekapcsolt fényképes háttérrel.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Időjárás / Weather</h3>
 
 <p align="center"><img src="weather-dac-320x240/player.png" width="320" alt="Időjárás / Weather" /></p>
 
-<p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>R130 éjszakai előnézet példaadatokkal; nem élő időjárásmérés.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 <h3 align="center">Bluetooth IN</h3>
 
@@ -99,7 +99,7 @@ A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A W
 <tr><td align="center"><a href="videoton-rt6303s-320x240/boot.png"><img src="videoton-rt6303s-320x240/boot.png" width="320" alt="Videoton RT 6303 S — Betöltő" /></a></td><td align="center"><a href="videoton-rt6303s-320x240/player.png"><img src="videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S — Lejátszó" /></a></td></tr>
 </table>
 
-<p align="center"><em>Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → üres gomb sorrenddel és RT 6303 S típusfelirattal. Az R143-ban a bootképből eltűntek a zöld szövegmaradványok, a betöltősáv tisztán rajzolódik. A BT gomb menü nélkül IN módra váltott, a telefonról folyamatosan szólt a hang. A 36 oldalas, 255 menüsort érintő rövid rajzolási próbában nem tért vissza a veremtúlcsordulás. Az előnézeten példaadatok látszanak; a többi funkció teljes ellenőrzése még folyamatban van.<br>Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.</em></p>
+<p align="center"><em>Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → üres gomb sorrenddel és RT 6303 S típusfelirattal. Az R143-ban a bootképből eltűntek a zöld szövegmaradványok, a betöltősáv tisztán rajzolódik. A BT gomb menü nélkül IN módra váltott, a telefonról folyamatosan szólt a hang. A 36 oldalas, 255 menüsort érintő rövid rajzolási próbában nem tért vissza a veremtúlcsordulás. Az előnézeten példaadatok látszanak; a többi funkció teljes ellenőrzése még folyamatban van.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 
 

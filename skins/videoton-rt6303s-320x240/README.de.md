@@ -6,4 +6,4 @@ Ich habe das freigegebene originale Videoton-Layout mit der Reihenfolge Beschrif
 
 <p align="center"><img src="boot.png" width="320" alt="Bootbild – Startvorschau" /></p>
 
-Auf Wunsch des Auftraggebers halte ich den Quellcode auf unbestimmte Zeit privat. Auf gesonderte Anfrage veröffentliche ich ihn mit Zustimmung des Eigentümers.
+Ich habe den Skin-Quellcode mit Erlaubnis des Eigentümers veröffentlicht: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">Skin-Quellcode</a>.

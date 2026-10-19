@@ -6,4 +6,4 @@ Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → ür
 
 <p align="center"><img src="boot.png" width="320" alt="Bootképernyő – indulás közbeni előnézet" /></p>
 
-Megrendelői kérésre bizonytalan ideig a forráskódot privátként kezelem. Külön kérésre, a tulajdonos engedélyével publikálom.
+A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.

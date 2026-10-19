@@ -6,4 +6,4 @@ I kept the approved original Videoton layout, with label → LED → blank butto
 
 <p align="center"><img src="boot.png" width="320" alt="Boot screen – startup preview" /></p>
 
-At the client's request, I keep the source code private for an indefinite period. I publish it on separate request with the owner's permission.
+I published the skin source with the owner’s permission: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skin sources</a>.
