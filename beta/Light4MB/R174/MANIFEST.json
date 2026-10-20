@@ -1,0 +1,22 @@
+{
+  "firmware": "V166-R174",
+  "release": "BETA",
+  "date": "2026-10-20",
+  "profile": "lite4",
+  "flash_mb": 4,
+  "psram": false,
+  "physical": "NOT_RUN",
+  "archive": {
+    "file": "I-BT-Radio_Light4MB_R174_BETA.zip",
+    "bytes": 1608438,
+    "sha256": "6f6fac158bffef1255c564a8f769ae4181a44cb69bdb6cceeef4fb150a136f0b"
+  },
+  "firmware_bin": {
+    "bytes": 2357088,
+    "sha256": "3d207ab0fe62d4c97ccc61391463c293d1680d2297075e7678d1d3c2ed00df00"
+  },
+  "source_commit": "09c7da96ef30dbd28dc079133bb6075c7bcde7c1",
+  "app_slot_free": 788640,
+  "iram_free": 36848,
+  "guards": "UNCHANGED"
+}
