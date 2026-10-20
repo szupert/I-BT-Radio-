@@ -28,3 +28,9 @@ A források az API-kat és optimalizálási irányokat igazolják, **nem** a mi 
 - Maximum **egy** automatikus újratöltés az adott lapbetöltési ciklusban; tartós eltérésnél figyelmeztetés, nincs végtelen reload. Hálózati timeout esetén a meglévő felület marad, és következő kézi megnyitáskor próbál újra.
 - Ne építs új párhuzamos verziókezelést: előbb ellenőrizd a meglévő R172 HTTP fejléceket és FW/WebUI buildazonosítást. Nincs flash/NVS írás, hangmegszakítás vagy nagy RAM-puffer.
 - Elfogadás: frissítés után első új megnyitás helyes UI-verziót tölt; változatlan verziónál nincs extra reload; offline/timeout esetén nincs loop; MP3 alatt nincs új underrun. Fizikai teszt még NOT_RUN.
+
+## Verzióazonosítás pontosítása — 2026-10-20
+- A szerver külön közli a **fő firmware-verziót**, az **R release-számot**, és a **WebUI asset/build tag** értékét. A böngészőben betöltött megfelelő értékekhez hasonlítjuk őket.
+- Ha **bármelyik** eltér, a WebUI új verziójú erőforrásokra navigál, legfeljebb egyszer az adott megnyitás során. A megnyitáskori egyszeri lekérésen túl nincs periodikus polling.
+- A szerververziót cache nélkül kérjük, a HTML újraellenőrzendő, a CSS/JS URL buildtag alapján verziózott. Frissítéskor ugyanaz a főverzió és R szám mellett megváltozott asset tag is kiváltja a frissítést.
+- Ez kizárólag WebUI újratöltés; **nem** indít firmware-újraflashelést, rádió-resetet vagy hangútvonal-váltást.
