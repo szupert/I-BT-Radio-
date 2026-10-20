@@ -20,3 +20,11 @@ Dátum: 2026-10-20. Státusz: TERV / NOT_RUN. Hatály: PSRAM nélküli ESP32 Lig
 - ESP-IDF v5.5 konfiguráció: CONFIG_ESP_COEX_SW_COEXIST_ENABLE: https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32/api-reference/kconfig-reference.html
 
 A források az API-kat és optimalizálási irányokat igazolják, **nem** a mi R172 firmware-ünk mért gyorsulását. A 320 kbit/s yoRadio 0.9.420 referencia más firmware, nem Light PASS.
+
+## WEBUI_VERSION_GUARD — egyszeri ellenőrzés frissítés után (TERV / NOT_RUN)
+- NINCS 60 másodperces polling és nincs folyamatos verziófigyelés. A szerver a firmware/WebUI buildazonosítójának hiteles forrása.
+- A böngésző a WebUI megnyitásakor vagy újranyitásakor **egyszer** lekéri a kis méretű, `Cache-Control: no-store` verzióvégpontot, és összeveti a betöltött UI buildazonosítójával. Ez biztosítja, hogy a firmware-frissítés utáni első látogatásnál a régi cache felismerhető legyen; ha a lap nyitva marad, automatikus frissítés nem garantált polling vagy push nélkül.
+- Eltéréskor egyszeri navigáció az új verziózott HTML/JS/CSS URL-re; verziózott statikus erőforrásoknál hosszú cache engedett, a fő HTML legyen újraellenőrzött (`no-cache`), dinamikus rádióállapot `no-store`.
+- Maximum **egy** automatikus újratöltés az adott lapbetöltési ciklusban; tartós eltérésnél figyelmeztetés, nincs végtelen reload. Hálózati timeout esetén a meglévő felület marad, és következő kézi megnyitáskor próbál újra.
+- Ne építs új párhuzamos verziókezelést: előbb ellenőrizd a meglévő R172 HTTP fejléceket és FW/WebUI buildazonosítást. Nincs flash/NVS írás, hangmegszakítás vagy nagy RAM-puffer.
+- Elfogadás: frissítés után első új megnyitás helyes UI-verziót tölt; változatlan verziónál nincs extra reload; offline/timeout esetén nincs loop; MP3 alatt nincs új underrun. Fizikai teszt még NOT_RUN.
