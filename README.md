@@ -197,6 +197,9 @@ GPIO35-ön nincs belső felhúzás. Ha a rotary modulon sincs, tegyél 10 kΩ el
 
 ### ESP-PSRAM64H — 64 Mbit / 8 MB, SOP-8-150 mil, 3,3 V
 
+Figyelem! Elég sok a hibás és hamisított nem működő 64H, jelenleg 6404L-es memóriablokkokkal nincs probléma!
+A nyákon közelezően el kell vágni a 1-es PAD-et! 
+
 ![ESP-PSRAM64H memóriachip](hardware/hardware_media/ESP_PSRAM64H_USER.jpg)
 
 ![ESP-PSRAM64H lábkiosztás és CE felhúzó](hardware/hardware_media/PSRAM64H_PINOUT.svg)
