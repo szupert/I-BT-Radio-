@@ -1,0 +1,14 @@
+I-BT-Radio R176 BÉTA – lite16
+Az állomáslista mentése elsődleges a hanggal szemben, Light és Pro változatban is.
+A bal oldali hangjegy nyitja az állomásszerkesztőt; a jobb fogaskerék a beállításokat.
+A mentés kérhető lejátszás alatt. A rádió szabályosan leállítja a hangot és a BT-t,
+megvárja az audio/SD/BT tulajdonosok lezárását, majd ellenőrzi és telepíti a listát.
+Siker csak a teljes lista pontos visszaolvasása után. A korábbi internetes adót
+URL szerint keresi vissza, nem a régi sorszámon: törölt adó helyett nem indul másik.
+A BT-hangkapcsolat nem kapcsol vissza automatikusan, a párosítások megmaradnak.
+Megszakadt kérésnél az Ellenőrzés / folytatás gombot használd; nincs vak újraküldés.
+1–10 fájl, fájlonként256KiB, duplikációszűrés után legfeljebb480 állomás.
+MP3 fájlkiterjesztés-ellenőrzés és verzióőr utáni WebUI-megnyitás javítva.
+500ms hangvédelem és RAM/BLE/GPIO/DMA/verem biztonsági határok változatlanok.
+Fordítás és számítógépes ellenőrzés igazolható; R176 készülékes teszt még NEM futott.
+A hang rövid megszakítása mentéskor szándékos. Hosszú stressz nem indul magától.

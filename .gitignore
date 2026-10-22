@@ -1,13 +1,11 @@
-# Keep the public skins-only repository free of radio builds and local data.
-.pio/
-__pycache__/
-*.bin
+# Generated files and private device data only; firmware source is public.
+**/.pio/
+**/__pycache__/
+*.pyc
 *.elf
 *.map
-*.uf2
-*.zip
-*.ino
-sdkconfig*
-secrets*
-RETURN_TO_EVA/
 *.log
+RETURN_TO_EVA/
+secrets*
+**/build/
+**/dist/

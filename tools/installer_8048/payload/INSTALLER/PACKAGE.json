@@ -1,0 +1,40 @@
+{
+  "firmware": "MENU8048C-R4",
+  "target": "ESP32-8048S070C",
+  "offsets": {
+    "bootloader.bin": 0,
+    "partitions.bin": 32768,
+    "boot_app0.bin": 57344,
+    "firmware.bin": 65536
+  },
+  "files": {
+    "bootloader.bin": {
+      "bytes": 19968,
+      "sha256": "31b3c1be45dc5a76aa85c82540d6787b675e711eaf11021a5eea7e36f469c6de"
+    },
+    "boot_app0.bin": {
+      "bytes": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    "firmware.bin": {
+      "bytes": 1832928,
+      "sha256": "1a3fca8674273cf4dd43e0cd50a3248cd70b33434040d33e0903c6e1be20e454"
+    },
+    "partitions.bin": {
+      "bytes": 3072,
+      "sha256": "bd0f7954aca2ef7d925ee21aaa1f3dc8822d1d6ce5cbbd26a135e5886bfff6ce"
+    },
+    "partitions_factory.bin": {
+      "bytes": 3072,
+      "sha256": "aaae2888c5a6a348004b5b436f47abb25ae32e72d9003902955a998eda723edd"
+    },
+    "speed_probe.py": {
+      "bytes": 3795,
+      "sha256": "cfef181aa050172a0af6f0131734311094f5fbf897fe30e29a25fa5390f12e62"
+    },
+    "update.py": {
+      "bytes": 12242,
+      "sha256": "3722845cbe86a5415c0fd7b4be8b3c3584a6ad7e4ad2b2bf1e766ec7b0d3ae91"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Telepítés és első indítás · R163 BETA
 
-**[Aktuális telepítő és részletes útmutató](../beta/V166_R163/README.md)** · [Hardver és bekötés](../hardware/README.md)
+**[Aktuális telepítő és részletes útmutató](../beta/16MB_PSRAM/V166_R163/README.md)** · [Hardver és bekötés](../hardware/README.md)
 
 Egyetlen Windows x64 EXE, beépített futtatókörnyezettel. Csak SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelző és külső DAC. Nem általános ESP32/S3/4 MB telepítő.
 

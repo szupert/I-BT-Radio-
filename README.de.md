@@ -15,7 +15,7 @@ Ich habe den Skin-Quellcode mit Erlaubnis des Eigentümers veröffentlicht: <a h
 
 ## Aktuelle Windows-Beta · R163 · 19.10.2026
 
-**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Anleitung und Prüfsummen](beta/V166_R163/README.md)
+**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R163/I-BT-Radio-R163-Install.exe)** · [Anleitung und Prüfsummen](beta/16MB_PSRAM/V166_R163/README.md)
 
 Nur für die dokumentierte SMALL-Konfiguration mit ESP32-WROOM, PSRAM, 16 MB Flash, 320×240-Display und externem DAC. Laufzeitumgebung enthalten, kein separates Python nötig. Keine Firmware-/Skinquellen, ELF/MAP-Dateien oder persönlichen Einstellungen. Passende Partitionen ermöglichen ein Update mit Erhalt der Einstellungen; vollständiges Löschen nur nach ausdrücklichem IGEN. Kein automatischer Stresstest.
 
@@ -32,7 +32,7 @@ Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und kon
 
 ## Frühere Windows-Beta · R151
 
-**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Anleitung und Prüfsummen](beta/V166_R151/README.md)
+**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R151/I-BT-Radio-R151-Install.exe)** · [Anleitung und Prüfsummen](beta/16MB_PSRAM/V166_R151/README.md)
 
 Ich habe Laufzeitumgebung und Firmware in einer EXE gebündelt; eine separate Python-Installation ist nicht nötig. Die Beta ist ausschließlich für den dokumentierten SMALL ESP32-WROOM mit PSRAM, 16 MB Flash, 320×240-Display und externem DAC vorgesehen. Normale Updates erhalten eine passende Partitionierung. Vollständiges Löschen erfordert die ausdrückliche Bestätigung IGEN. Es startet kein automatischer Stresstest.
 

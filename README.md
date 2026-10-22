@@ -18,7 +18,7 @@ A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https
 
 ## Aktuális Windows béta · R163 · 2026.10.19.
 
-**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Útmutató és ellenőrzőösszegek](beta/V166_R163/README.md)
+**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R163/I-BT-Radio-R163-Install.exe)** · [Útmutató és ellenőrzőösszegek](beta/16MB_PSRAM/V166_R163/README.md)
 
 Kizárólag a dokumentált SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelző és külső DAC összeállításhoz. A telepítőben benne van a futtatókörnyezet; külön Python nem kell. Firmware- és skinforráskód, ELF/MAP és saját beállítás nincs a csomagban. Megfelelő partíció esetén adatmegőrző frissítés, teljes törlés csak külön IGEN megerősítéssel. Automatikus stresszteszt nincs.
 
@@ -37,7 +37,7 @@ Az I-BT-Radio a saját, yoRadio-alapú ESP32-WROOM + PSRAM rádióprojektem. A S
 
 ## Korábbi Windows béta · R151
 
-**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · **[Telepítési útmutató és ellenőrzőösszegek](beta/V166_R151/README.md)**
+**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R151/I-BT-Radio-R151-Install.exe)** · **[Telepítési útmutató és ellenőrzőösszegek](beta/16MB_PSRAM/V166_R151/README.md)**
 
 Az EXE-be beépítettem a futtatókörnyezetet és a firmware-t, külön Python nem kell. A kiadás a SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelzős, külső DAC-os összeállításhoz készült, a [dokumentált bekötéssel](hardware/README.md). Nem általános ESP32-telepítő. Meglévő megfelelő partíciót frissítéskor megőriz; teljes törlést csak külön IGEN megerősítéssel végez. Automatikus stresszteszt nincs.
 

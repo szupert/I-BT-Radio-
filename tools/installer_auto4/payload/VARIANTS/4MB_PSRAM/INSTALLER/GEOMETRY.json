@@ -1,0 +1,9 @@
+{
+  "profile": "psram4",
+  "flash_mb": 4,
+  "psram_required": true,
+  "fps_max": 20,
+  "app_slot": 3145728,
+  "fs_size": 983040,
+  "fs_offset": 3211264
+}

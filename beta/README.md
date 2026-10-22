@@ -1,15 +1,14 @@
-# Nyilvános béta
+# Béta-telepítők — négy hardverprofil
 
-## Light 4 MB, PSRAM nélkül
+| Flash | PSRAM | Telepítők |
+|---|---|---|
+|4MB|nincs|[4MB_PSRAM_NELKUL](4MB_PSRAM_NELKUL/README.md)|
+|4MB|van|[4MB_PSRAM](4MB_PSRAM/README.md)|
+|16MB|nincs|[16MB_PSRAM_NELKUL](16MB_PSRAM_NELKUL/README.md)|
+|16MB|van|[16MB_PSRAM](16MB_PSRAM/README.md)|
 
-**[Light4MB — revíziók és telepítők](Light4MB/README.md)**. Első külön kiadás: [R174](Light4MB/R174/README.md), 2026.10.20. Fordítás és hosttesztek PASS; a készülékes R174-ellenőrzés még NOT_RUN.
+Az egyfájlos Windows telepítő automatikusan ismeri fel a négy hardverprofilt; beépített futtatókörnyezet, nem kell külön Python. A négy mappában ugyanaz az ellenőrzött automata EXE található, Git ugyanazt a bináris objektumot tárolja, nem négy külön fordítást. A verziók nem azonosak: 4MB/noPSRAM:R211diagnosztika (BT/BLE/SD/WebUI OFF), 4MB/PSRAM és16MB/PSRAM:R176,16MB/noPSRAM:R189. Minden változat fejlesztői béta.
 
-## Korábbi SMALL 16 MB + PSRAM béták
+A régebbi kiadások változatlan binárishashsel kerültek a megfelelő hardvermappa alá. [Teljes alkalmazásforrás](../source/README.md) · [Fejlesztési blokkok](../docs/DEVELOPMENT_BLOCKS.md).
 
-**[Aktuális: V166-R163 · egyfájlos Windows x64 telepítő](V166_R163/README.md)** — 2026.10.19.
-
-Ismert hanghibás tesztkiadás: Wi-Fi → DAC szaggatás menü nélkül és menüjárással, stream-újracsatlakozás, Windows 7 bootvillogás. Az indexelő watchdog a rövid R163 próbában nem tért vissza. Nem stabil kiadás.
-
-Csak a dokumentált SMALL 16 MB + PSRAM hardverhez. Firmware- és skinforrás nincs a csomagban; külön Python nem kell. Teljes törlés csak IGEN-nel, automatikus stresszteszt nincs.
-
-[Korábbi R151 telepítő és történeti útmutató](V166_R151/README.md)
+[8048S070C S3/16MB/8MB menu-demo: kulon egykattintasos telepito](16MB_PSRAM/8048/MENU8048C-R4/README.md). A negyprofilos WROOM automata helyett ezt valaszd az8048 panelhez.
