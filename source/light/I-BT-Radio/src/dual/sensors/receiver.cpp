@@ -96,7 +96,7 @@ static void retainBoundDevice(){
 // Native fixed-size Xiaomi packets avoid the generic JSON worker entirely.
 // Runs only in the existing idle owner with a stack guard, at most one/100ms.
 static void nativePacket(const Packet& packet){
- if(packet.epoch!=epoch.load()||uxTaskGetStackHighWaterMark(nullptr)<3072)return;
+ if(packet.epoch!=epoch.load()||(ibtram::reserve!=0&&uxTaskGetStackHighWaterMark(nullptr)<3072))return;
  Config c=configuration();if(!c.keyValid)return;Reading candidate;portENTER_CRITICAL(&lock);candidate=value;portEXIT_CRITICAL(&lock);
  Frame f;memcpy(f.address,packet.address,6);f.service=packet.data;f.length=packet.length;f.uuid=packet.uuid;f.rssi=packet.rssi;
  const uint32_t started=micros();const auto decoded=decodeMiBeacon(c,f,packet.capturedAt,candidate);
@@ -128,6 +128,10 @@ static void run(void*){
   else if(decoded!=Result::WrongDevice)result=3;
   vTaskDelay(pdMS_TO_TICKS(100)); // one packet per turn, worker priority zero
  }
+}
+void stackStopped(){
+ permit=false;++epoch;attached=false;paramsReady=false;initTried=false;
+ direct::stackStopped();if(!integrityFailed.load())phase=Phase::Off;
 }
 bool available(){return true;}bool enabled(){return on.load();}
 void toggle(){on=!on.load();dirty=true;if(!on.load())permit=false;else resetRequest=true;}
@@ -187,6 +191,11 @@ void service(){
   Serial.printf("[BLE-GATE] id=%lu pending=%u searching=%u result=%s ui_mask=0x%lx runtime_mask=0x%lx enabled=%u running=%u stopped=%u diag=%u probe=%u background=%u bt_wanted=%u bt_idle=%u phase=%u\n",(unsigned long)id,unsigned(searchRequest.load()),unsigned(searching.load()),idle?"READY":"WAIT",(unsigned long)ui,(unsigned long)gateMask,unsigned(on.load()),unsigned(running),unsigned(stopped),unsigned(diag),unsigned(probe),unsigned(busy),unsigned(btWanted),unsigned(btIdle),unsigned(phase.load()));
  }
  if(!on.load()||!idle){permit=false;if(phase==Phase::Running||phase==Phase::Starting){if(esp_ble_gap_stop_scanning()==ESP_OK){phase=Phase::Stopping;phaseAt=now;}}}
+ if((!on.load()||!idle)&&quiescent()){
+#if IBT_NO_PSRAM
+  btaudio::releasePassiveStack();
+#endif
+ }
  if(direct::exclusive()){
   permit=false;if(phase==Phase::Running||phase==Phase::Starting){if(esp_ble_gap_stop_scanning()==ESP_OK){phase=Phase::Stopping;phaseAt=now;}}
   return;
@@ -213,12 +222,16 @@ void service(){
  if(!chosen.load()&&!searching.load()&&!searchRequest.load()){permit=false;return;}
  if(resetRequest.exchange(false)){if(result.load()==5)return;initTried=false;if(phase==Phase::Fault){phase=Phase::Off;paramsReady=false;}}
  if(phase==Phase::Fault)return;
- const bool needDecoder=needsDecoderTask(chosen.load(),searchRequest.load(),searching.load(),configuration().keyValid);
+ const bool needDecoder=needsDecoderTask(chosen.load(),searchRequest.load(),searching.load(),configuration().keyValid
+#if IBT_BLE_NATIVE_ONLY
+ || true
+#endif
+ );
  if((needDecoder&&!worker)||!attached){if(initTried&&uint32_t(now-initAt)<60000)return;initTried=true;initAt=now;
   // Fail closed before SDK startup; do not consume the worker stack first.
   if(!attached){
    if(!checkHeap("before_preflight"))return;traceInit("preflight");
-   if(esp_bluedroid_get_status()!=ESP_BLUEDROID_STATUS_ENABLED &&
+   if(ibtram::reserve!=0 && esp_bluedroid_get_status()!=ESP_BLUEDROID_STATUS_ENABLED &&
       (heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<65536||heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<32768||uxTaskGetStackHighWaterMark(nullptr)<2048)){
        result=4;traceInit("deferred_budget");return;
    }
@@ -255,7 +268,7 @@ void service(){
  if(auditBursts<3&&!checkHeap("before_scan_admission"))return;
  Config c=configuration();if(searching.load())c.selected=true;
  const unsigned heap=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT),largest=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
- const bool blocked=heap<32768||largest<16384;
+ const bool blocked=ibtram::reserve!=0&&(heap<32768||largest<16384);
  if(blocked||admissionBlocked){
   Serial.printf("[BLE-ADMISSION] result=%s reason=%s free=%u largest=%u required_free=32768 required_largest=16384 psram_free=%lu worker_hwm=%lu retry_ms=%u\n",blocked?"DEFER":"READY",heap<32768?(largest<16384?"free_and_largest":"free"):largest<16384?"largest":"none",heap,largest,(unsigned long)heap_caps_get_free_size(MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT),(unsigned long)(worker?uxTaskGetStackHighWaterMark(worker):0),blocked?30000u:1000u);
  }
@@ -276,7 +289,7 @@ void service(){
 }
 #else
 namespace sensors {
-bool available(){return false;}bool enabled(){return false;}void toggle(){}void discover(){}unsigned deviceCount(){return 0;}bool deviceLabel(unsigned,char*,size_t){return false;}void select(unsigned){}bool bindDevice(unsigned,const char*){return false;}bool bindAddress(const char*,const char*){return false;}
+void stackStopped(){}bool available(){return false;}bool enabled(){return false;}void toggle(){}void discover(){}unsigned deviceCount(){return 0;}bool deviceLabel(unsigned,char*,size_t){return false;}void select(unsigned){}bool bindDevice(unsigned,const char*){return false;}bool bindAddress(const char*,const char*){return false;}
 void bindingStatus(char*a,size_t n,bool&k,bool&p){if(n)a[0]=0;k=p=false;}
 void audioRequested(){}void listDevices(){}void setBudget(bool,uint32_t){}void service(){}bool quiescent(){return true;}const char*status(){return "BLE firmware szukseges";}bool reading(radiosensor::Reading&){return false;}void diagnostics(){Serial.println("[BLE-SENSOR] available=0 enabled=0");}
 }

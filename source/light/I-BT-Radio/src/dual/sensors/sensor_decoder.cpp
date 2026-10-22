@@ -2,7 +2,9 @@
 #include "passive_frame.h"
 #include "mibeacon.h"
 #include <mbedtls/ccm.h>
+#if !IBT_BLE_NATIVE_ONLY
 #include "decoder.h"
+#endif
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -33,6 +35,9 @@ Result decode(const Config& c,const Frame& f,uint32_t now,Reading& output){
  if(f.uuid==0xfe95&&encrypted(f.uuid,f.service,f.length))return decodeMiBeacon(c,f,now,output);
  // Other encrypted protocols are not silently accepted.
  if(f.encrypted||encrypted(f.uuid,f.service,f.length))return Result::NeedsDecryption;
+#if IBT_BLE_NATIVE_ONLY
+ return Result::Unknown; // No generic JSON/model engine in Light.
+#else
  char mac[18],uuid[7],hex[129];
  snprintf(mac,sizeof(mac),"%02X:%02X:%02X:%02X:%02X:%02X",f.address[0],f.address[1],f.address[2],f.address[3],f.address[4],f.address[5]);
  snprintf(uuid,sizeof(uuid),"0x%04x",f.uuid);
@@ -56,5 +61,6 @@ Result decode(const Config& c,const Frame& f,uint32_t now,Reading& output){
  if(object["batt"].is<float>()){float batt=object["batt"].as<float>();if(batt>=0&&batt<=100)battery=int(lroundf(batt));}
  if(!updateReading(candidate,hasT,int(lroundf(t*100)),hasH,int(lroundf(h*100)),battery,now))return Result::InvalidReading;
  output=candidate;return Result::Decoded;
+#endif
 }
 }

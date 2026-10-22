@@ -222,7 +222,11 @@ void Config::changeMode(int newmode){
     #endif
   }
   if(getMode()==PM_WEB) {
+    #if IBT_NO_PSRAM
+    if(network.status==SDREADY){network.enterOnlinePlayer();Serial.println("[SOURCE-RESTORE] WEB=QUEUED reboot=0");}
+#else
     if(network.status==SDREADY) ESP.restart();
+#endif
     sdman.stop();
   }
   if(!_bootDone) return;

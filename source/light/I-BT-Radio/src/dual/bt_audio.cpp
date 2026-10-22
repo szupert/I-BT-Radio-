@@ -2,6 +2,7 @@
 #include "pcm_gain_cache.h"
 #include "../core/options.h"
 #include "bt_audio.h"
+#include "sensors/receiver.h"
 #include "ram_reserve.h"
 #include "surface_policy.h"
 #include "bt_rate_policy.h"
@@ -891,7 +892,7 @@ static_assert(16384>32000/2,"Lite TX must retain at least500ms PCM");
 static bool allocateRx(){
     auto& target=rxRing;
     if(target.load())return true;
-    const uint32_t capacity=IBT_NO_PSRAM?32768:131072;
+    const uint32_t capacity=IBT_NO_PSRAM?8192:131072;
     const uint32_t caps=litememory::payloadCaps;
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve)return false;
 #if IBT_NO_PSRAM
@@ -932,7 +933,7 @@ static bool stopLiteStack(){
     if(esp_bt_controller_get_status()==ESP_BT_CONTROLLER_STATUS_ENABLED && !stackResult("controller_disable",esp_bt_controller_disable()))return false;
     if(esp_bt_controller_get_status()==ESP_BT_CONTROLLER_STATUS_INITED && !stackResult("controller_deinit",esp_bt_controller_deinit()))return false;
     if(esp_bt_controller_get_status()!=ESP_BT_CONTROLLER_STATUS_IDLE)return false;
-    initialized=false;return true;
+    initialized=false;sensors::stackStopped();return true;
 }
 #endif
 static bool initMemoryPhase(const char* phase,unsigned remaining){
@@ -1002,6 +1003,17 @@ static bool initializeStack(bool audit=false){
     }
     return checkpoint("sdk_ready")&&initMemoryPhase("sdk_ready",0);
 }
+bool releasePassiveStack(){
+#if IBT_NO_PSRAM && CONFIG_BT_BLE_ENABLED
+    if(wanted()||!idle()||!sensors::quiescent())return false;
+    if(esp_bluedroid_get_status()==ESP_BLUEDROID_STATUS_UNINITIALIZED&&esp_bt_controller_get_status()==ESP_BT_CONTROLLER_STATUS_IDLE)return true;
+    const unsigned before=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
+    if(!stopLiteStack())return false;
+    Serial.printf("[BLE-LIFECYCLE] result=SDK_DEINIT before=%u after=%u static_reservation=RETAINED\n",before,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));return true;
+#else
+    return false;
+#endif
+}
 bool preparePassiveStack(){
 #if CONFIG_BT_BLE_ENABLED
     if(wanted()||!idle())return false;
@@ -1025,7 +1037,8 @@ static bool startStack(){
     if(esp_bt_gap_set_pin(ESP_BT_PIN_TYPE_FIXED,4,pin)!=ESP_OK)return false;
     return esp_a2d_register_callback(event)==ESP_OK&&esp_avrc_ct_register_callback(avrc)==ESP_OK;
 }
-static void fault(const char* why){failed.store(true);stage.store(Stage::Fault);if(outputSelected())autoDacFallback.store(true);Serial.printf("[BT-AUDIO] lifecycle_fault=%s restart_required=1\n",why);}
+static bool faultCleanupAttempted=false;
+static void fault(const char* why){faultCleanupAttempted=false;failed.store(true);stage.store(Stage::Fault);if(outputSelected())autoDacFallback.store(true);Serial.printf("[BT-AUDIO] lifecycle_fault=%s restart_required=1\n",why);}
 static void enter(Stage next){stageAt=millis();stage.store(next);}
 static void heapCheckpoint(const char* point){
     // Inspect the internal heap at lifecycle boundaries, never in the audio
@@ -1069,7 +1082,20 @@ void service(){
     serviceControl();
     auto s=stage.load();auto target=mode();auto current=active.load();uint32_t now=millis();
     if(s!=Stage::Active||current!=Mode::Out){mediaGate.reset();mediaCheckAck.store(0);mediaStartFailed.store(false);}
-    if(s==Stage::Fault)return;
+    if(s==Stage::Fault){
+#if IBT_NO_PSRAM
+        if(faultCleanupAttempted)return;
+        faultCleanupAttempted=true;desired.store(Mode::Off);streaming.store(false);ready.store(false);
+        // Close reader admission first; SDK owns callbacks until disabled/deinitialized.
+        if(!litePayloadGate.close()){faultCleanupAttempted=false;return;}
+        if(!stopLiteStack()||!releaseLiteBtPayload()){
+            Serial.println("[BT-FAULT-CLEANUP] result=FAILED retry=MANUAL reboot=0");return;
+        }
+        active.store(Mode::Off);epoch.fetch_add(1);autoDacFallback.store(true);enter(Stage::Off);
+        Serial.println("[BT-FAULT-CLEANUP] result=PASS reboot=0 DAC_RESTORE=QUEUED");
+#endif
+        return;
+    }
     if(s==Stage::Active&&current==target&&connected()){
         // Asynchronous GAP query, once per ten-second bucket; never in an
         // audio callback or display draw. A missing reply hides the bars.
@@ -1109,9 +1135,8 @@ void service(){
 #if IBT_NO_PSRAM
         // Mutually exclusive profiles retain their original buffer capacities.
         // IN32KiB has no unused OUT64KiB arena; OUT still protects500ms at32kHz.
-        if(target==Mode::In&&!allocateRx()){
-            rollbackLiteStartup("payload_allocation");return;
-        }
+        // SDK sink startup has a 9680B contiguous allocation: do not pre-allocate RX.
+        // RX is attached only after profile-ready, before discoverability is enabled.
         // Profile callbacks may allocate more queues after controller/host setup.
         // Keep their budget in addition to the full payload and retained reserve.
         if(!initMemoryPhase("before_profile",btstart::profilePlan)){
@@ -1146,7 +1171,12 @@ void service(){
         if(controlGone.load())deinitProfile(current);else if(uint32_t(now-stageAt)>10000)fault("avrc_deinit_timeout");return;
     }
     if(s==Stage::Init){
-        if(ready.load()){heapCheckpoint("after_profile_init");linkAt=now;lastCheck=0;enter(Stage::Active);}
+        if(ready.load()){
+#if IBT_NO_PSRAM
+            if(current==Mode::In&&!allocateRx()){fault("rx_after_profile");return;}
+#endif
+            heapCheckpoint("after_profile_init");linkAt=now;lastCheck=0;enter(Stage::Active);
+        }
         else if(uint32_t(now-stageAt)>10000)fault("init_timeout");
         return;
     }

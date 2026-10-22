@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "passive_policy.h"
 namespace sensors {
+void stackStopped(); // SDK owner notification; callbacks are no longer live
 bool available();
 bool enabled();
 void toggle();

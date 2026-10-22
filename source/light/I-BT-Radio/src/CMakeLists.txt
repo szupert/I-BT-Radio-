@@ -64,7 +64,12 @@ idf_component_register(SRCS
 
 if(CONFIG_BT_BLE_ENABLED)
     set(IBT_THEENGS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../THIRD_PARTY/TheengsDecoder/src")
-    target_sources(${COMPONENT_LIB} PRIVATE "${IBT_THEENGS_ROOT}/decoder.cpp" "dual/sensors/sensor_decoder.cpp")
+    target_sources(${COMPONENT_LIB} PRIVATE "dual/sensors/sensor_decoder.cpp")
+    if(CONFIG_SPIRAM)
+        target_sources(${COMPONENT_LIB} PRIVATE "${IBT_THEENGS_ROOT}/decoder.cpp")
+    else()
+        target_compile_definitions(${COMPONENT_LIB} PRIVATE IBT_BLE_NATIVE_ONLY=1)
+    endif()
     target_include_directories(${COMPONENT_LIB} PRIVATE "${IBT_THEENGS_ROOT}" "${IBT_THEENGS_ROOT}/arduino_json/src")
 endif()
 

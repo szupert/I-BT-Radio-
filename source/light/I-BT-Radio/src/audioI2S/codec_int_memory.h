@@ -6,7 +6,7 @@
 static inline void* ibtCodecIntAlloc(size_t bytes) {
 #if IBT_NO_PSRAM && defined(CONFIG_IDF_TARGET_ESP32)
     constexpr unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_EXEC|MALLOC_CAP_32BIT;
-    constexpr size_t reserve=4096;
+    constexpr size_t reserve=ibtram::reserve==0?0:4096;
     // EXEC/32BIT can come from shared D/IRAM, reducing byte-accessible DRAM.
     // A post-allocation rejection alone can already destroy its low-water mark.
     // Keep the final shared10000B DRAM reserve before/after the attempt.

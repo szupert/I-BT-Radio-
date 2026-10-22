@@ -52,6 +52,12 @@ static void closing(uint32_t now,const char* reason){
  if(stage==Stage::Closing||stage==Stage::Fault)return;
  lastReason.store(reason);lastStage.store(unsigned(stage.load()));stage=Stage::Closing;closingAt=now;closeSent=cancelSent=false;Serial.printf("[BLE-DIRECT] result=CLOSING reason=%s\n",reason);
 }
+void stackStopped(){
+ if(!quiet())return;
+ portENTER_CRITICAL(&mux);mail=Mail{};portEXIT_CRITICAL(&mux);
+ interfaceId=ESP_GATT_IF_NONE;callbackSet=false;registering=openPending=faultBusy=false;
+ samplePending=notifyRegistered=closeSent=cancelSent=stable=haveValue=false;characteristic=connection=0;stage=Stage::Idle;
+}
 void audioRequested(){veto.store(true,std::memory_order_release);}
 bool exclusive(){return stage.load()!=Stage::Idle;}
 bool faulted(){return stage==Stage::Fault;}
@@ -137,5 +143,5 @@ void service(const Config& c,bool idle,bool ready,bool scanQuiet,uint32_t now){
 }
 }}
 #else
-namespace sensors {namespace direct {void service(const radiosensor::Config&,bool,bool,bool,uint32_t){}bool exclusive(){return false;}bool quiet(){return true;}bool faulted(){return false;}void audioRequested(){}bool take(radiosensor::Reading&){return false;}void diagnostics(){}}}
+namespace sensors {namespace direct {void stackStopped(){}void service(const radiosensor::Config&,bool,bool,bool,uint32_t){}bool exclusive(){return false;}bool quiet(){return true;}bool faulted(){return false;}void audioRequested(){}bool take(radiosensor::Reading&){return false;}void diagnostics(){}}}
 #endif

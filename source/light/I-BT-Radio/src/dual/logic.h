@@ -86,7 +86,13 @@ inline void sanitize(Settings &s) {
 #else
     s.playerEnabled=true;s.cassetteEnabled=false;s.mediaPlayerSkin=false;s.kajonSkin=false;s.vintageSkin=0;
     s.language=Language::HU;s.rotation&=2;s.reelAnimation=false;s.swipeSkins=false;s.bootScreen=0;s.bootSound=0;
-    s.alarm.clockHome=false;s.alarm.mode=0;s.hlsEnabled=false;
+#if !defined(IBT_SENSOR_EXPERIMENTAL)
+    s.alarm.clockHome=false;
+#endif
+    s.alarm.mode=0;s.hlsEnabled=false;
+#if defined(FEATURE_ARTWORK) && !FEATURE_ARTWORK
+    s.artworkEnabled=false;
+#endif
 #endif
 
 }

@@ -1,11 +1,11 @@
 #include "mono_dsp.h"
-#if IBT_STREAM_ART_DIAG
+#if IBT_STREAM_ART_DIAG || IBT_MONO_DISABLED
 #include <Arduino.h>
 namespace monodsp {
 void begin(){} void service(bool,unsigned){} Config configuration(){return Config{};}
 bool change(unsigned,int){return false;}bool set(unsigned,int){return false;}bool pendingSave(){return false;}
 void block(uint32_t){}bool active(){return false;}uint32_t process(int16_t,int16_t,uint32_t dry,unsigned,uint32_t){return dry;}
-void measuredBlock(unsigned,uint32_t){}void diagnostics(){Serial.println("[MONO-DSP] enabled=0 compiled_engine=0 diagnostic=STREAM_ART_ONLY");}
+void measuredBlock(unsigned,uint32_t){}void diagnostics(){Serial.println("[MONO-DSP] enabled=0 compiled_engine=0 reason=PROFILE_DISABLED");}
 }
 #else
 #include <Arduino.h>
