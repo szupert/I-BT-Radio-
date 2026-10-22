@@ -1,0 +1,146 @@
+dependencies:
+  chmorgan/esp-libhelix-mp3:
+    component_hash: cbb76089dc2c5749f7b470e2e70aedc44c9da519e04eb9a67d4c7ec275229e53
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.1.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.3
+  espressif/cbor:
+    component_hash: dad9ca860963e930366510a10b422b3125a4fb27b979712ed65efcbcd742de50
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.6.1~4
+  espressif/esp-dsp:
+    component_hash: ed9ac175b14e0414399a2b33c525579414b5bad19a2a67b12ea212def96f9a98
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.2'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.8.2
+  espressif/esp-zboss-lib:
+    component_hash: 321883d142421f65009972408287441794250057668a11abbdfd8bec77c3309a
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.6.4
+  espressif/esp-zigbee-lib:
+    component_hash: fa0812e6743e2a7d999af9f44ccdcea17ccb1e80f98d6b2956f44687503a88fd
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.6.8
+  espressif/lan867x:
+    component_hash: 88bcd9834f0ddd780c1dbed3b9135d03edd00e76dadfd70b91410a524cc5e85a
+    dependencies:
+    - name: espressif/lan86xx_common
+      registry_url: https://components.espressif.com
+      require: private
+      version: '*'
+    - name: idf
+      require: private
+      version: '>=5.3'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    targets:
+    - esp32
+    - esp32p4
+    - esp32s31
+    version: 2.1.0
+  espressif/lan86xx_common:
+    component_hash: 1045dc16e9eaa23c8f94ebd012e4ccc9087e85323c39f870b116391f27196914
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.2'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.0.1
+  espressif/libsodium:
+    component_hash: d4066b373fc6d4c5196db42aeea7faef4ac7f3080af96c2b74e2476c08b78dc1
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.2'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.22~1
+  espressif/mdns:
+    component_hash: b5b30022c46302eab89c1d2e3b6fb5918a627563a7462f0ee284b22b9a934967
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.14.0
+  espressif/network_provisioning:
+    component_hash: ef2e10182fd1861e68b821491916327c25416ca7ae70e5a6e43313dbc71fe993
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.2
+  espressif/qrcode:
+    component_hash: 3b493771bc5d6ad30cbf87c25bf784aada8a08c941504355b55d6b75518ed7bc
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.1.0~2
+  idf:
+    source:
+      type: idf
+    version: 5.5.5
+  joltwallet/littlefs:
+    component_hash: 3af20a3d75c49db9dc2286fd50862c34055c9f578419ad1f2bf7ed3ed01391fe
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.22.3
+direct_dependencies:
+- chmorgan/esp-libhelix-mp3
+- espressif/cbor
+- espressif/esp-dsp
+- espressif/esp-zboss-lib
+- espressif/esp-zigbee-lib
+- espressif/lan867x
+- espressif/libsodium
+- espressif/mdns
+- espressif/network_provisioning
+- espressif/qrcode
+- idf
+- joltwallet/littlefs
+manifest_hash: 3278c57bd26f0043ec66e8e8eef79a85dec3e1e5951989b91b61329d1bf1a1cf
+target: esp32
+version: 2.0.0
