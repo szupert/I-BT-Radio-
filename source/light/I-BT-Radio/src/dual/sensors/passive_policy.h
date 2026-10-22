@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "../ram_reserve.h"
 namespace radiosensor {
 struct Config { bool enabled=false; uint8_t address[6]={}; bool selected=false; uint8_t bindkey[16]={}; bool keyValid=false; };
 // Any foreground work vetoes BLE, regardless of how long reception was deferred.
@@ -13,7 +14,7 @@ struct AcquisitionCooldown {
 inline AcquisitionCooldown& acquisitionCooldown(){static AcquisitionCooldown gate;return gate;}
 constexpr uint32_t staleMs=300000, scanBurstMs=1000, scanRestMs=59000;
 constexpr bool receiveAllowed(const Config& c,bool stackReady,bool audioBusy,bool foregroundBusy,unsigned heap,unsigned largest,unsigned loadPermille){
- return c.enabled&&c.selected&&stackReady&&!audioBusy&&!foregroundBusy&&heap>=32768&&largest>=16384&&loadPermille<800;
+ return c.enabled&&c.selected&&stackReady&&!audioBusy&&!foregroundBusy&&heap>=(ibtram::reserve==0?0u:32768u)&&largest>=(ibtram::reserve==0?0u:16384u)&&loadPermille<800;
 }
 constexpr bool scanDue(const Config& c,bool ready,bool audio,bool foregroundBusy,unsigned heap,unsigned largest,unsigned load,uint32_t now,uint32_t last,bool attempted){
  return receiveAllowed(c,ready,audio,foregroundBusy,heap,largest,load)&&(!attempted||uint32_t(now-last)>=scanBurstMs+scanRestMs);

@@ -30,6 +30,7 @@ unsigned negotiatedOutputRate(); // zero until producer ready; actual SBC clock
 unsigned outputRate(); // selected BT OUT SBC rate, saved in NVS
 bool setOutputRate(unsigned hz); // only while the BT profile is fully off
 void service(); // core 0: asynchronous, bounded profile lifecycle
+bool releasePassiveStack(); // Core0, quiescent BLE only; reversible SDK deinit
 bool preparePassiveStack(); // Core0 only, no audio buffers/profile allocation
 void sample(int16_t left,int16_t right,uint32_t rate); // fallback for non-16-bit decoded output
 void feedBlock(const int16_t* samples,uint32_t frames,unsigned channels,unsigned rate,unsigned volume,int balance); // V029 OUT path, raw 16-bit PCM

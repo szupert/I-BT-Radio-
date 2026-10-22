@@ -241,7 +241,7 @@ bool NetServer::begin(bool quiet) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
 #endif
-    auto* response=request->beginResponse(200,"application/json","{\"major\":\"166\",\"release\":\"211\",\"webui\":\"IBT_R211_1\",\"save\":\"lease3\"}");
+    auto* response=request->beginResponse(200,"application/json","{\"major\":\"166\",\"release\":\"216\",\"webui\":\"IBT_R216_1\",\"save\":\"lease3\"}");
     response->addHeader("Cache-Control","no-store");request->send(response);
   });
   webserver.on("/api/player", HTTP_GET, [](AsyncWebServerRequest *request) {

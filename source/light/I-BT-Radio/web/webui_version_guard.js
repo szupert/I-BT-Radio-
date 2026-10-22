@@ -1,6 +1,6 @@
 (() => {
  'use strict';
- const client={major:'166',release:'211',webui:'IBT_R211_1'};
+ const client={major:'166',release:'216',webui:'IBT_R216_1'};
  const key='ibt-webui-version:'+location.host;
  const token=v=>[v.major,v.release,v.webui].join('|');
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);

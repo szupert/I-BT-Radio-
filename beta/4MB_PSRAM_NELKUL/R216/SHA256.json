@@ -1,0 +1,27 @@
+{
+  "result": "PASS_PUBLIC_AUTO4_FROZEN_HOST_ONLY",
+  "exe": "C:\\esp32\\SYSTEM\\TEMP\\PUBLIC_AUTO4_R216_20261022\\dist\\I-BT-Radio-Auto4-Install.exe",
+  "bytes": 28292101,
+  "sha256": "5a1486c2519bfba8a6d0c3a82e4adb57906cc32d78b22de533dc1ee2c1ad652a",
+  "firmware_profiles": {
+    "4MB_PSRAM_NELKUL": "V166-R216",
+    "4MB_PSRAM": "V166-R176",
+    "16MB_PSRAM_NELKUL": "V166-R189",
+    "16MB_PSRAM": "V166-R176"
+  },
+  "COM": false,
+  "flash": false,
+  "physical": "NOT_RUN",
+  "runtime_included": true,
+  "portable_unicode_no_python_PATH": "PASS",
+  "internal_probe_dispatch": "PASS_ACTUAL_CALLER_AND_FROZEN_HELP",
+  "actual_selected_profiles": [
+    "lite4",
+    "lite16",
+    "psram4",
+    "psram16"
+  ],
+  "all4_firmware_image_info": "PASS",
+  "normal_Q_before_COM": "PASS",
+  "engine_admission_receipt_regression": "18_CASES_PASS"
+}

@@ -1,3 +1,9 @@
+## R216 Light4MB ·2026.10.22.
+
+[Menütesztelt béta és telepítő](https://github.com/szupert/I-BT-Radio-/tree/main/beta/4MB_PSRAM_NELKUL/R216) · [Aktuális Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light)
+
+Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú mérési béta; Wi-Fi hang, BT-OUT memória és veremtartalék továbbra nyitott. Az alábbi régebbi kiadások történeti állapotok.
+
 # I-BT-Radio — Light és Pro · nyilvános fejlesztői béta
 
 ## Teljes forrás és négy hardverprofil · 2026. október 22.

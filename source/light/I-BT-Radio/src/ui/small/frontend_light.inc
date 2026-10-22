@@ -271,8 +271,8 @@ static void player(const dual::Snapshot&s,bool speaker,bool full,bool force){
  }
  clock(speaker,full||coverChanged);if((full||coverChanged)&&!coverMode)meters(speaker,true);
  if(full){
-  if(speaker){const btspeakerui::Rect rects[]={btspeakerui::previous,btspeakerui::toggle,btspeakerui::next,btspeakerui::menu};const char* names[]={"Előző",playing?"Szünet":"Indít","Követk.","Menü"};for(unsigned i=0;i<4;++i){auto r=rects[i];button(r.x,r.y,r.w,r.h,names[i]);}}
-  else{const char* names[]={"Előző",playing?"Szünet":"Indít","Követk.","Forrás","Menü"};for(unsigned i=0;i<5;++i)button(i*64,196,64,44,names[i]);}
+  if(speaker){const btspeakerui::Rect rects[]={btspeakerui::previous,btspeakerui::toggle,btspeakerui::next,btspeakerui::menu};const char* names[]={"Előző",playing?"Szünet":"Indít","Követk.","Csatl."};for(unsigned i=0;i<4;++i){auto r=rects[i];button(r.x,r.y,r.w,r.h,names[i]);}}
+  else{const char* names[]={"Előző",playing?"Szünet":"Indít","Követk.","Forrás",btaudio::outputSelected()?"Scan":"Menü"};for(unsigned i=0;i<5;++i)button(i*64,196,64,44,names[i]);}
  }
  if(full||force||statusChanged||playing!=transportWasPlaying||pulse!=previousPulse){
   if(speaker){auto r=btspeakerui::toggle;transportButton(r.x,r.y,r.w,r.h,playing,pulse);}

@@ -17,11 +17,12 @@ inline const char* pick(dual::Language l,const char* hu,const char* en,const cha
 }
 inline unsigned itemCount(unsigned page){
     switch(page){
+      case 75:return 5;
 #if IBT_COMPACT_UI
       case 74:return 17;
 #endif
       case 1:return 5;   // root, including clock home
-      case 3:return 7;   // Bluetooth input, output, DAC, status, rate, back
+      case 3:return 8;   // Bluetooth input, output, DAC, status, rate, back
       case 45:return 8;
       case 46:return IBT_NO_PSRAM?8:6;
       case 43:return 5;  // four standard SBC rates and back
@@ -64,6 +65,7 @@ inline unsigned itemCount(unsigned page){
 inline bool isMenuPage(unsigned page){return itemCount(page)!=0;}
 inline const char* pageTitle(dual::Language l,unsigned page){
     switch(page){
+      case 75:return "Forrás / hangút";
 #if IBT_COMPACT_UI
       case 74:return "IR taviranyito";
 #endif
@@ -262,14 +264,17 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
           case 3:label=pick(l,"Bluetooth-bemenet","Bluetooth input","Bluetooth-Eingang");enabled=true;break;
           default:label=dual::tr(l,dual::Text::Back);enabled=true;break;
         } break;
+    case 75:{static const char* routes[]={"WIFI-DAC","SD-DAC","SD-BT","BT-DAC","Vissza"};
+        if(item<5){label=routes[item];enabled=true;}break;}
     case 3:
         switch(item){
-          case 0:label=pick(l,"Bluetooth-bemenet","Bluetooth input","Bluetooth-Eingang");enabled=true;break;
-          case 1:label=pick(l,"Bluetooth-kimenet","Bluetooth output","Bluetooth-Ausgang");enabled=true;break;
+          case 0:label=pick(l,"Telefon csatlakoztatása","Connect phone","Telefon verbinden");enabled=true;break;
+          case 1:label=pick(l,"BT-hangszóró keresése","Find BT speaker","BT-Lautsprecher suchen");enabled=true;break;
           case 2:label=pick(l,"Vissza a DAC-ra","Return to DAC","Zurück zum DAC");enabled=true;break;
           case 3:label=pick(l,"Állapot","Status","Status");enabled=true;break;
           case 4:label=pick(l,"BT kimenet kHz","BT output kHz","BT-Ausgang kHz");snprintf(value,sizeof(value),"%u%s",btaudio::outputRate()==44100?44:btaudio::outputRate()/1000,btaudio::outputRate()==44100?",1":"");enabled=true;break;
           case 5:label=pick(l,"BT gyorskereső","BT quick scan","BT-Schnellsuche");snprintf(value,sizeof(value),"%s",s.settings.btQuickScan?pick(l,"Be","On","Ein"):pick(l,"Ki","Off","Aus"));enabled=true;break;
+          case 6:label=pick(l,"Mentett hangszórók","Saved speakers","Gespeicherte Lautsprecher");enabled=true;break;
           default:label=dual::tr(l,dual::Text::Back);enabled=true;break;
         } break;
     case 43:

@@ -395,9 +395,16 @@ static void openBluetoothMenu(unsigned parent,unsigned row,unsigned selection){
     bluetoothParent=parent;bluetoothParentRow=row;
     page=PAGE_BLUETOOTH;selected=selection;redraw=true;
 }
+static int localRoutePending=-1;static uint32_t localRouteAt=0;
+static bool speakerSearchPending=false;static uint8_t speakerSearchStep=0;static uint32_t speakerSearchAt=0;
 void bluetoothMode(int mode){
+    localRoutePending=-1;
+    pendingConnectivity=-1; // An explicit BT choice supersedes deferred offline phone selection.
+    if(mode!=0)speakerSearchPending=false;
     if(mode==0&&config.getMode()==PM_WEB){
-        btRateNotice("BT OUT csak SD forrasbol");return;
+        if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, probald ujra");return;}
+        speakerSearchPending=true;speakerSearchStep=0;speakerSearchAt=millis();
+        page=PAGE_SOURCE_PENDING;pendingSourceTarget=PM_SDCARD;pendingSourceAt=0;selected=0;redraw=true;return;
     }
     if(!player.sendCommand({PR_BT,mode})){btRateNotice("BT parancs var, probald ujra");redraw=true;return;}
     if(page!=PAGE_BLUETOOTH&&page!=PAGE_BT_SCAN&&page!=PAGE_BT_SAVED){bluetoothParent=page;bluetoothParentRow=selected;}
@@ -726,6 +733,9 @@ void begin() {
     lightui::style.store(0);vuprobe::dacEnabled.store(false);vuprobe::localBtEnabled.store(false);btinputvu::enabled.store(false);
 #endif
     sanitize(state.settings);
+#if !FEATURE_ARTWORK
+    state.settings.artworkEnabled=false;
+#endif
     publishSurface(state.settings);
     ibtdirect::setHlsEnabled(state.settings.hlsEnabled);
     config.store.volsteps=(uint8_t)max(1,(int(state.settings.volumeStep)*254+50)/100);
@@ -1155,6 +1165,7 @@ static bool menuEnabled(unsigned p,unsigned item){
 #endif
 
     switch(p){
+      case 75:return item<5;
       case PAGE_MAIN:return item<5;
       case PAGE_STATIONS:return item<=2||(FEATURE_SD&&item==3)||(item>=4&&item<8);
       case PAGE_SOUND:return item<=5;
@@ -1730,7 +1741,7 @@ static void goBack(unsigned from){
            player.sdPrepareState()!=SdPrepareState::Failed &&
            player.sdPrepareState()!=SdPrepareState::Cancelled &&
            !player.sendCommand({PR_CANCEL_SOURCE,0})){btRateNotice("Megszakítás vár, próbáld újra");redraw=true;return;}
-        pendingConnectivity=-1;pendingSourceAt=0;
+        pendingConnectivity=-1;speakerSearchPending=false;pendingSourceAt=0;
         page=PAGE_STATIONS;selected=pendingSourceTarget==PM_SDCARD?3:0;break;
       case PAGE_SD_INFO:page=PAGE_STORAGE;selected=1;break;
       case PAGE_STATION_SEARCH:page=PAGE_STATIONS;selected=2;break;
@@ -1744,8 +1755,9 @@ static void goBack(unsigned from){
       case PAGE_BT_PLAYER:page=PAGE_BLUETOOTH;selected=0;break;
       case PAGE_BT_SCAN:
         if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, próbáld újra");redraw=true;return;}
-        page=PAGE_BT_SAVED;selected=4;break;
-      case PAGE_BT_SAVED:page=PAGE_BLUETOOTH;selected=1;break;
+        page=PAGE_BLUETOOTH;selected=1;break;
+      case 75:page=PAGE_HOME;selected=0;localRoutePending=-1;speakerSearchPending=false;break;
+      case PAGE_BT_SAVED:page=PAGE_BLUETOOTH;selected=6;break;
       case PAGE_DAC_INFO:page=PAGE_OUTPUTS;selected=0;break;
       case PAGE_FS_INFO:page=PAGE_STORAGE;selected=3;break;
       case PAGE_ART_CACHE:page=PAGE_STORAGE;selected=2;break;
@@ -1770,6 +1782,29 @@ static void selectConnectivity(unsigned mode){
 #endif
 }
 static void serviceConnectivity(){
+    if(localRoutePending>=0){
+        if(uint32_t(millis()-localRouteAt)>30000){localRoutePending=-1;btRateNotice("Hangútváltás nem fejeződött be");return;}
+        if(!btaudio::idle()||player.queueDepth()!=0)return;
+        const auto target=playMode_e(localRoutePending);
+        if(target==PM_WEB&&network.offlinePlayer()){network.enterOnlinePlayer();return;}
+        if(config.getMode()!=target){
+            if(player.sendCommand({PR_SOURCE,target})){pendingSourceTarget=target;pendingSourceAt=millis();pendingSourceCancelSent=false;localRoutePending=-1;page=PAGE_SOURCE_PENDING;redraw=true;}
+        }else{localRoutePending=-1;page=PAGE_HOME;selected=0;redraw=true;}
+        return;
+    }
+    if(speakerSearchPending){
+        if(uint32_t(millis()-speakerSearchAt)>30000){speakerSearchPending=false;page=PAGE_BLUETOOTH;selected=1;btRateNotice("SD/BT keresés nem indult el");return;}
+        if(!btaudio::idle()||player.queueDepth()!=0)return;
+        if(config.getMode()!=PM_SDCARD||!sdman.catalogReady.load()){
+            if(!speakerSearchStep&&player.sendCommand({PR_SOURCE,PM_SDCARD}))speakerSearchStep=1;
+            if(speakerSearchStep&&(player.sdPrepareState()==SdPrepareState::Failed||player.sdPrepareState()==SdPrepareState::Cancelled)){
+                speakerSearchPending=false;page=PAGE_BLUETOOTH;selected=1;btRateNotice("SD-kártya nem érhető el");
+            }
+            return;
+        }
+        if(player.sendCommand({PR_BT,0})){speakerSearchPending=false;cancelAlarmForUser();page=PAGE_BT_SCAN;selected=0;redraw=true;}
+        return;
+    }
     if(pendingConnectivity<1||!player.audioTaskHandle()||!network.offlineReady())return;
     const unsigned target=unsigned(pendingConnectivity);
     if(!connectivityAt)connectivityAt=millis();
@@ -1837,9 +1872,18 @@ static void activateMenu(unsigned p,unsigned item){
     }
     if(p==73){if(item==12){goBack(p);return;}static const int8_t map[]={0,1,2,-1,3,4,5,6,7,8,9,10};if(item<12&&map[item]>=0)monodsp::change(unsigned(map[item]),1);redraw=true;return;}
     if(p==PAGE_SOUND){if(item==4){page=73;selected=0;redraw=true;return;}if(item==0)page=PAGE_VOLUME_STREAM;else if(item==1)page=PAGE_EQ;else if(item==2)page=PAGE_OUTPUTS;else if(item==3){openBluetoothMenu(PAGE_SOUND,3,0);return;}else {goBack(p);return;}selected=0;redraw=true;return;}
+    if(p==75){
+        if(item>=4){localRoutePending=-1;speakerSearchPending=false;page=PAGE_HOME;selected=0;redraw=true;return;}
+        pendingConnectivity=-1;speakerSearchPending=false;localRoutePending=-1;
+        if(item==3){bluetoothMode(1);return;}
+        if(item==2){bluetoothMode(0);return;}
+        if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, próbáld újra");return;}
+        localRoutePending=item==0?PM_WEB:PM_SDCARD;localRouteAt=millis();cancelAlarmForUser();redraw=true;return;
+    }
     if(p==PAGE_BLUETOOTH){
         if(item==0){bluetoothMode(1);return;}
-        if(item==1){page=PAGE_BT_SAVED;selected=btaudio::savedDeviceCount()?0:4;redraw=true;return;}
+        if(item==1){bluetoothMode(0);return;}
+        if(item==6){page=PAGE_BT_SAVED;selected=btaudio::savedDeviceCount()?0:4;redraw=true;return;}
         if(item==2){bluetoothMode(-1);return;}
         if(item==3){page=PAGE_BT_INFO;selected=0;redraw=true;return;}
         if(item==4){page=PAGE_BT_RATE;selected=0;redraw=true;return;}
@@ -2508,7 +2552,7 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
 #endif
         if(page==PAGE_HOME&&network.status!=SOFT_AP&&!clockHomeTouch){
             const int button=lightui::homeButton(q.x,q.y);
-            if(button>=0){const Action buttons[]={Action::Prev,Action::Toggle,Action::Next,Action::Source,Action::Menu};input(buttons[button]);}
+            if(button>=0){const Action buttons[]={Action::Prev,Action::Toggle,Action::Next,Action::Source,Action::Menu};if(button==4&&btaudio::outputSelected()){page=PAGE_BT_SCAN;selected=0;redraw=true;}else input(buttons[button]);}
             else if(q.y>=170&&q.y<196&&q.x>=8&&q.x<312){if(player.sendCommand({PR_VOL,constrain((q.x-8)*254/303,0,254)})){cancelAlarmForUser();redraw=true;}}
             else if(q.y<28)openChannels();
         }else if(clockHomeTouch){
@@ -2611,7 +2655,7 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
               case Key::Previous:btPlayerKey(0);break;
               case Key::Toggle:btToggleAcknowledged();redraw=true;break;
               case Key::Next:btPlayerKey(2);break;
-              case Key::Menu:openMainMenu();break;
+              case Key::Menu:bluetoothMode(1);break;
               case Key::Volume:if(player.sendCommand({PR_VOL,int(btspeakerui::percent(q.x)*254/100)})){cancelAlarmForUser();redraw=true;}break;
               default:break;
             }
@@ -3154,6 +3198,7 @@ void audioLoop() {
         case Action::VolDown:player.stepVol(false);break;
         case Action::VolUp:player.stepVol(true);break;
         case Action::Source:
+            page=75;selected=0;redraw=true;break;
         case Action::SourceWeb:
         case Action::SourceSd:
 #if FEATURE_SD

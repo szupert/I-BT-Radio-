@@ -42,7 +42,7 @@ static const char ibt_branding_js[] PROGMEM = R"IBTJS(
     if (!document.getElementById('ibt-source-credit')) {
       const f=document.createElement('footer'); f.id='ibt-source-credit';
       const a=document.createElement('a'); a.textContent=credit;
-      a.href='https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md'; a.target='_blank'; a.rel='noopener noreferrer';
+      a.href='https://github.com/szupert/I-BT-Radio-/blob/main/LICENSE'; a.target='_blank'; a.rel='noopener noreferrer';
       f.appendChild(a); document.body.appendChild(f);
     }
     if (!document.getElementById('ibt-brand-style')) {
