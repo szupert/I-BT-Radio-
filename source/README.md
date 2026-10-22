@@ -15,7 +15,7 @@ A `SOURCE_MANIFEST.json` az átadott fájlok SHA-256 listája. A folyamatban lé
 
 PlatformIO/pioarduino55.03.311, ArduinoESP323.3.11 és ESP-IDF5.5.5 az alkalmazott környezet. A `dependencies.lock`, az SDK-konfigurációk, CMake- és PlatformIO-fájlok megmaradtak. A jelenlegi fejlesztési környezet C:/esp32 alatti helyi útvonalakat és előre letöltött managed_components könyvtárat használ. Ez a publikált forráspillanatkép **még nem igazolt, tiszta gépen önmagában reprodukálható buildcsomag**; a környezet hordozhatóvá tétele külön, visszavonható fejlesztési blokk. Ne tekints egy eltérő SDK-val készülő buildet az eredeti BIN hiteles reprodukciójának.
 
-Az `esp_audio_codec` külső, előre fordított Espressif-függőség, saját mellékelt licenccel; nem állítjuk, hogy annak gyártói belső forrása rendelkezésünkre áll. Az alkalmazás saját kódja és módosított yoRadio-forrása olvasható, beleértve az összes átadott skin kódját. Harmadik felek és márkajelzések jogai megmaradnak.
+Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
 
 ## Közreműködés
 

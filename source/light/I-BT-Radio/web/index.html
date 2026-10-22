@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#202225"><title>I-BT-Radio menü</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#15191c;color:#edf1f2}
+*{box-sizing:border-box}body{margin:0}main{max-width:780px;margin:auto;padding:0 16px 48px}
+header{position:sticky;top:0;z-index:2;background:#15191cf2;border-bottom:1px solid #465258;padding:15px 0 12px;backdrop-filter:blur(8px)}
+h1{font-size:1.35rem;margin:0 0 10px;letter-spacing:.02em}h2{font-size:1.05rem;margin:0;color:#f3d47b}
+p{line-height:1.4}#status{color:#b9c4c7;margin:8px 0 0;font-size:.9rem}
+#search{width:100%;font:inherit;padding:10px 12px;border:1px solid #607178;border-radius:7px;background:#242c30;color:#fff}
+#sections{display:flex;flex-wrap:wrap;gap:7px;padding:12px 0 4px}
+#sections a{padding:6px 9px;border:1px solid #49565b;border-radius:5px;font-size:.84rem}
+button,a{font:inherit}button{border:1px solid #68777d;border-radius:6px;background:#303a3e;color:#edf1f2;padding:8px 11px;cursor:pointer}
+button:hover,button:focus-visible,a:focus-visible{border-color:#f3d47b;color:#f3d47b}
+a{color:#edf1f2;text-decoration:none}a:hover{color:#f3d47b}
+section{scroll-margin-top:165px;margin-top:20px}section h2{padding:0 2px 8px}
+.menu-group{scroll-margin-top:165px;margin-top:22px;padding-top:8px;border-top:1px solid #465258}
+.menu-group>h2{font-size:1.25rem;color:#edf1f2}
+.menu-group section{margin:14px 0 0}
+.menu-group>section:first-of-type h2{display:none}
+ol{list-style:none;margin:0;padding:0;border:1px solid #465258;border-radius:7px;overflow:hidden}
+li{min-height:40px;background:#21282b;padding:9px 12px;overflow-wrap:anywhere}
+li:nth-child(even){background:#252d30}li+li{border-top:1px solid #3b474b}
+li button{width:100%;text-align:left;background:#303a3e}li.off{color:#899599}li.readonly{color:#c0c9cc}
+li a{display:block}li a::after{content:' ↘';color:#f3d47b}
+#refresh{margin:12px 0 0}small{color:#b9c4c7}
+#player{width:320px;max-width:100%;margin:18px auto 22px}
+#player-frame{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden}
+#player-frame:has(#player-screen[data-skin="1"]){aspect-ratio:320/213}
+#player-screen{position:relative;width:320px;height:240px;transform-origin:top left;overflow:hidden;background:#060a0b;
+ border:1px solid #5f6668;border-radius:7px;box-shadow:0 12px 32px #0009}
+#skin-image{display:block;width:320px;height:240px;object-fit:fill}
+#skin-image[hidden]{display:none}
+.player-field{position:absolute;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ font:11px/1.25 system-ui,sans-serif;color:#e5ebed;pointer-events:none}
+#player-station{font-weight:700}#player-track{font-size:10px}#player-extra{font-size:9px}
+#player-screen[data-skin="0"]{background:linear-gradient(145deg,#133034,#060d12 55%,#182028)}
+#player-screen[data-skin="0"]:before{content:'I-BT-Radio';position:absolute;top:13px;left:15px;
+ font:bold 16px system-ui;color:#bfe6df}
+#player-screen[data-skin="0"] .player-field{display:block;left:16px;width:288px}
+#player-screen[data-skin="0"] #player-station{top:65px;font-size:16px}
+#player-screen[data-skin="0"] #player-track{top:96px;font-size:13px}
+#player-screen[data-skin="0"] #player-extra{top:136px;font-size:11px}
+#player-screen[data-skin="1"] #skin-image{height:213px}
+#player-screen[data-skin="1"]{height:213px}
+#player-screen[data-skin="1"] .player-field{display:block;color:#29251d;left:30px;width:260px}
+#player-screen[data-skin="1"] #player-station{top:25px}
+#player-screen[data-skin="1"] #player-track{top:44px}
+#player-screen[data-skin="1"] #player-extra{top:127px;left:208px;width:90px}
+#player-screen[data-skin="2"] .player-field{display:block;color:#42e66d;font:10px monospace}
+#player-screen[data-skin="2"] #player-station{left:129px;top:26px;width:174px}
+#player-screen[data-skin="2"] #player-track{display:none}
+#player-screen[data-skin="2"] #player-extra{left:129px;top:43px;width:116px;height:15px;background:#000;font-size:9px}
+#player-screen[data-skin="2"] #player-time{display:block;left:44px;top:28px;width:76px;background:#000;color:#42e66d;font:10px monospace}
+#player-screen[data-skin="3"] .player-field{display:block;left:97px;width:208px;background:#001125;color:#dcf2ff}
+#player-screen[data-skin="3"] #player-station{top:49px;height:17px}
+#player-screen[data-skin="3"] #player-track{top:67px;height:16px}
+#player-screen[data-skin="3"] #player-extra{top:105px;height:14px;width:155px}
+#player-screen[data-skin="3"] #player-time{display:block;left:273px;top:105px;width:35px;background:#001125;color:#dcf2ff}
+#player-screen[data-skin="3"] #player-volume{display:block;left:177px;top:195px;width:38px;background:#b7c3ce;color:#142031;text-align:center}
+#player-screen[data-skin="4"] .player-field{display:block;left:16px;width:287px;background:#000}
+#player-screen[data-skin="4"] #player-station{top:117px;color:#61edff;height:17px}
+#player-screen[data-skin="4"] #player-track{top:136px;height:16px}
+#player-screen[data-skin="4"] #player-extra{top:226px;left:249px;width:60px}
+#player-screen[data-skin="6"] .player-field{display:block;color:#3aff72}
+#player-screen[data-skin="6"][data-retro="1"] #skin-image{filter:hue-rotate(-75deg)}
+#player-screen[data-skin="6"][data-retro="2"] #skin-image{filter:hue-rotate(-95deg)}
+#player-screen[data-skin="6"][data-retro="3"] #skin-image{filter:hue-rotate(-125deg)}
+#player-screen[data-skin="6"][data-retro="4"] #skin-image{filter:hue-rotate(110deg)}
+#player-screen[data-skin="6"][data-retro="5"] #skin-image{filter:hue-rotate(70deg)}
+#player-screen[data-skin="6"][data-retro="6"] #skin-image{filter:hue-rotate(45deg)}
+#player-screen[data-skin="6"][data-retro="7"] #skin-image{filter:hue-rotate(170deg)}
+#player-screen[data-skin="6"][data-retro="8"] #skin-image{filter:grayscale(1) brightness(1.4)}
+#player-screen[data-skin="6"] #player-station{left:84px;top:104px;width:216px}
+#player-screen[data-skin="6"] #player-track{left:84px;top:131px;width:216px}
+#player-screen[data-skin="6"] #player-extra{display:none}
+#player-screen[data-skin="7"] .player-field{display:block;color:#ffd78d}
+#player-screen[data-skin="7"] #player-station{left:125px;top:43px;width:174px}
+#player-screen[data-skin="7"] #player-track{left:125px;top:72px;width:174px}
+#player-screen[data-skin="7"] #player-extra{display:none}
+#player-screen[data-skin="8"] .player-field{display:block;color:#ffd69a}
+#player-screen[data-skin="8"] #player-station{left:137px;top:43px;width:111px}
+#player-screen[data-skin="8"] #player-track{left:137px;top:73px;width:111px}
+#player-screen[data-skin="8"] #player-extra{display:none}
+#player-screen[data-skin="6"] #player-time,#player-screen[data-skin="7"] #player-time,#player-screen[data-skin="8"] #player-time{
+ display:block;left:183px;top:8px;width:55px;color:#ffe0a0}
+#player-screen[data-skin="6"] #player-volume,#player-screen[data-skin="7"] #player-volume,#player-screen[data-skin="8"] #player-volume{
+ display:block;left:91px;top:8px;width:72px;color:#ffe0a0}
+#player-screen[data-skin="6"] #player-time,#player-screen[data-skin="6"] #player-volume{color:#3aff72}
+#player-screen[data-skin="0"] #player-time,#player-screen[data-skin="0"] #player-volume,
+#player-screen[data-skin="1"] #player-time,#player-screen[data-skin="1"] #player-volume,
+#player-screen[data-skin="2"] #player-volume,
+#player-screen[data-skin="4"] #player-time,#player-screen[data-skin="4"] #player-volume{display:none}
+.player-hot{position:absolute;border:0;background:transparent;color:transparent;padding:0;min-width:20px;min-height:20px}
+.player-hot:hover,.player-hot:focus-visible{outline:2px solid #f3d47b;outline-offset:-2px;background:#fff2;color:transparent}
+.player-hot[data-action="prev"]{left:16%;top:75%;width:20%;height:21%}
+.player-hot[data-action="toggle"]{left:39%;top:75%;width:22%;height:21%}
+.player-hot[data-action="next"]{left:63%;top:75%;width:20%;height:21%}
+#player-screen[data-skin="1"] .player-hot[data-action="prev"]{left:5%;top:73%}
+#player-screen[data-skin="1"] .player-hot[data-action="toggle"]{left:39%;top:31%}
+#player-screen[data-skin="1"] .player-hot[data-action="next"]{left:76%;top:73%}
+#player-screen[data-skin="2"] .player-hot{top:37%;height:10%;width:9%}
+#player-screen[data-skin="2"] .player-hot[data-action="prev"]{left:37%}
+#player-screen[data-skin="2"] .player-hot[data-action="toggle"]{left:20%}
+#player-screen[data-skin="2"] .player-hot[data-action="next"]{left:46%}
+#player-screen[data-skin="3"] .player-hot{top:62%;height:18%;width:17%}
+#player-screen[data-skin="3"] .player-hot[data-action="prev"]{left:6%}
+#player-screen[data-skin="3"] .player-hot[data-action="toggle"]{left:24%}
+#player-screen[data-skin="3"] .player-hot[data-action="next"]{left:55%}
+#player-screen[data-skin="4"] .player-hot{top:72%;height:17%;width:15%}
+#player-screen[data-skin="4"] .player-hot[data-action="prev"]{left:4%}
+#player-screen[data-skin="4"] .player-hot[data-action="toggle"]{left:16%}
+#player-screen[data-skin="4"] .player-hot[data-action="next"]{left:44%}
+#player-screen[data-skin="6"] .player-hot{top:83%;height:15%}
+#player-screen[data-skin="7"] .player-hot,#player-screen[data-skin="8"] .player-hot{top:68%;height:27%}
+#player-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:10px 0 4px}
+#player-controls button{min-width:42px;text-align:center}
+#next-skin{flex-basis:100%}
+#player-state{min-height:20px;margin:8px 0;text-align:center;font-size:.86rem;color:#c2d3d5}
+#player-progress{height:4px;background:#2c363a;border-radius:3px;overflow:hidden}
+#player-progress span{display:block;height:100%;width:0;background:#63ced5}
+#web-settings{max-width:780px;margin:0 auto 10px;padding:8px 16px;color:#c2d3d5;font-size:.9rem}
+#web-settings summary{cursor:pointer}
+#web-settings label{display:block;margin:8px 0}
+#station-search{margin-top:9px;width:100%;font:inherit;padding:10px 12px;border:1px solid #607178;border-radius:7px;background:#242c30;color:#fff}
+#station-results{margin-top:7px;max-height:220px;overflow-y:auto}
+#station-results li{min-height:35px;padding:4px 7px}
+#station-results button{width:100%;text-align:left}
+#menu-panel[hidden],#station-results[hidden]{display:none}
+#player-screen[data-skin="12"] #player-station{left:9px;top:171px;width:248px;height:23px;font-size:17px;background:none;color:white}
+#player-screen[data-skin="12"] #player-track{left:9px;top:196px;width:302px;height:17px;font-size:12px;background:none;color:white}
+#player-screen[data-skin="12"] #player-time{left:8px;top:28px;width:145px;height:55px;font-size:44px;background:none;color:white}
+#player-screen[data-skin="12"] #player-extra{left:220px;top:40px;width:94px;height:100px;font-size:16px;background:none;color:white;white-space:pre-line}
+#player-screen[data-skin="12"] #player-volume{left:280px;top:224px;width:39px;height:16px;font-size:12px;background:none;color:white}
+#player-screen[data-skin="12"] .player-hot[data-action="prev"]{left:48px;top:216px;width:38px;height:24px}
+#player-screen[data-skin="12"] .player-hot[data-action="toggle"]{left:90px;top:216px;width:38px;height:24px}
+#player-screen[data-skin="12"] .player-hot[data-action="next"]{left:134px;top:216px;width:38px;height:24px}
+#weather-form label{display:block;margin:8px 0}#weather-form input:not([type="checkbox"]),#weather-form select{max-width:100%;font:inherit}
+
+@font-face{font-family:VideotonVFD;src:url('/api/videoton.ttf') format('truetype');font-display:swap}
+#player-screen[data-skin="15"] .player-field{display:block;background:#04110f;color:#40ffaa;font:11px/1.2 VideotonVFD,monospace;text-align:center}
+#player-screen[data-skin="15"] #player-station{left:14px;top:52px;width:256px;height:26px;font-size:16px}
+#player-screen[data-skin="15"] #player-extra{left:14px;top:80px;width:256px;height:15px;font-size:11px}
+#player-screen[data-skin="15"] #player-track{left:14px;top:96px;width:256px;height:23px;font-size:12px}
+#player-screen[data-skin="15"] #player-time{left:257px;top:125px;width:45px;height:13px;font-size:9px}
+#player-screen[data-skin="15"] #player-volume{left:246px;top:202px;width:42px;height:8px;font:7px/8px sans-serif;color:#101010;background:#c9c9c6}
+#player-screen[data-skin="15"] #player-clock{left:267px;top:35px;width:38px;height:14px;font-size:8px}
+#player-screen[data-skin="15"] #player-preset{left:272px;top:69px;width:34px;height:28px;font-size:18px;color:#ff2055}
+#player-screen[data-skin="15"] #player-mode{left:18px;top:36px;width:80px;height:12px;text-align:left;font-size:8px}
+#player-screen[data-skin="15"] #player-rate{left:162px;top:125px;width:72px;height:13px;font-size:8px}
+#player-screen[data-skin="15"] #player-play-icon{left:75px;top:208px;width:15px;height:11px;font:11px/11px sans-serif;background:#d6ccb9;color:#101010}
+#player-screen[data-skin="15"] .player-hot{top:201px;height:25px;width:43px;min-height:20px}
+#player-screen[data-skin="15"] .player-hot[data-action="prev"]{left:15px}
+#player-screen[data-skin="15"] .player-hot[data-action="toggle"]{left:64px}
+#player-screen[data-skin="15"] .player-hot[data-action="next"]{left:112px}
+
+[hidden]{display:none!important}
+.player-layout{display:grid;grid-template-columns:44px minmax(0,320px) 44px;gap:8px;max-width:424px;margin:18px auto;align-items:start}
+.player-layout #player{width:100%;margin:0}
+.side-key{width:44px;height:48px;margin-top:74px;display:grid;place-items:center;padding:8px;background:#252d30}
+.side-key svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8}
+dialog{width:min(940px,calc(100% - 24px));max-height:88dvh;padding:0;border:1px solid #607178;border-radius:12px;background:#15191c;color:#edf1f2;box-shadow:0 20px 70px #000a}
+dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
+.dialog-title{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#20272b;padding:14px 16px;border-bottom:1px solid #465258}
+.dialog-title h2{font-size:1.15rem;color:#edf1f2}.dialog-title button{min-width:44px;min-height:40px}
+.dialog-content{padding:0 16px 20px}dialog header{position:static;backdrop-filter:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.toolbar button,.toolbar a{min-height:42px}
+.station-grid{display:grid;grid-template-columns:minmax(140px,1fr) minmax(0,1.2fr);gap:16px}
+#station-editor-list{max-height:310px;overflow:auto}#station-editor-list button{border:0;border-radius:0;background:transparent;padding:7px;text-align:left;width:100%;color:inherit}
+#station-editor-list li{padding:0;min-height:38px}#station-editor-list [aria-pressed=true]{background:#35555d;color:#fff}
+#station-form label{display:block;margin:8px 0}#station-form input{width:100%;font:inherit;padding:9px;background:#242c30;color:#fff;border:1px solid #607178;border-radius:5px}
+#station-file{max-width:100%}#station-info,#station-save-state{line-height:1.5;min-height:24px;color:#c2d3d5}.danger{border-color:#d28d88;color:#ffb9b3}
+#reset-confirm{padding:18px;max-width:520px}#reset-confirm h2{color:#ffb9b3}
+@media(max-width:560px){.station-grid{grid-template-columns:1fr}.player-layout{gap:4px;grid-template-columns:40px minmax(0,320px) 40px}.side-key{width:40px;padding:6px}main{padding-inline:8px}#station-editor-list{max-height:180px}}
+</style></head><body><main>
+<div class="player-layout">
+<button id="open-stations" class="side-key" type="button" aria-label="Rádióállomások: lista, szerkesztés, import és export" title="Rádióállomások" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="5.5" cy="18" rx="3.5" ry="2.5"/><ellipse cx="16.5" cy="16" rx="3.5" ry="2.5"/></svg></button>
+<div id="player" aria-label="Lejátszó">
+ <div id="player-frame">
+ <div id="player-screen" data-skin="0">
+  <img id="skin-image" alt="" width="320" height="240" hidden>
+  <span id="player-clock" class="player-field"></span><span id="player-preset" class="player-field"></span><span id="player-mode" class="player-field"></span><span id="player-rate" class="player-field"></span><span id="player-play-icon" class="player-field"></span>
+  <span id="player-station" class="player-field"></span>
+  <span id="player-track" class="player-field"></span>
+  <span id="player-extra" class="player-field"></span>
+  <span id="player-time" class="player-field"></span>
+  <span id="player-volume" class="player-field"></span>
+  <button class="player-hot" data-action="prev" type="button" aria-label="Előző"></button>
+  <button class="player-hot" data-action="toggle" type="button" aria-label="Lejátszás vagy szünet"></button>
+  <button class="player-hot" data-action="next" type="button" aria-label="Következő"></button>
+ </div>
+ </div>
+ <div id="player-controls"><button data-action="prev" type="button" aria-label="Előző">⏮</button>
+  <button data-action="toggle" type="button" aria-label="Lejátszás vagy szünet">⏯</button>
+  <button data-action="next" type="button" aria-label="Következő">⏭</button>
+  <button data-action="volm" type="button" aria-label="Halkítás">−</button>
+  <button data-action="volp" type="button" aria-label="Hangosítás">+</button>
+  <button id="next-skin" type="button">Következő skin</button></div>
+ <div id="player-progress" aria-label="Hangpuffer"><span></span></div>
+ <p id="player-state" role="status">Lejátszó betöltése...</p>
+</div>
+<button id="open-settings" class="side-key" type="button" aria-label="Beállítások" title="Beállítások" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 2-.7 2.8-2 .9L4.7 5 2 9l2 2v2l-2 2 2.7 4 2.6-.7 2 .9L10 22h4l.7-2.8 2-.9 2.6.7 2.7-4-2-2v-2l2-2-2.7-4-2.6.7-2-.9L14 2Z"/><circle cx="12" cy="12" r="3.5"/></svg></button>
+</div>
+<dialog id="stations-dialog" aria-labelledby="stations-title"><div class="dialog-title"><h2 id="stations-title">♫ Rádióállomások</h2><button type="button" data-close="stations-dialog" aria-label="Állomáskezelő bezárása">✕</button></div><div class="dialog-content">
+<p>Keresés és indítás, saját lista szerkesztése, importálás és exportálás.</p>
+<input id="station-search" type="search" placeholder="Állomások keresése" aria-label="Állomások keresése">
+<ol id="station-results" aria-label="Talált állomások" hidden></ol>
+<div class="toolbar"><button id="stations-reload" type="button">Lista újraolvasása</button><button id="station-add" type="button">Új állomás</button><button id="station-export" type="button">Exportálás CSV-be</button></div>
+<div class="station-grid"><div><p id="station-info" role="status">A lista megnyitáskor töltődik be.</p><ol id="station-editor-list" aria-label="Szerkeszthető állomások"></ol></div>
+<form id="station-form"><h2>Állomás szerkesztése</h2><label>Név<input id="station-name" required autocomplete="off"></label><label>Streamcím<input id="station-url" type="url" required placeholder="https://…" autocomplete="off"></label><label>Hangerőkorrekció<input id="station-volume" type="number" min="-80" max="80" step="1" value="0" required></label><button type="submit">Sor alkalmazása</button><div class="toolbar"><button id="station-up" type="button">↑ Fel</button><button id="station-down" type="button">↓ Le</button><button id="station-delete" class="danger" type="button">Sor törlése</button></div></form></div>
+<section><h2>Importálás</h2><p>I-BT-Radio CSV (tabulátoros), pontosvesszős/vesszős CSV vagy M3U. Egyszerre 1–10 fájl egyesíthető. Azonos streamcím esetén az első példány marad; azonos név eltérő címmel megmarad. Legfeljebb 480 egyedi állomás. Először csak az előnézet változik.</p><input id="station-file" type="file" multiple accept=".csv,.tsv,.m3u,.m3u8,.txt"><label><input id="station-merge-current" type="checkbox"> A jelenlegi előnézetet is tartsa meg</label><div class="toolbar"><button id="station-import" type="button">Fájlok egyesítése és duplikációk kiszűrése</button></div></section>
+<p>Az albumborítót a rádió önállóan keresi. Letöltés szünetben, elegendő memória mellett; találat hiányában a feltöltött állomáslogó jelenik meg. A korábbi, nem típusozott képek új feltöltéssel jelölhetők állomáslogónak.</p>
+<details id="cover-editor"><summary>Állomáslogó tartalék feltöltése a flashbe</summary>
+<p>Az éppen kiválasztott rádióadóhoz. Hallgasd legalább 60 másodpercig, majd nyomj Szünetet. Kapcsold be a Beállítások → Kijelző → Nézet: Borító opciót. SD-kártya nem szükséges. A négy legutóbb hallgatott adó borítója marad meg.</p>
+<input id="cover-file" type="file" accept="image/*" aria-label="Állomáslogó képfájl"><button id="cover-send" type="button">Állomáslogó mentése a flashbe</button>
+<p id="cover-state" role="status">A képet a böngésző alakítja át, aránytartóan 64×64 képpontba. A feltöltés 4096 bájt.</p></details>
+<div class="toolbar"><button id="station-save" type="button">Teljes lista mentése a rádióra</button><button id="station-check" type="button" hidden>Mentés ellenőrzése / folytatása</button><button id="station-cancel-save" type="button" hidden>Várakozó kérés törlése</button></div><p id="station-save-state" role="status">A mentés lecseréli a teljes állomáslistát, és elsőbbséget élvez a hanggal szemben. A rádió szükség esetén leállítja a lejátszást; csak a teljes visszaolvasás után kér folytatást. A Wi-Fi és a BT-párosítások megmaradnak.</p>
+</div></dialog>
+<dialog id="settings-dialog" aria-labelledby="settings-title"><div class="dialog-title"><h2 id="settings-title">⚙ Beállítások</h2><button type="button" data-close="settings-dialog" aria-label="Beállítások bezárása">✕</button></div><div class="dialog-content">
+<section><h2>Visszaállítás</h2><p>Minden rádióbeállítás és a saját állomáslista törlődik. A Wi-Fi és a mentett Bluetooth-eszközök megmaradnak. Az SD-n lévő zenék nem törlődnek.</p><button id="reset-open" class="danger" type="button">Minden visszaállítása…</button><p id="reset-state" role="status"></p></section>
+<div id="menu-panel" hidden>
+<header><h1>I-BT-Radio <small>BETA</small></h1>
+<input id="search" type="search" placeholder="Keresés a menüben" aria-label="Keresés a menüben">
+<nav id="sections" aria-label="Menücsoportok"></nav>
+<p id="status" role="status">Menü betöltése...</p></header>
+<button id="refresh" type="button">Frissítés</button><div id="menu"></div>
+<section id="weather-setup"><h2>Időjárás · Fotó skin</h2>
+<p>Open-Meteo: kulcs nélkül. OpenWeather: saját API-kulcs szükséges. Az adatok leállított hang mellett frissülnek; lejátszáskor a tárolt adat látszik.</p>
+<form id="weather-form" autocomplete="off">
+<label><input id="weather-on" type="checkbox"> Időjárás engedélyezése (alapból ki)</label>
+<label>Szolgáltató <select id="weather-provider"><option value="0">Open-Meteo · kulcs nélkül</option><option value="1">OpenWeather · saját kulcs</option></select></label>
+<label>Város keresése <input id="weather-city" maxlength="80" placeholder="Például Budapest vagy Szeged"></label><button id="weather-city-search" type="button">Város keresése</button><select id="weather-city-results" aria-label="Talált városok" hidden></select>
+<label>Hely neve <input id="weather-location" maxlength="39" value="Budapest" required></label>
+<label>Szélesség <input id="weather-lat" type="number" min="-90" max="90" step="0.00001" value="47.49790" required></label>
+<label>Hosszúság <input id="weather-lon" type="number" min="-180" max="180" step="0.00001" value="19.04020" required></label>
+<label>Frissítési idő <select id="weather-interval"><option value="15">15 perc</option><option value="30">30 perc</option><option value="60">60 perc</option></select></label>
+<label>OpenWeather API-kulcs <input id="weather-key" type="password" maxlength="64" autocomplete="new-password" placeholder="Üresen: korábbi kulcs megtartása"></label>
+<label><input id="weather-clear" type="checkbox"> Mentett kulcs törlése</label>
+<button type="submit">Időjárás mentése</button><button id="weather-refresh" type="button">Állapot betöltése</button></form>
+<p id="weather-state" role="status">Nincs automatikus háttér-lekérdezés a böngészőben. Betöltés vagy mentés kézzel.</p>
+<p><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo</a> / <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeather</a></p></section>
+<section id="sensor-setup"><h2>BLE hőmérő</h2>
+<p>LYWSD03MMC: a MAC-címet BluetoothLEView, a kulcsot a Telink Mi Bind Key mezője adja.</p>
+<form id="sensor-form" autocomplete="off">
+<label for="sensor-mac">Érzékelő MAC-címe</label><input id="sensor-mac" name="mac" maxlength="17" placeholder="AA:BB:CC:DD:EE:FF" required>
+<label for="sensor-key">Mi Bind Key (32 hexadecimális karakter)</label><input id="sensor-key" name="key" type="password" minlength="32" maxlength="32" pattern="[0-9a-fA-F]{32}" autocomplete="new-password" required>
+<button type="submit">Érzékelő mentése</button><button id="sensor-refresh" type="button">Állapot frissítése</button>
+</form><p id="sensor-state" role="status">Az állapot külön kérhető le. A vétel leállított lejátszás mellett, nyugalmi óralapon működik.</p></section>
+
+</div>
+
+</div></dialog>
+<dialog id="reset-confirm" aria-labelledby="reset-title"><h2 id="reset-title">Minden visszaállítása?</h2><p>Az állomáslista, kedvencek, skinek beállításai, ébresztők, hangbeállítások, időjárás beállításai alaphelyzetbe kerülnek.</p><p><strong>A Wi-Fi és a Bluetooth-párosítások és a BLE-hőmérő kulcsa megmaradnak.</strong> Az SD zenéi és a működő hardverkalibráció megmaradnak. A rádió újraindul.</p><div class="toolbar"><button type="button" data-close="reset-confirm">Mégse</button><button id="reset-accept" type="button" class="danger">Visszaállítás és újraindítás</button></div></dialog>
+</main><script>
+(() => {
+ 'use strict';
+ const client={major:'166',release:'211',webui:'IBT_R211_1'};
+ const key='ibt-webui-version:'+location.host;
+ const token=v=>[v.major,v.release,v.webui].join('|');
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+ fetch('/api/version',{cache:'no-store',signal:controller.signal}).then(r=>{if(!r.ok)throw Error('Version unavailable');return r.json();}).then(server=>{
+  if(!['major','release','webui'].every(k=>typeof server[k]==='string'&&server[k]))return;
+  const target=token(server);let old=null;
+  try{old=localStorage.getItem(key);localStorage.setItem(key,target);}catch(e){}
+  const mismatch=token(client)!==target || (old!==null&&old!==target);
+  if(mismatch){try{Object.keys(localStorage).filter(k=>k.startsWith('ibt-menu-')&&k.includes(location.host+':')).forEach(k=>localStorage.removeItem(k));}catch(e){}}
+  const url=new URL(location.href);
+  if(mismatch&&url.searchParams.get('ibt-ui')!==target){
+   url.searchParams.set('ibt-ui',target);location.replace(url.href);
+  }
+ }).catch(()=>{}).finally(()=>clearTimeout(timer));
+})();
+
+(function(root){'use strict';
+ var enc=new TextEncoder();
+ function validate(rows,source){
+  if(!rows.length||(!source&&rows.length>480))throw Error('1–480 állomás adható meg.');
+  return rows.map(function(r,i){
+   var name=String(r.name||'').trim(),url=String(r.url||'').trim(),volume=Number(r.volume===undefined?0:r.volume);
+   if(!name||enc.encode(name).length>169||/[\x00-\x1f\x7f]/.test(name))throw Error((i+1)+'. sor: hibás vagy túl hosszú név (legfeljebb 169 bájt).');
+   if(enc.encode(url).length>169||/[\x00-\x20\x7f]/.test(url)||!/^https?:\/\//i.test(url))throw Error((i+1)+'. sor: teljes http:// vagy https:// streamcím szükséges (legfeljebb 169 bájt).');
+   try{if(!new URL(url).hostname)throw Error();}catch(e){throw Error((i+1)+'. sor: hibás streamcím.');}
+   if(!Number.isInteger(volume)||volume< -80||volume>80)throw Error((i+1)+'. sor: a hangerőkorrekció −80 és +80 közötti egész szám.');
+   return {name:name,url:url,volume:volume};
+  });
+ }
+ function fields(line,separator){
+  var a=[],s='',quote=false;
+  for(var i=0;i<line.length;i++){
+   var c=line[i];if(c==='"'){if(quote&&line[i+1]==='"'){s+='"';i++;}else quote=!quote;}
+   else if(c===separator&&!quote){a.push(s);s='';}else s+=c;
+  }
+  if(quote)throw Error('Lezáratlan idézőjel az importált sorban.');a.push(s);return a;
+ }
+ function parse(text,source){
+  if(enc.encode(text).length>262144)throw Error('A fájl legfeljebb 256 KiB lehet.');
+  text=text.replace(/^\uFEFF/,'');var lines=text.split(/\r?\n/).filter(function(l){return l.trim();}),rows=[];
+  if(!lines.length)throw Error('A fájl üres.');
+  if(lines[0].trim()==='#EXTM3U'){
+   var title='';lines.forEach(function(l){if(l.indexOf('#EXTINF:')===0)title=l.slice(l.indexOf(',')+1).trim();
+    else if(l[0]!=='#'){rows.push({name:title||l,url:l,volume:0});title='';}});
+  }else{
+   var separator=lines[0].includes('\t')?'\t':lines[0].includes(';')?';':',';
+   lines.forEach(function(l,i){var f=separator==='\t'?l.split('\t'):fields(l,separator);
+    if(i===0&&/^(name|név|állomás)$/i.test(f[0].trim())&&/^(url|cím|stream)$/i.test((f[1]||'').trim()))return;
+    if(f.length<2||f.length>3)throw Error((i+1)+'. sor: név, streamcím és opcionális hangerőkorrekció kell.');
+    rows.push({name:f[0],url:f[1],volume:f[2]===undefined||f[2]===''?0:Number(f[2])});
+   });
+  }
+  return validate(rows,source===true);
+ }
+ function serialize(rows){return validate(rows).map(function(r){return r.name+'\t'+r.url+'\t'+r.volume;}).join('\n')+'\n';}
+ function merge(sources,initial){
+  if(!Array.isArray(sources)||!sources.length||sources.length>10)throw Error('Egyszerre 1–10 fájl egyesíthető.');
+  var rows=[],seen=new Set(),total=0;
+  function add(list){list.forEach(function(row){total++;
+   // Hostname/default port normalization is safe; path/query case and order
+   // stay intact. Fragments are not sent in an HTTP stream request.
+   var address=new URL(row.url);address.hash='';var key=address.href;
+   if(!seen.has(key)){seen.add(key);rows.push(row);}
+  });}
+  if(initial&&initial.length)add(validate(initial));
+  sources.forEach(function(text,i){try{add(parse(text,true));}catch(e){throw Error((i+1)+'. fájl: '+e.message);}});
+  if(rows.length>480)throw Error('Az egyesítés után '+rows.length+' különböző állomás marad ('+(total-rows.length)+' ismétlődés kiszűrve). A rádió legfeljebb 480-at fogad; az előnézet nem változott.');
+  return {rows:validate(rows),total:total,duplicates:total-rows.length};
+ }
+ var api={parse:parse,validate:validate,serialize:serialize,merge:merge};
+ if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.IBTStations=api;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+(function(){'use strict';
+var pages=[73,1,8,6,14,15,16,3,43,7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46];
+var groups=[{root:8,pages:[8]},{root:6,pages:[73,6,14,15,16]},
+ {root:3,pages:[3,43]},{root:7,pages:[7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46]}];
+var $=function(id){return document.getElementById(id);};
+function weatherState(){return fetch('/api/weather',{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
+ $('weather-on').checked=!!d.enabled;$('weather-provider').value=String(d.provider);$('weather-lat').value=d.latitude;$('weather-lon').value=d.longitude;$('weather-location').value=d.location;$('weather-interval').value=String(d.interval);
+ $('weather-state').textContent=d.status+' · '+(d.key_set?'API-kulcs mentve':'Nincs API-kulcs')+(d.fresh?' · '+(d.temperature_tenths/10).toFixed(1)+' °C':'');
+ }).catch(function(e){$('weather-state').textContent='Állapotlekérés sikertelen: '+e.message;});}
+$('weather-refresh').addEventListener('click',weatherState);
+var cities=[];
+$('weather-city-search').addEventListener('click',function(){var query=$('weather-city').value.trim(),button=this;if(query.length<2){$('weather-state').textContent='Legalább két karaktert adj meg.';return;}
+ button.disabled=true;var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},8000);
+ // City lookup runs on the phone/browser, never on the radio or for each keystroke.
+ fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(query)+'&count=8&language=hu&format=json',{signal:controller.signal}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
+ cities=Array.isArray(d.results)?d.results:[];var select=$('weather-city-results');select.replaceChildren();var placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Válassz várost';select.appendChild(placeholder);
+ cities.forEach(function(c,i){var option=document.createElement('option');option.value=String(i);option.textContent=[c.name,c.admin1,c.country].filter(Boolean).join(' · ');select.appendChild(option);});select.hidden=!cities.length;$('weather-state').textContent=cities.length?'Válassz a találatok közül, majd mentsd a beállítást.':'Nem találtam várost. Koordináta kézzel is megadható.';
+ }).catch(function(e){$('weather-state').textContent='Városkeresés sikertelen: '+e.message;}).finally(function(){clearTimeout(timeout);button.disabled=false;});
+});
+$('weather-city-results').addEventListener('change',function(){if(this.value==='')return;var c=cities[Number(this.value)];if(!c)return;var name=Array.from(c.name);while(new TextEncoder().encode(name.join('')).length>39)name.pop();$('weather-location').value=name.join('');$('weather-lat').value=Number(c.latitude).toFixed(5);$('weather-lon').value=Number(c.longitude).toFixed(5);$('weather-state').textContent='Város kiválasztva, még nincs mentve. A rádió órájának időzónája ettől nem változik.';});
+
+$('weather-form').addEventListener('submit',function(e){e.preventDefault();var button=this.querySelector('button[type="submit"]');button.disabled=true;
+ var body=new URLSearchParams({enabled:$('weather-on').checked?'1':'0',provider:$('weather-provider').value,latitude:$('weather-lat').value,longitude:$('weather-lon').value,location:$('weather-location').value,interval:$('weather-interval').value,key:$('weather-key').value.trim(),clear_key:$('weather-clear').checked?'1':'0'});
+ fetch('/api/weather',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);$('weather-key').value='';$('weather-clear').checked=false;$('weather-state').textContent='Elfogadva. A tartós mentéshez állítsd le a hangot, térj a főképernyőre és várj 15 másodpercet. Utána kérj állapotot.';}).catch(function(e){$('weather-state').textContent='Mentési hiba: '+e.message;}).finally(function(){button.disabled=false;});body.delete('key');
+});
+function sensorState(){return fetch('/api/sensor',{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
+ if(!$('sensor-mac').value)$('sensor-mac').value=d.mac||'';
+ $('sensor-state').textContent=d.pending?'Mentésre vár: állítsd le a lejátszást és térj a nyugalmi óralapra.':d.fresh?'Hőmérséklet: '+(d.temperature_centi/100).toFixed(1)+' °C · Pára: '+(d.humidity_centi/100).toFixed(1)+'%':d.key_set?'Cím és kulcs beállítva, friss mérésre vár.':'Nincs ehhez a címhez mentett kulcs.';
+ }).catch(function(e){$('sensor-state').textContent='Állapotlekérés sikertelen: '+e.message;});}
+$('sensor-refresh').addEventListener('click',sensorState);
+$('sensor-form').addEventListener('submit',function(e){e.preventDefault();var form=this,button=form.querySelector('button[type="submit"]'),mac=$('sensor-mac').value.trim().replace(/-/g,':'),key=$('sensor-key').value.trim();
+ if(!/^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)||!/^[0-9a-fA-F]{32}$/.test(key)){$('sensor-state').textContent='Ellenőrizd a MAC-címet és a 32 karakteres kulcsot.';return;}
+ button.disabled=true;fetch('/api/sensor',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({mac:mac,key:key}).toString()}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);$('sensor-key').value='';$('sensor-state').textContent='Beállítás elfogadva. Lejátszás STOP, nyugalmi óralap után kérj állapotot.';}).catch(function(e){$('sensor-state').textContent='Mentés sikertelen: '+e.message;}).finally(function(){button.disabled=false;});key='';
+});
+var key=function(page){return 'ibt-menu-v150:'+location.host+':'+page;};
+var activeSkin=0,stationNames=null,stationLoading=null;
+function playerResize(){var frame=$('player-frame'),screen=$('player-screen');
+ if(frame&&screen)screen.style.transform='scale('+Math.min(1,frame.clientWidth/320)+')';}
+function playerTime(seconds){seconds=Math.max(0,Number(seconds)||0);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
+function playerRender(data){
+ if(data.device)saveKnownDevice=data.device;
+ if(!data||typeof data.skin!=='number'||data.skin<0||(data.skin>12&&data.skin!==15))return;
+ var screen=$('player-screen'),picture=$('skin-image'),skin=data.skin===5?0:data.skin;
+ activeSkin=skin;
+ screen.dataset.skin=String(skin);
+ screen.dataset.retro=String(data.retroColor||0);
+ if(skin===0){picture.hidden=true;picture.removeAttribute('src');}
+ else{
+  var url='/api/skin.png?id='+skin+'&v=R142';
+  if(picture.getAttribute('src')!==url)picture.setAttribute('src',url);
+  picture.hidden=false;
+ }
+ var source=data.btIn?'BT IN':data.sd?'SD':'Rádió';
+ var track=[data.artist,data.title].filter(Boolean).join(' - ');
+ $('player-station').textContent=skin===2?track:(data.station||source);
+ $('player-track').textContent=skin===15?(data.title||''):track;
+ $('player-extra').textContent=skin===1?(data.playing?'LIVE ':'STOP ')+data.volume+'%':
+  skin===4?source.toUpperCase():
+  skin===2?(data.bitrate||'?')+' kb/s · '+(data.sampleRate?(data.sampleRate/1000).toFixed(1):'?')+' kHz':
+  data.bitrate?data.bitrate+' kb/s · '+Math.round((data.sampleRate||0)/1000)+' kHz':'';
+ $('player-time').textContent=skin===12?(data.clock||'--:--'):playerTime(data.elapsed);
+ if(skin===12)$('player-extra').textContent=data.weather||'API: ki';
+ $('player-volume').textContent=(skin===3?'':'VOL ')+data.volume+'%';
+ var buffer=Math.min(100,Math.max(0,Number(data.buffer)||0))+'%';
+ $('player-progress').firstElementChild.style.width=buffer;
+ if(skin===15){
+ $('player-station').textContent=data.btIn?'BLUETOOTH IN':data.station||source;
+ $('player-extra').textContent=data.artist||'';
+ $('player-clock').textContent=data.clock||'--:--';
+ $('player-preset').textContent=data.btIn?'--':String(data.preset||1);
+ $('player-mode').textContent=data.btIn?'BT IN':data.btOut?'BT OUT':'STEREO';
+ $('player-rate').textContent=data.btIn?'BT IN':(data.bitrate||'--')+' kbps';
+ $('player-play-icon').textContent=data.playing?'Ⅱ':'▶';
+ $('player-volume').textContent=data.volume+'%';
+ }
+ $('player-state').textContent=source+' · '+(data.playing?'Lejátszás':'Szünet')+' · Hangerő '+data.volume+'%';
+}
+var playerPending=null,playerTimer=null,playerAbort=null;
+function playerLoad(){
+ if(editorBusy)return Promise.resolve();
+ if(document.hidden)return Promise.resolve();
+ if(playerPending)return playerPending;
+ var controller=typeof AbortController==='function'?new AbortController():null;
+ playerAbort=controller;
+ var timeout=controller?setTimeout(function(){controller.abort();},5000):null;
+ var options={cache:'no-store'};if(controller)options.signal=controller.signal;
+ playerPending=fetch('/api/player',options).then(function(response){
+  if(!response.ok)throw Error('HTTP '+response.status);return response.json();
+ }).then(playerRender).catch(function(error){if(!document.hidden)$('player-state').textContent='Lejátszó nem elérhető: '+error.message;})
+ .finally(function(){if(timeout!==null)clearTimeout(timeout);playerPending=null;playerAbort=null;});
+ return playerPending;
+}
+function playerSchedule(delay){
+ if(playerTimer!==null)clearTimeout(playerTimer);playerTimer=null;
+ if(document.hidden)return;
+ playerTimer=setTimeout(function(){playerTimer=null;playerLoad().finally(function(){playerSchedule(60000);});},delay);
+}
+function playerVisibility(){
+ if(document.hidden){if(playerTimer!==null)clearTimeout(playerTimer);playerTimer=null;if(playerAbort)playerAbort.abort();}
+ else playerSchedule(1000);
+}
+if($('player-screen')){
+ document.querySelectorAll('[data-action]').forEach(function(button){
+  button.addEventListener('click',function(){
+   var action=button.getAttribute('data-action');button.disabled=true;
+   fetch('/api/player-action?action='+encodeURIComponent(action),{method:'POST',cache:'no-store'})
+    .then(function(response){if(!response.ok)throw Error('HTTP '+response.status);
+      $('player-state').textContent='Parancs elküldve';setTimeout(playerLoad,400);})
+    .catch(function(error){$('player-state').textContent='Parancshiba: '+error.message;})
+    .finally(function(){button.disabled=false;});
+  });
+ });
+ playerLoad().finally(function(){playerSchedule(60000);});
+ document.addEventListener('visibilitychange',playerVisibility);
+ playerResize();if(typeof window!=='undefined')window.addEventListener('resize',playerResize);
+}
+var skinCycle=[1,2,3,6,7,8,11,12,15];
+$('next-skin').addEventListener('click',function(){
+ var button=this,index=skinCycle.indexOf(activeSkin),next=skinCycle[(index+1)%skinCycle.length];
+ button.disabled=true;
+ fetch('/api/menu-action?page=47&item='+(next===15?13:next),{method:'POST',cache:'no-store'})
+  .then(function(response){if(!response.ok)throw Error('HTTP '+response.status);
+   $('player-state').textContent='Skinváltás elküldve';
+   setTimeout(function(){playerLoad();if(!$('menu-panel').hidden)load(47,true);},500);
+  }).catch(function(error){$('player-state').textContent='Skinváltási hiba: '+error.message;})
+  .finally(function(){button.disabled=false;});
+});
+function note(text){$('status').textContent=text;}
+function render(data){
+ if(!data||!Array.isArray(data.items)||!pages.includes(data.page))return;
+ if(data.page===1)return;
+ var section=$('page-'+data.page);if(!section)return;
+ section.querySelector('h2').textContent=data.title;
+ var jump=$('jump-'+data.page);if(jump)jump.textContent=data.title;
+ var group=$('group-'+data.page);
+ if(group)group.querySelector('h2').textContent=data.title;
+ var list=section.querySelector('ol');list.replaceChildren();
+ data.items.forEach(function(row){
+  var li=document.createElement('li'),child=row.enabled&&pages.includes(row.child)?row.child:0;
+  if(!row.enabled)li.className='off';
+  else if(!row.action&&!child)li.className='readonly';
+  if(data.page===73&&row.parameter!==undefined){
+   var input=document.createElement('input');input.type='number';input.min=row.min;input.max=row.max;input.step=row.step;input.value=row.value;
+   var label=document.createElement('label');label.textContent=row.label+' ';label.appendChild(input);li.appendChild(label);
+   var save=document.createElement('button');save.textContent='Alkalmazás';save.onclick=function(){save.disabled=true;fetch('/api/mono',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'parameter='+row.parameter+'&value='+encodeURIComponent(input.value)}).then(function(r){if(!r.ok)throw Error('Invalid MONO DSP value');note('Applied; saved when playback stops');setTimeout(function(){load(73,true);},150);}).catch(function(e){note(e.message);}).finally(function(){save.disabled=false;});};li.appendChild(save);
+  }else if(data.page===68&&row.index<4){
+   var label=document.createElement('label');label.textContent='NTP '+(row.index+1)+' ';
+   var input=document.createElement('input');input.type='text';input.maxLength=63;input.value=row.value||'';
+   input.placeholder='Szervernév vagy IPv4';label.appendChild(input);li.appendChild(label);
+   var save=document.createElement('button');save.type='button';save.textContent='Mentés';
+   save.addEventListener('click',function(){save.disabled=true;
+    fetch('/api/clock-server?index='+row.index+'&value='+encodeURIComponent(input.value),{method:'POST',cache:'no-store'})
+     .then(function(response){if(!response.ok)throw Error('Érvénytelen szerver vagy foglalt menü');
+      note('Időszerver elküldve; tartós mentés a lejátszás leállítása után');setTimeout(function(){load(68,true);},350);})
+     .catch(function(error){note(error.message);}).finally(function(){save.disabled=false;});
+   });li.appendChild(save);
+  }else if(child){
+   var link=document.createElement('a');link.href='#page-'+child;link.textContent=row.label;li.appendChild(link);
+  }else if(row.action){
+   var button=document.createElement('button');button.type='button';button.textContent=row.label;
+   button.addEventListener('click',function(){button.disabled=true;
+    fetch('/api/menu-action?page='+data.page+'&item='+row.index,{method:'POST',cache:'no-store'})
+     .then(function(response){if(!response.ok)throw Error('HTTP '+response.status);
+       if(data.page===19&&row.index===0){
+        pages.forEach(function(page){try{localStorage.removeItem(key(page));}catch(e){}});
+        setTimeout(function(){all(true);},350);
+       }else setTimeout(function(){load(data.page,true);},350);
+       note('Beállítás elküldve: '+row.label);})
+     .catch(function(error){button.disabled=false;note('Nem sikerült: '+error.message);});
+   });li.appendChild(button);
+  }else li.textContent=row.label;
+  list.appendChild(li);
+ });
+}
+function cached(page){try{var saved=JSON.parse(localStorage.getItem(key(page))||'null');
+ if(saved&&Date.now()-saved.time<600000&&saved.data&&saved.data.page===page&&Array.isArray(saved.data.items)){render(saved.data);return true;}
+ }catch(e){}return false;}
+var menuJobs={},menuFailed={},menuFlight=null,menuTimer=null,menuNextAt=0,menuStopped=false;
+var menuBackoff=[2000,5000,10000,20000],menuGap=1500;
+function menuCanRun(){
+ return !menuStopped&&!document.hidden&&!$('menu-panel').hidden&&
+  !(typeof navigator!=='undefined'&&navigator.onLine===false);
+}
+function menuState(page,text,manual){
+ var section=$('page-'+page);if(!section)return;
+ var state=section.querySelector('.menu-load-state');
+ if(!state){state=document.createElement('p');state.className='menu-load-state';state.setAttribute('role','status');section.appendChild(state);}
+ state.replaceChildren();state.textContent=text;state.hidden=!text;
+ if(manual){var button=document.createElement('button');button.type='button';button.textContent='Oldal újrapróbálása';
+  button.addEventListener('click',function(){load(page,true);});state.appendChild(button);}
+}
+function menuSummary(){
+ var pending=Object.keys(menuJobs).length,failed=Object.keys(menuFailed).length;
+ note(pending?'Menü betöltése: '+pending+' rész még vár.':
+  failed?failed+' menürész nem töltődött be. Az érintett résznél újrapróbálható.':'A menü betöltve.');
+}
+function menuPause(){
+ menuStopped=true;
+ if(menuTimer!==null)clearTimeout(menuTimer);menuTimer=null;
+ if(menuFlight&&menuFlight.controller){menuFlight.paused=true;menuFlight.controller.abort();}
+}
+function menuKick(){
+ if(menuTimer!==null)clearTimeout(menuTimer);menuTimer=null;
+ if(menuFlight||!menuCanRun())return;
+ var job=null;Object.keys(menuJobs).forEach(function(id){var next=menuJobs[id];if(!job||next.due<job.due)job=next;});
+ if(!job)return;
+ menuTimer=setTimeout(menuTick,Math.max(0,Math.max(job.due,menuNextAt)-Date.now()));
+}
+function menuTick(){
+ menuTimer=null;if(menuFlight||!menuCanRun())return;
+ var job=null;Object.keys(menuJobs).forEach(function(id){var next=menuJobs[id];if(!job||next.due<job.due)job=next;});
+ if(!job)return;
+ if(Date.now()<Math.max(job.due,menuNextAt)){menuKick();return;}
+ menuFlight=job;job.attempts++;job.timedOut=false;job.paused=false;
+ job.controller=new AbortController();
+ var timeout=setTimeout(function(){job.timedOut=true;job.controller.abort();},5000);
+ fetch('/api/menu?page='+job.page,{cache:'no-store',signal:job.controller.signal})
+ .then(function(response){
+  if(!response.ok){var error=Error('HTTP '+response.status);
+   error.permanent=response.status>=400&&response.status<500&&![408,425,429].includes(response.status);throw error;}
+  return response.json();
+ }).then(function(data){
+  if(!data||data.page!==job.page||!Array.isArray(data.items)){var error=Error('Hibás menüadat');error.permanent=true;throw error;}
+  render(data);try{localStorage.setItem(key(job.page),JSON.stringify({time:Date.now(),data:data}));}catch(e){}
+  delete menuJobs[job.page];delete menuFailed[job.page];menuState(job.page,'',false);job.resolve(true);
+ }).catch(function(error){
+  if(!job.timedOut&&job.paused){
+   job.attempts--;job.due=Date.now()+menuGap;menuState(job.page,'A betöltés szünetel.',false);
+  }else if(!error.permanent&&job.attempts<=menuBackoff.length){
+   job.due=Date.now()+menuBackoff[job.attempts-1];menuState(job.page,'Átmenetileg nem elérhető. Később újrapróbálom.',false);
+  }else{
+   delete menuJobs[job.page];menuFailed[job.page]=true;
+   menuState(job.page,'Ez a menürész most nem tölthető be.',true);job.resolve(false);
+  }
+ }).finally(function(){
+  clearTimeout(timeout);job.controller=null;menuFlight=null;menuNextAt=Date.now()+menuGap;menuSummary();menuKick();
+ });
+}
+function load(page,force){
+ if(!pages.includes(page))return Promise.resolve(false);
+ if(menuJobs[page])return menuJobs[page].promise;
+ if(!force&&cached(page)){delete menuFailed[page];menuState(page,'',false);return Promise.resolve(true);}
+ var job={page:page,attempts:0,due:Date.now(),controller:null};
+ job.promise=new Promise(function(resolve){job.resolve=resolve;});menuJobs[page]=job;delete menuFailed[page];
+ menuState(page,'Betöltésre vár...',false);menuSummary();menuKick();return job.promise;
+}
+function all(force){
+ return Promise.all(pages.map(function(page){return load(page,force);})).then(function(){menuSummary();});
+}
+function menuResume(){menuStopped=false;menuKick();}
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&!$('menu-panel').hidden)menuResume();else menuPause();});
+window.addEventListener('online',menuResume);window.addEventListener('offline',menuPause);
+window.addEventListener('pagehide',menuPause);window.addEventListener('pageshow',menuResume);
+
+groups.forEach(function(entry){
+ var group=document.createElement('div');group.className='menu-group';group.id='group-'+entry.root;
+ var title=document.createElement('h2');title.textContent='Betöltés...';group.appendChild(title);
+ entry.pages.forEach(function(page){
+  var section=document.createElement('section');section.id='page-'+page;
+  var heading=document.createElement('h2');heading.textContent='Betöltés...';
+  var list=document.createElement('ol');list.setAttribute('aria-label','Menü '+page);
+  var row=document.createElement('li');row.textContent='Betöltés...';list.appendChild(row);
+  section.appendChild(heading);section.appendChild(list);group.appendChild(section);
+ });$('menu').appendChild(group);
+ var jump=document.createElement('a');jump.id='jump-'+entry.root;jump.href='#group-'+entry.root;
+ jump.textContent='Betöltés...';$('sections').appendChild(jump);
+});
+$('refresh').addEventListener('click',function(){stationNames=null;stationLoading=null;all(true);
+ if($('station-search').value.trim())stationResults();});
+var menuPanel=$('menu-panel');
+$('open-settings').addEventListener('click',function(){menuPanel.hidden=false;$('settings-dialog').showModal();menuResume();all(false);});
+$('settings-dialog').addEventListener('close',function(){menuPanel.hidden=true;menuPause();});
+document.querySelectorAll('[data-close]').forEach(function(button){button.addEventListener('click',function(){$(button.dataset.close).close();});});
+function stationList(){
+ if(stationNames)return Promise.resolve(stationNames);
+ if(stationLoading)return stationLoading;
+ stationLoading=fetch('/api/radio-stations.csv',{cache:'no-store'}).then(function(response){
+  if(!response.ok)throw Error('HTTP '+response.status);return response.text();
+ }).then(function(csv){
+  stationNames=csv.split(/\r?\n/).filter(function(line){return line.indexOf('\t')>=0;})
+   .slice(0,480).map(function(line,index){return {number:index+1,name:line.split('\t')[0]};});
+  return stationNames;
+ }).catch(function(error){stationLoading=null;throw error;});
+ return stationLoading;
+}
+function stationResults(){
+ var term=$('station-search').value.trim().toLocaleLowerCase('hu'),list=$('station-results');
+ list.replaceChildren();list.hidden=!term;
+ if(!term)return;
+ if(term.length<2){var hint=document.createElement('li');hint.textContent='Írj be legalább 2 karaktert.';list.appendChild(hint);return;}
+ stationList().then(function(stations){
+  if(term!==$('station-search').value.trim().toLocaleLowerCase('hu'))return;
+  list.replaceChildren();var matches=stations.filter(function(row){
+   return row.name.toLocaleLowerCase('hu').includes(term);
+  }).slice(0,12);
+  if(!matches.length){var empty=document.createElement('li');empty.textContent='Nincs találat.';list.appendChild(empty);return;}
+  matches.forEach(function(row){
+   var li=document.createElement('li'),button=document.createElement('button');
+   button.type='button';button.textContent=row.name;
+   button.addEventListener('click',function(){button.disabled=true;
+    fetch('/api/station-play?number='+row.number,{method:'POST',cache:'no-store'})
+     .then(function(response){if(response.status===409)throw Error('Előbb válts internetes rádióra és DAC-ra');
+      if(!response.ok)throw Error('HTTP '+response.status);
+      note('Állomás indítása: '+row.name);setTimeout(playerLoad,500);})
+     .catch(function(error){note('Állomáshiba: '+error.message);})
+     .finally(function(){button.disabled=false;});
+   });li.appendChild(button);list.appendChild(li);
+  });
+ }).catch(function(error){list.replaceChildren();var li=document.createElement('li');
+  li.textContent='Állomáslista nem elérhető: '+error.message;list.appendChild(li);});
+}
+$('station-search').addEventListener('input',stationResults);
+$('search').addEventListener('input',function(){
+ var term=this.value.trim().toLocaleLowerCase('hu');
+ groups.forEach(function(entry){var group=$('group-'+entry.root),groupVisible=0;
+ entry.pages.forEach(function(page){var section=$('page-'+page),visible=0;
+  var title=section.querySelector('h2').textContent.toLocaleLowerCase('hu');
+  Array.from(section.querySelector('ol').children).forEach(function(row){
+   row.hidden=!!term&&!title.includes(term)&&!group.querySelector('h2').textContent.toLocaleLowerCase('hu').includes(term)&&!row.textContent.toLocaleLowerCase('hu').includes(term);
+   if(!row.hidden)visible++;
+  });section.hidden=!!term&&!visible;groupVisible+=visible;
+ });group.hidden=!!term&&!groupVisible;
+ });
+});
+// Included inside the main WebUI closure; no separate browser request.
+var editorRows=[],editorSelected=-1,editorLoaded=false,editorDirty=false,formChanged=false,editorBusy=false,expectedCsv=null;
+function editorNote(text){$('station-save-state').textContent=text;}
+function stationFetch(url,options){
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},10000);
+ return fetch(url,Object.assign({cache:'no-store'},options||{},{signal:controller.signal})).finally(function(){clearTimeout(timer);});
+}
+function editorLock(on){editorBusy=on;$('stations-dialog').querySelectorAll('input,button').forEach(function(b){if(!b.dataset.close)b.disabled=on;});}
+function editorForm(){
+ var row=editorRows[editorSelected];$('station-name').value=row?row.name:'';$('station-url').value=row?row.url:'';$('station-volume').value=row?row.volume:0;formChanged=false;
+}
+function editorRender(){
+ var list=$('station-editor-list');list.replaceChildren();
+ editorRows.forEach(function(row,i){var li=document.createElement('li'),button=document.createElement('button');
+  button.type='button';button.textContent=(i+1)+'. '+row.name;button.setAttribute('aria-pressed',String(i===editorSelected));
+  button.addEventListener('click',function(){if(!editorCommit())return;editorSelected=i;editorForm();editorRender();});li.appendChild(button);list.appendChild(li);
+ });
+ $('station-info').textContent=editorRows.length+' / 480 állomás'+(editorDirty?' · még nincs mentve':'');
+}
+function editorCommit(){
+ if(!formChanged)return true;
+ try{
+  var row=IBTStations.validate([{name:$('station-name').value,url:$('station-url').value,volume:$('station-volume').value}])[0];
+  if(editorSelected>=0&&editorSelected<editorRows.length)editorRows[editorSelected]=row;
+  else{if(editorRows.length>=480)throw Error('Legfeljebb 480 állomás fér el.');editorRows.push(row);editorSelected=editorRows.length-1;}
+  formChanged=false;editorDirty=true;editorRender();return true;
+ }catch(e){editorNote(e.message);return false;}
+}
+function editorReload(){
+ if(editorBusy)return;
+ if(expectedCsv){editorNote('Előbb ellenőrizd a már elküldött mentést. Nem dobom el annak állapotát.');return;}
+ if(editorDirty&&!confirm('Eldobod a még nem mentett állomáslista-módosításokat?'))return;
+ editorLock(true);editorNote('Állomáslista beolvasása…');
+ stationFetch('/api/radio-stations.csv').then(function(r){if(r.status===404)return '';if(!r.ok)throw Error('HTTP '+r.status);return r.text();})
+ .then(function(text){editorRows=text.trim()?IBTStations.parse(text):[];editorSelected=editorRows.length?0:-1;editorLoaded=true;editorDirty=false;editorForm();editorRender();editorNote('Lista beolvasva. A módosítások csak a teljes lista mentésekor kerülnek a rádióra.');})
+ .catch(function(e){editorNote('Beolvasási hiba: '+e.message);}).finally(function(){editorLock(false);});
+}
+$('open-stations').addEventListener('click',function(){$('stations-dialog').showModal();if(!editorLoaded)editorReload();if(saveRecord&&saveRecord.phase==='queued')runStationSave(false);});
+$('stations-reload').addEventListener('click',editorReload);
+$('station-form').addEventListener('input',function(){formChanged=true;editorDirty=true;});
+$('station-form').addEventListener('submit',function(e){e.preventDefault();if(editorCommit()){editorRender();editorNote('Sor alkalmazva az előnézetre. A rádión még nem változott.');}});
+$('station-add').addEventListener('click',function(){if(!editorCommit())return;if(editorRows.length>=480){editorNote('Legfeljebb 480 állomás adható meg.');return;}editorSelected=-1;editorForm();editorRender();$('station-name').focus();});
+$('station-delete').addEventListener('click',function(){if(editorSelected<0)return;editorRows.splice(editorSelected,1);editorSelected=Math.min(editorSelected,editorRows.length-1);editorDirty=true;editorForm();editorRender();});
+function editorMove(direction){if(!editorCommit())return;var next=editorSelected+direction;if(editorSelected<0||next<0||next>=editorRows.length)return;
+ var row=editorRows[editorSelected];editorRows[editorSelected]=editorRows[next];editorRows[next]=row;editorSelected=next;editorDirty=true;editorForm();editorRender();}
+$('station-up').addEventListener('click',function(){editorMove(-1);});$('station-down').addEventListener('click',function(){editorMove(1);});
+$('station-import').addEventListener('click',function(){var files=Array.from($('station-file').files||[]),keep=$('station-merge-current').checked;if(!files.length||files.length>10){editorNote('Válassz 1–10 állomáslista-fájlt.');return;}
+ if(files.some(function(file){return file.size>262144;})){editorNote('Egy fájl legfeljebb 256 KiB lehet.');return;}
+ if(keep&&!editorCommit())return;
+ if(!keep&&editorDirty&&!confirm('A fájlok lecserélik a szerkesztő még nem mentett előnézetét. Folytatod?'))return;
+ editorLock(true);Promise.all(files.map(function(file){return file.arrayBuffer().then(function(bytes){return new TextDecoder('utf-8',{fatal:true}).decode(bytes);});})).then(function(texts){
+  var result=IBTStations.merge(texts,keep?editorRows:[]);
+  editorRows=result.rows;editorSelected=0;editorDirty=true;editorLoaded=true;editorForm();editorRender();editorNote(files.length+' fájl · '+result.total+' sorból '+result.rows.length+' állomás · '+result.duplicates+' duplikáció kiszűrve. Ellenőrizd, majd mentsd a teljes listát.');
+ }).catch(function(e){editorNote('Importálási hiba, a korábbi lista megmaradt: '+e.message);}).finally(function(){editorLock(false);});
+});
+$('station-export').addEventListener('click',function(){if(!editorCommit())return;try{var csv=IBTStations.serialize(editorRows),url=URL.createObjectURL(new Blob([csv],{type:'text/tab-separated-values;charset=utf-8'})),a=document.createElement('a');
+ a.href=url;a.download='playlist.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+ editorNote(editorDirty?'A szerkesztett előnézet exportálva; a rádióra még nincs mentve.':'A rádió állomáslistája exportálva.');
+ }catch(e){editorNote(e.message);}});
+// Included in the editor closure. This is a control transaction, not an audio stress test.
+// Only the browser holds the full original image. The radio receives one
+// bounded RGB332 thumbnail; no filesystem write occurs from scrolling/preview.
+async function coverPixels(file){
+ if(!file||file.size>16*1024*1024)throw Error('Válassz legfeljebb 16 MB-os képet.');
+ const url=URL.createObjectURL(file);let image=new Image();
+ try{await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('A képfájl nem olvasható.'));image.src=url;});
+  if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth*image.naturalHeight>40000000)throw Error('A kép túl nagy.');
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=64;const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,64,64);
+  const scale=Math.min(64/image.naturalWidth,64/image.naturalHeight),w=Math.max(1,Math.round(image.naturalWidth*scale)),h=Math.max(1,Math.round(image.naturalHeight*scale));
+  c.drawImage(image,Math.floor((64-w)/2),Math.floor((64-h)/2),w,h);
+  const rgba=c.getImageData(0,0,64,64).data,out=new Uint8Array(4096);
+  for(let i=0;i<4096;i++)out[i]=(rgba[4*i]&224)|((rgba[4*i+1]>>3)&28)|(rgba[4*i+2]>>6);
+  return out;
+ }finally{URL.revokeObjectURL(url);}
+}
+function coverHash(bytes){let h=2166136261;for(const b of bytes)h=Math.imul(h^b,16777619)>>>0;return h;}
+$('cover-send').addEventListener('click',async function(){
+ const state=$('cover-state');this.disabled=true;
+ try{
+  state.textContent='Borító előkészítése…';const bytes=await coverPixels($('cover-file').files[0]);
+  let r=await stationFetch('/api/cover');if(!r.ok)throw Error('Állapot: HTTP '+r.status);const status=await r.json();
+  if(!status.enabled)throw Error('Válaszd a rádió Kijelző menüjében a Borító nézetet.');
+  if(!status.qualified)throw Error('Előbb hallgasd ezt az adót legalább 60 másodpercig.');
+  if(status.playing||status.busy)throw Error('Nyomj Szünetet, várj néhány másodpercet, majd próbáld újra.');
+  state.textContent='Borító mentése és visszaellenőrzése…';
+  r=await stationFetch('/api/cover?station='+encodeURIComponent(status.stationKey)+'&generation='+status.generation,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:bytes});
+  if(!r.ok)throw Error(await r.text());const saved=await r.json();if(!saved.saved||saved.bytes!==4096||saved.hash!==coverHash(bytes))throw Error('A visszaolvasott borító ellenőrzőösszege eltér.');
+  state.textContent='Borító mentve a flashbe, visszaolvasás ellenőrizve. Folytathatod a lejátszást.';
+ }catch(e){state.textContent='Nem mentettem a borítót: '+e.message;}finally{this.disabled=false;}
+});
+var saveRecord=null,saveTimer=0,saveKnownDevice='',saveKey='ibt-station-save-v2:'+location.host;
+function saveRemember(){localStorage.setItem(saveKey,JSON.stringify(saveRecord));}
+function saveClear(message){
+ localStorage.removeItem(saveKey);saveRecord=null;expectedCsv=null;clearTimeout(saveTimer);saveTimer=0;
+ $('station-check').hidden=true;$('station-cancel-save').hidden=true;editorNote(message);
+}
+function saveSchedule(){
+ clearTimeout(saveTimer);saveTimer=0;
+ if(saveRecord&&saveRecord.phase==='queued'&&saveRecord.device&&!document.hidden)saveTimer=setTimeout(function(){saveTimer=0;runStationSave(false);},15000);
+}
+function savePath(action){return '/api/station-save/'+action+'?job='+saveRecord.job+(action==='prepare'&&saveRecord.device?'&device='+encodeURIComponent(saveRecord.device):'');}
+async function saveControl(action){
+ var r=await stationFetch(savePath(action),action==='status'?{}:{method:'POST'});
+ if(!r.ok)throw Error('Mentésvezérlés: HTTP '+r.status);
+ var state=await r.json();
+ if(state.job!==saveRecord.job||typeof state.device!=='string'||!state.device)throw Error('Eltérő mentési kérés vagy hiányzó rádióazonosító.');
+ if(saveRecord.device&&saveRecord.device!==state.device)throw Error('Másik rádió van ezen az IP-címen; a listát nem küldöm el.');
+ saveRecord.device=state.device;saveKnownDevice=state.device;saveRemember();return state;
+}
+async function runStationSave(manual){
+ clearTimeout(saveTimer);saveTimer=0;if(!saveRecord||editorBusy||document.hidden)return;
+ editorLock(true);var sent=false;
+ try{
+  editorNote('Az állomásmentés az elsődleges. A rádió szabályosan leállítja a hangot, majd ellenőrzi és elmenti a listát…');
+  $('station-check').hidden=false;
+  var state=await saveControl(saveRecord.phase==='queued'?'prepare':'status'),deadline=Date.now()+30000;
+  while(true){
+   if(saveRecord.cancel){
+    if(state.phase==='ready'){await saveControl('cancel');saveClear('A mentési kérés megszakítva; a rádió listáját nem cseréltem le. A lejátszás visszaállítását kértem.');return;}
+    if(state.phase==='complete'||state.phase==='failed'){saveClear('A kérés már lezárult a rádión. A listát újra beolvashatod.');return;}
+   }
+   if(state.phase==='ready'&&state.uploadReady&&!saveRecord.cancel){
+    if(saveRecord.phase==='verified'||(saveRecord.phase!=='queued'&&!manual))throw Error('A korábbi feltöltés eredménye bizonytalan. Az ellenőrzés gombbal folytathatod.');
+    saveRecord.phase='submitted';saveRemember();sent=true;
+    var body=new FormData();body.append('plfile',new Blob([saveRecord.csv],{type:'text/plain;charset=utf-8'}),'playlist.csv');
+    var response=await stationFetch('/upload',{method:'POST',headers:{'X-Station-Save':String(saveRecord.job)},body:body});
+    if(response.status!==202)throw Error('A lista feltöltése HTTP '+response.status+' hibával visszautasult. Az előnézet megmaradt.');
+    await response.json();manual=false;editorNote('Lista elküldve. A rádiós ellenőrzést és a teljes visszaolvasást várom…');
+   }else if(state.phase==='saved'||state.phase==='complete'){
+    if(!state.installed)throw Error('A rádió nem igazolta a lista telepítését.');
+    if(saveRecord.phase!=='verified'){
+     var read=await stationFetch('/api/radio-stations.csv');if(!read.ok)throw Error('Visszaolvasás: HTTP '+read.status);
+     var csv=IBTStations.serialize(IBTStations.parse(await read.text()));
+     if(csv!==saveRecord.csv)throw Error('A teljes visszaolvasott lista eltér. A mentést nem jelölöm sikeresnek.');
+     saveRecord.phase='verified';saveRemember();
+    }
+    if(state.phase==='saved')await saveControl('finish');
+    var unchanged=false;try{unchanged=!formChanged&&IBTStations.serialize(editorRows)===saveRecord.csv;}catch(e){}
+    editorDirty=!unchanged;stationNames=null;stationLoading=null;editorRender();
+    saveClear('Mentés kész, a teljes állomáslista visszaolvasva és ellenőrizve. A korábbi lejátszás folytatását kértem; törölt adó helyett nem indítok másikat.'+(editorDirty?' Az újabb előnézet-módosítás még nincs mentve.':''));return;
+   }else if(state.phase==='failed')throw Error('A rádiós mentési kérés lezárult sikeres telepítés nélkül. Az előnézet megmaradt.');
+   if(Date.now()>=deadline||document.hidden)throw Error('A mentési kérés megmaradt. Később az ellenőrzés gombbal folytasd; ne töltsd fel vakon újra.');
+   await new Promise(function(resolve){setTimeout(resolve,750);});state=await saveControl('status');
+  }
+ }catch(e){
+  editorNote('A mentés még nincs igazolva: '+e.message);$('station-check').hidden=false;
+  $('station-cancel-save').hidden=!saveRecord||saveRecord.phase!=='queued';
+ }finally{editorLock(false);if(!sent)saveSchedule();}
+}
+function checkStationSave(){runStationSave(true);}
+$('station-check').addEventListener('click',checkStationSave);
+$('station-save').addEventListener('click',function(){
+ if(editorBusy||!editorCommit())return;
+ if(saveRecord){editorNote('Már van mentési kérés. Előbb az ellenőrzés / folytatás gombot használd.');return;}
+ try{
+  var csv=IBTStations.serialize(editorRows);
+  saveRecord={schema:2,job:1+Math.floor(Math.random()*2147483646),device:saveKnownDevice,csv:csv,phase:'queued'};
+  saveRemember();expectedCsv=csv;runStationSave(true);
+ }catch(e){saveRecord=null;expectedCsv=null;editorNote('A böngésző nem tudta megőrizni a kérést; nem küldtem semmit a rádióra. Exportáld a listát CSV-be. '+e.message);}
+});
+$('station-cancel-save').addEventListener('click',function(){
+ if(!saveRecord||editorBusy||saveRecord.phase!=='queued')return;
+ saveRecord.cancel=true;saveRemember();runStationSave(false);
+});
+document.addEventListener('visibilitychange',function(){if(document.hidden){clearTimeout(saveTimer);saveTimer=0;}else saveSchedule();});
+try{
+ var stored=JSON.parse(localStorage.getItem(saveKey)||'null');
+ if(stored&&stored.schema===2&&Number.isInteger(stored.job)&&stored.job>0&&stored.job<=2147483647&&typeof stored.device==='string'&&['queued','submitted','verified'].includes(stored.phase)){
+  var rows=IBTStations.parse(stored.csv);if(IBTStations.serialize(rows)!==stored.csv)throw Error('Sérült mentési kérés.');
+  saveRecord=stored;expectedCsv=stored.csv;saveKnownDevice=stored.device;editorRows=rows;editorSelected=0;editorLoaded=true;editorDirty=true;editorForm();editorRender();
+  $('station-check').hidden=false;$('station-cancel-save').hidden=stored.phase!=='queued';
+  editorNote('Korábbi mentési kérés visszatöltve. A mentés a hang elé kerül; az eredmény még ellenőrizendő.');saveSchedule();
+ }else{
+  // R175 drafts never become an automatic new upload or an automatic stop.
+  var old=JSON.parse(localStorage.getItem('ibt-station-save-v1:'+location.host)||'null');
+  if(old&&typeof old.csv==='string'){
+   editorRows=IBTStations.parse(old.csv);saveKnownDevice=typeof old.device==='string'?old.device:'';editorSelected=0;editorLoaded=true;editorDirty=true;editorForm();editorRender();
+   editorNote('Régi mentési előnézet visszatöltve. A rádióra nem küldtem újra; ellenőrizd, majd külön kérd a mentést.');
+  }
+ }
+}catch(e){editorNote('A korábbi mentési kérés nem tölthető vissza: '+e.message);}
+
+$('reset-open').addEventListener('click',function(){$('reset-confirm').showModal();});
+$('reset-accept').addEventListener('click',function(){var button=this;button.disabled=true;
+ stationFetch('/api/reset-user',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'confirm=reset-user-keep-connections'})
+ .then(function(r){if(r.status!==202)throw Error(r.status===409?'Előbb állítsd le a lejátszást, válts internetes rádió / DAC módra, és fejezd be az importálást.':'HTTP '+r.status);
+  $('reset-confirm').close();menuPanel.hidden=true;menuPause();$('reset-state').textContent='Visszaállítás kérése elfogadva. A rádió újraindul; utána töltsd újra ezt az oldalt. A Wi-Fi és a BT-párosítások megmaradnak.';
+  editorLoaded=false;editorDirty=false;expectedCsv=null;saveRecord=null;clearTimeout(saveTimer);saveTimer=0;stationNames=null;stationLoading=null;
+  try{localStorage.removeItem(saveKey);localStorage.removeItem('ibt-station-save-v1:'+location.host);}catch(e){$('reset-state').textContent+=' A böngésző mentési kérését nem sikerült törölni; a lapot zárd be.';}
+  try{Object.keys(localStorage).filter(function(k){return k.indexOf('ibt-menu-')===0&&k.includes(location.host+':');}).forEach(function(k){localStorage.removeItem(k);});}catch(e){}
+ }).catch(function(e){$('reset-confirm').close();$('reset-state').textContent='Visszaállítás nincs igazolva: '+e.message;}).finally(function(){button.disabled=false;});
+});
+menuPanel.hidden=true;menuPause();
+})();
+</script></body></html>

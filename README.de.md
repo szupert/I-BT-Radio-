@@ -28,7 +28,7 @@ Den Watchdog-Pfad der Senderindexierung habe ich korrigiert: 480 Zeilen in 814 m
 
 [Magyar](README.md) · [English](README.en.md)
 
-Ich entwickle mein eigenes yoRadio-basiertes ESP32-WROOM-Radio mit PSRAM und konzentriere mich auf SMALL. [Funktionsstand](docs/Features.md) · [Menü](docs/menu/README.md) · [Anschlüsse](hardware/README.md).
+Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
 
 ## Frühere Windows-Beta · R151
 
