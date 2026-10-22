@@ -1,3 +1,11 @@
+# Source / Installer · 2026-10-22
+
+Full Light/Pro application sources and four hardware profiles are public. One-click Windows installers remain available. R2114MB/noPSRAM is diagnostic-only (BT/BLE/SD/WebUI OFF); Bluetooth restoration is a separate pending block. This is a development beta, not a stability claim.
+
+[Source](source/README.md) · [Installer](beta/README.md) · [Contribution blocks](docs/DEVELOPMENT_BLOCKS.md)
+
+---
+
 # I-BT-Radio — V166-R151 BETA · 19 October 2026
 
 ## Public skin sources · 2026.10.20.
@@ -7,7 +15,7 @@ I published the skin source with the owner’s permission: <a href="https://gith
 
 ## Current Windows beta · R163 · 2026-10-19
 
-**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R163/I-BT-Radio-R163-Install.exe)** · [Instructions and checksums](beta/V166_R163/README.md)
+**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R163/I-BT-Radio-R163-Install.exe)** · [Instructions and checksums](beta/16MB_PSRAM/V166_R163/README.md)
 
 For the documented SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 display and external DAC only. Runtime included; no separate Python required. No firmware/skin sources, ELF/MAP files or personal configuration are bundled. Matching partitions allow an update that preserves settings; full erasure requires explicit IGEN confirmation. No automatic stress test.
 
@@ -24,7 +32,7 @@ I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL.
 
 ## Earlier Windows beta · R151
 
-**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R151/I-BT-Radio-R151-Install.exe)** · [Instructions and checksums](beta/V166_R151/README.md)
+**[Download the standalone installer](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R151/I-BT-Radio-R151-Install.exe)** · [Instructions and checksums](beta/16MB_PSRAM/V166_R151/README.md)
 
 I bundled the runtime and firmware in one EXE; no separate Python installation is needed. This beta is only for the documented SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 display and external DAC configuration. Normal updates preserve a matching partition layout; full erasure requires an explicit IGEN confirmation. No automatic stress test starts.
 

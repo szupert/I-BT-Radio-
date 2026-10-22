@@ -1,0 +1,4 @@
+Built-in image_gen. Reference: WEATHER_DAC_PANEL_PREVIEW.png.
+Selected background prompt: four equally sized 4:3 photographs in a seamless 2x2 atlas, same Budapest Danube and Parliament skyline; dawn, day, dusk, night; no solar or moon disk, no sun reflection; natural architectural photography; no text/icons/UI/frame; generous sky and foreground space for separate firmware UI.
+Selected cloud prompt: one photorealistic white/silver cumulus cloud, soft grey underside, warm rim, frontal view, centered, genuinely transparent background, no sun/sky/text/frame, intended small weather sprite.
+Original assets preserved beside the converted 320x240 PNGs. The discarded first sunrise-only candidate is not the selected firmware background.

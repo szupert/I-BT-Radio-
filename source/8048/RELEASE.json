@@ -1,0 +1,191 @@
+{
+  "firmware": "MENU8048C-R4",
+  "source_inventory_sha256": "faca8c98f41cf8bbf52542d2b20742d7ab6887e74cdc3b2f438baa01b7a23a3b",
+  "files": [
+    {
+      "path": "menu.json",
+      "sha256": "c391022aee30dd7a1c7dd7b94c46b06da71b147bd37046ca092146318e8a1d43",
+      "bytes": 3449
+    },
+    {
+      "path": "platformio.ini",
+      "sha256": "a72e57731e0ab0e630d5f0af37588348e08021e35f7a8152b8291858139fc1b5",
+      "bytes": 778
+    },
+    {
+      "path": "preview.png",
+      "sha256": "eab0da27b94bcf4efa8a43c42dc93eef985a5000bcd50f6c0ca00b6239abf457",
+      "bytes": 15546
+    },
+    {
+      "path": "README.md",
+      "sha256": "e46bd3308c07b7426ff0715481ef6844cd18915054c99f2d56b4b06f5f326447",
+      "bytes": 4275
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "998135b6658d2d3194dce0370be37695b3df400573d70fcea1c1c68a6dfc1d9c",
+      "bytes": 3868
+    },
+    {
+      "path": "skin_audit.json",
+      "sha256": "bebe9c118811d7dff1879660baff1c20300911fa0e839379934a060e262dcc45",
+      "bytes": 1563
+    },
+    {
+      "path": "src/demo_skin_assets.h",
+      "sha256": "6ca8fbab01bee6edbd1083c5b6c39836e69446e9368993757bf1a637ad13d3dc",
+      "bytes": 4234315
+    },
+    {
+      "path": "src/display_config.h",
+      "sha256": "4b09fb98595e131985b600d39a449d18428ab9074234788b5da7012d3e75e39d",
+      "bytes": 2396
+    },
+    {
+      "path": "src/fonts.h",
+      "sha256": "676903849b56bbc82b900941bf53146f927e4c82f2476bee67f1f52eacc6b6ef",
+      "bytes": 30461
+    },
+    {
+      "path": "src/main.cpp",
+      "sha256": "46930e8f22cc5ae45e20517fcced13be042682beef29f7ab9a0d25877fa12da3",
+      "bytes": 9661
+    },
+    {
+      "path": "src/menu_data.h",
+      "sha256": "6317aecbd5f4b7365735d109c31a58bce7935db4bacfc85c6f8fc2f7f468aa21",
+      "bytes": 3245
+    },
+    {
+      "path": "src/radio/dual/alarm_policy.h",
+      "sha256": "fde08f5e5c33a627afcc84e5c600bf1e6875fa235cbce71bc2ae58519c8735fd",
+      "bytes": 5801
+    },
+    {
+      "path": "src/radio/dual/battery_policy.h",
+      "sha256": "e517350e79295d62369c975688fe672581130faa386e39bafaa9e40944c637da",
+      "bytes": 826
+    },
+    {
+      "path": "src/radio/dual/bt_audio.h",
+      "sha256": "a40eeaa55ebce0a32dfe1561b14e8d09e5252678a1bb20427610e54a4d7a93f8",
+      "bytes": 3157
+    },
+    {
+      "path": "src/radio/dual/core.h",
+      "sha256": "690f0c49411e39a3e1c87a1e1f0826e9679f489a6dc1742b7ed52d8b3c9f1207",
+      "bytes": 3456
+    },
+    {
+      "path": "src/radio/dual/dns_policy.h",
+      "sha256": "17777ef6aeb928a9ff74ecfeab71603b5f0595a5cd8f022f3c481697a3f82b35",
+      "bytes": 632
+    },
+    {
+      "path": "src/radio/dual/eq_presets.h",
+      "sha256": "17792b52429939b63d130aefa2676f716b5b4a7c9b3b632dbaf956a8890edf64",
+      "bytes": 2968
+    },
+    {
+      "path": "src/radio/dual/logic.h",
+      "sha256": "c49f1a2b7939324b018293207811cd0b1f5551e3d8122fc48bb60e19ccbb1e68",
+      "bytes": 7329
+    },
+    {
+      "path": "src/radio/dual/service_model.h",
+      "sha256": "c12ebe9533bb6e9df0e782ad83107bbf35aed922d61c784bc9181e94e3b571bd",
+      "bytes": 2640
+    },
+    {
+      "path": "src/radio/dual/service_output.h",
+      "sha256": "8eaa0810b671677fe6dbc115119a7b85a950af3f3c80942b54545ca095af21b9",
+      "bytes": 1649
+    },
+    {
+      "path": "src/radio/dual/vu_probe.h",
+      "sha256": "4b77338f9277be5488699d2657252cb7f62f6d79d67c20b7ad394548a3a997db",
+      "bytes": 1343
+    },
+    {
+      "path": "src/radio/ui/content.h",
+      "sha256": "9ed902527945a0f163d75deec4ee2e0dfb616e30216ed5d0e7f8d22a3763ae17",
+      "bytes": 30592
+    },
+    {
+      "path": "src/radio_stubs.cpp",
+      "sha256": "9cd9ab82e56548d5a945b794ecdd525b98746151bec1a81cb4517552d3b1664f",
+      "bytes": 1199
+    },
+    {
+      "path": "tools/menu_test.py",
+      "sha256": "17a62bf6bfc3eaac6a3a4bad4d6b6ce84e2a24c8e94573a7fc460c60b14d2795",
+      "bytes": 2216
+    },
+    {
+      "path": "tools/package.py",
+      "sha256": "323f3557e37bd1cd922e6783bf3f9ab7cd6df59e4ace50b63ac2bcfce19f5881",
+      "bytes": 2241
+    },
+    {
+      "path": "tools/partitions_factory.bin",
+      "sha256": "aaae2888c5a6a348004b5b436f47abb25ae32e72d9003902955a998eda723edd",
+      "bytes": 3072
+    },
+    {
+      "path": "tools/requirements.txt",
+      "sha256": "68f24598f2f9e1c4a8acd85e0d229be590c0a60aa95be8b999833833b01cb9be",
+      "bytes": 31
+    },
+    {
+      "path": "tools/START_INSTALLER.bat",
+      "sha256": "aa7042b302ced90264f50e9609c44404170f1d708205def44b9f08438106e847",
+      "bytes": 1566
+    },
+    {
+      "path": "tools/START_SELFTEST.bat",
+      "sha256": "00082f6e6325dcc88ddc09bda0097ddf2db44e2c10f0ee3fe946f1a5c47fdca9",
+      "bytes": 1541
+    },
+    {
+      "path": "tools/test_package.py",
+      "sha256": "8f64b90761ee297672997d2e0a95362ae2bb69e4fce21ad52448b15e1eb432ce",
+      "bytes": 5855
+    },
+    {
+      "path": "tools/update.py",
+      "sha256": "c5691ad256537c33802d9a98a17129c9ff84b985a1e5b08a5152810a512784f7",
+      "bytes": 11139
+    }
+  ],
+  "bin_sha256": "1a3fca8674273cf4dd43e0cd50a3248cd70b33434040d33e0903c6e1be20e454",
+  "elf_sha256": "ff8f600cf606a2a7d7d25a32fe8d50897e9112149967ffdeba86f769ef602188",
+  "partition_sha256": "bd0f7954aca2ef7d925ee21aaa1f3dc8822d1d6ce5cbbd26a135e5886bfff6ce",
+  "zip_sha256": "5c8eedeef6e78a31dc4345b028ba0c9f27f93fadadc4a1d7e49679007af0273f",
+  "bin_bytes": 1832928,
+  "pages": 55,
+  "expected_rows": 287,
+  "skin_selections": 9,
+  "status": {
+    "build": "PASS",
+    "host_tests_17": "PASS",
+    "graph_55_pages": "PASS",
+    "source_menu_copy": "PASS",
+    "rgb565_exact_copy": "PASS",
+    "package": "PASS",
+    "physical_flicker_touch": "PASS_USER_REPORTED",
+    "audio": "NOT_APPLICABLE",
+    "system_restore_empty_target": "PASS",
+    "full_menu_functional_selftest": "NOT_RUN"
+  },
+  "limits": "RAM demo, sample lists, no radio backend; original bitmaps do not imply all original button logic",
+  "driver": "LovyanGFX1.2.33 Sunton; separate GT911 Wire polling",
+  "brightness_default": 96,
+  "source_urls": [
+    "https://github.com/lovyan03/LovyanGFX/blob/1.2.33/src/lgfx_user/LGFX_Sunton_ESP32-8048S070.h",
+    "https://github.com/moononournation/Arduino_GFX/issues/641"
+  ],
+  "selftest_requires": "55 pages AND 287 rows, else FAIL",
+  "user_confirmation": "szuper mukodik igy marad",
+  "approved_baseline": true
+}

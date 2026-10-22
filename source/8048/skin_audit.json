@@ -1,0 +1,83 @@
+[
+  {
+    "index": 0,
+    "source": "skin_assets.h",
+    "array": "skin_modern_dark",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 1,
+    "source": "skin_assets.h",
+    "array": "skin_cassette",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 2,
+    "source": "player_skin_assets.h",
+    "array": "playerSkinEq",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 3,
+    "source": "media_player_asset.h",
+    "array": "mediaPlayerBackground",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 4,
+    "source": "kajon_assets_320.h",
+    "array": "background",
+    "pixels": 76800,
+    "min": 0,
+    "max": 64459,
+    "exact_copy": true
+  },
+  {
+    "index": 5,
+    "source": "skin_assets.h",
+    "array": "skin_modern_dark",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 6,
+    "source": "skin_assets.h",
+    "array": "skin_retro",
+    "pixels": 76800,
+    "min": 0,
+    "max": 30609,
+    "exact_copy": true
+  },
+  {
+    "index": 7,
+    "source": "skin_assets.h",
+    "array": "skin_hifi",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65535,
+    "exact_copy": true
+  },
+  {
+    "index": 8,
+    "source": "skin_assets.h",
+    "array": "skin_classic",
+    "pixels": 76800,
+    "min": 0,
+    "max": 65534,
+    "exact_copy": true
+  }
+]

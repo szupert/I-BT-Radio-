@@ -2,7 +2,7 @@
  
 ## V166-R163 BETA · 2026-10-19
 
-- Forráskód nélküli, egyfájlos Windows x64 telepítő a beta/V166_R163 mappában.
+- Forráskód nélküli, egyfájlos Windows x64 telepítő a beta/16MB_PSRAM/V166_R163 mappában.
 - Blokkos állomáslista-indexelés tényleges CPU-átadással. A készüléken 480 sor/814 ms, új watchdog és memóriahiba nélkül a rövid próbában.
 - A korábbi SD-/menüjavítások, webes tömörítés és XP/Win7 bootnézetek benne vannak; MP3 forró kódrész IRAM-ban, ritkított háttér-memóriavizsgálat.
 - Ismert hiba: Wi-Fi-DAC hang szaggat menü nélkül és menüjárással is; a menüs résztesztben LOW_BUFFER utáni újracsatlakozás történt. A csökkent CPU-terhelés nem folytonos hang-PASS.
@@ -12,7 +12,7 @@
 
 ## V166-R151 BETA · 2026-10-19
 
-- Nyilvános, egyfájlos Windows x64 telepítő a beta/V166_R151 mappában, firmware- és skinforrás nélkül.
+- Nyilvános, egyfájlos Windows x64 telepítő a beta/16MB_PSRAM/V166_R151 mappában, firmware- és skinforrás nélkül.
 - Saját futtatókörnyezet, élő COM/BOOT/százalék, adatmegőrző frissítés; teljes törlés csak IGEN-nel; hiba után kézi R/Q, automatikus stresszteszt nélkül.
 - R148–R150 rendezett menü, webes linkjavítás és késleltetett oldal-újrapróba bekerült a kiadásba.
 - R151: egy kijelölt webfeldolgozó, hangfeladat szinkron webhívásainak eltávolítása, közös válaszpufferek csökkentése, önmagára váró válaszsor javítása. Az 500 ms-os hangvédelem és a többi biztonsági határ változatlan.

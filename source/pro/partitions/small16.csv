@@ -1,0 +1,8 @@
+# 16 MB development profile: two 6 MB OTA slots and a 3.94 MB SPIFFS area.
+# Migrating from small.csv moves SPIFFS; back up playlist/Wi-Fi files before flashing.
+# Name,Type,SubType,Offset,Size,Flags
+nvs,data,nvs,0x9000,0x5000,
+otadata,data,ota,0xe000,0x2000,
+app0,app,ota_0,0x10000,0x600000,
+app1,app,ota_1,0x610000,0x600000,
+spiffs,data,spiffs,0xC10000,0x3F0000,

@@ -23,3 +23,7 @@ Teszt és eredmény (PASS/FAIL/NOT_RUN):
 Rollback (commit/firmware):
 Következő lépés:
 ```
+
+
+## Aktuális pontosítás · 2026.10.22.
+A későbbi felhasználói RAM-küszöbök és az új prioritás a [fejlesztési blokkok](DEVELOPMENT_BLOCKS.md) alatt érvényesek. A korábbi64KiB terv nem írhatja felül a későbbi konkrét utasítást. Az R171/R172 és WebUI-TERV állítások történeti állapotok; a most publikált R211-source és annak diagnosztikai korlátozásai a source/README.md alatt találhatók.

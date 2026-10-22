@@ -1,0 +1,22 @@
+I-BT-Radio Yellowboard - R170 BÉTA, 4 MB / PSRAM nélkül
+Indító: 0_AUTOMATA_FELTOLTES.bat; automatikus flash/PSRAM/sebességfelismerés.
+CSAK a 4 MB-os PSRAM nélküli profil R170. A másik három profil változatlan R169.
+Magyar yoRadio-jellegű felület, nagy óra, ékezetek; nincs teljes képkockapuffer.
+VU: KI / függőleges B-J / vízszintes B-J / magnórádió; 100/200/500ms, csak kis terület.
+Más kijelzés legfeljebb5kép/mp. Hangerő helyes0..100%, valódi pufferjelző.
+Forgatás0/180fok. Touch és rotary parancsok bekötve, készüléken még ellenőrizendők.
+MP3/WAV alap, AAC-LC/M4A-AAC és FLAC erőforrásfüggő. SBR/HE-AAC itt nincs.
+FLAC:8/16bit,1/2csatorna; a nagy munkaterülethez nem mindig marad elég RAM.
+Memóriahiánykor szabályos elutasítás; sem szabad RAM, sem hangstabilitás nem garantált.
+Opus/ALAC/Vorbis nincs. BluetoothhozSBC; SD→BT és telefon→rádió→DAC külön szerep.
+Az SD-borító legfeljebb4KB-osJPEG/64x64kijelzés; KI az alapállapot.
+Csak akkor tölti be, ha a teljes JPEG-munkaterület mellett is megmarad a tartalék.
+BT alatt nincs borítótöltés. Online borítókeresés ebben a profilban nincs.
+16KB bemeneti puffer,1600B kerettartalék,2304mintásPCM. AAC/FLAC kapacitásőrzött.
+Az MP3 négy int32 munkaterülete kérhet21KB IRAM32 memóriát; bájtos/float/PCM/DMA nem.
+65536B DRAM és4096B EXEC tartalék,500ms BT PCM-védelem változatlan.
+Host:8MP3 bitazonosPCM,12WAV-elrendezés,17AAC/FLACkapacitás- és PCM-próba,
+200000üzenetes sor, natív320x240UI/ékezet/VU-részterület/hangerőhatár PASS.
+Build és hostPASS nem készülékes hang/BT/RAM/touchPASS. R170 fizikaiNOT_RUN.
+Következő: feltöltés, passzív boot/RAM/verem, rövidMP3/WAV-DAC, majd különBT-próbák.
+InfraKI. Hosszú stresszteszt nem indul automatikusan. Eredeti teljes LATEST változatlan.

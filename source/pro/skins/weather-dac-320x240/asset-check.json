@@ -1,0 +1,26 @@
+[
+  {
+    "phase": "dawn",
+    "mean_abs_rgb_error": 2.9635329861111113,
+    "max565": 60553,
+    "pixels": 76800
+  },
+  {
+    "phase": "day",
+    "mean_abs_rgb_error": 3.2719097222222224,
+    "max565": 59164,
+    "pixels": 76800
+  },
+  {
+    "phase": "dusk",
+    "mean_abs_rgb_error": 2.777712673611111,
+    "max565": 60453,
+    "pixels": 76800
+  },
+  {
+    "phase": "night",
+    "mean_abs_rgb_error": 2.9529991319444444,
+    "max565": 60842,
+    "pixels": 76800
+  }
+]

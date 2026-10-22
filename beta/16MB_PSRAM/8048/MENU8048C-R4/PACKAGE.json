@@ -1,0 +1,21 @@
+{
+  "result": "PASS_FROZEN_HOST_NO_COM",
+  "version": "MENU8048C-R4",
+  "exe": "C:\\esp32\\SYSTEM\\TEMP\\PUBLIC_8048_20261022\\dist\\I-BT-Radio-8048-Install.exe",
+  "bytes": 21909112,
+  "sha256": "15c354e3406173b1b95c3a00aceeab820afca49135c874f705ebc1ed054f7fcc",
+  "firmware_sha256": "1a3fca8674273cf4dd43e0cd50a3248cd70b33434040d33e0903c6e1be20e454",
+  "source_zip_sha256": "c5ee94054b54b72dd778f872091e45ae459ec53fa9ba9c1a3e747fb0239d3be7",
+  "historical_zip_sha256": "5c8eedeef6e78a31dc4345b028ba0c9f27f93fadadc4a1d7e49679007af0273f",
+  "source_content_manifest": "PASS_ALL_31_FILES",
+  "hardware": "ESP32-8048S070C ESP32-S3 16MBflash 8MBPSRAM 800x480 capacitive",
+  "radio_backend": false,
+  "physical_public_exe": "NOT_RUN",
+  "COM": false,
+  "flash": false,
+  "engine_host_cases": 17,
+  "baud_selection": "PASS_1500000_FALLBACK_921600_RESTORE_FAIL_CLOSED",
+  "portable_unicode_no_python_PATH": "PASS",
+  "normal_Q_before_COM": "PASS",
+  "internal_speed_probe_dispatch": "PASS_FROZEN_HELP"
+}

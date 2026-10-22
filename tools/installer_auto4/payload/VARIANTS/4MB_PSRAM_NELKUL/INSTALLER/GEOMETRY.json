@@ -1,0 +1,9 @@
+{
+  "profile": "lite4",
+  "flash_mb": 4,
+  "psram_required": false,
+  "fps_max": 5,
+  "app_slot": 3145728,
+  "fs_size": 983040,
+  "fs_offset": 3211264
+}

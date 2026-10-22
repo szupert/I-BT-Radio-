@@ -1,0 +1,13 @@
+{
+  "profile": "16MB_PSRAM_NELKUL",
+  "selected_firmware": "V166-R189",
+  "installer_sha256": "98fb4ff5d7e3725452575fb6847e1640d50174b2140957fb806a87a1c10dca9e",
+  "firmware_profiles": {
+    "4MB_PSRAM_NELKUL": "V166-R211",
+    "4MB_PSRAM": "V166-R176",
+    "16MB_PSRAM_NELKUL": "V166-R189",
+    "16MB_PSRAM": "V166-R176"
+  },
+  "physical": "NOT_RUN_PUBLIC_EXE",
+  "runtime_included": true
+}

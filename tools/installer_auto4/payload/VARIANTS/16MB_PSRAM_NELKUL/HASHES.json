@@ -1,0 +1,50 @@
+{
+  "OLVASS_EL.txt": {
+    "bytes": 1215,
+    "sha256": "65f552e8a9762927c39ff7ad9fd257ecc92f60c8f8d7216ff8a8ef22b9e3ad6b"
+  },
+  "run_upload.py": {
+    "bytes": 3049,
+    "sha256": "ad6efa925043b51a75a479dba8660c04da99fe59ef4d42a35f43e46eaa6d8f26"
+  },
+  "INSTALLER/bootloader.bin": {
+    "bytes": 26128,
+    "sha256": "7d5441f997571f7451a4bceb395dd00af743feff7840928a60fbbddcaf52ffc7"
+  },
+  "INSTALLER/boot_app0.bin": {
+    "bytes": 8192,
+    "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+  },
+  "INSTALLER/firmware.bin": {
+    "bytes": 2335744,
+    "sha256": "9d2fe50a22e2ebe6e40ead7d769e5be2d37eb6a44c915b8d1b77bb135b629046"
+  },
+  "INSTALLER/FONT_LICENSES.txt": {
+    "bytes": 4487,
+    "sha256": "c6ee0567859cb7cc8d992149bbd96ad359ef65fb7355f7feae0547555ffacd23"
+  },
+  "INSTALLER/GEOMETRY.json": {
+    "bytes": 164,
+    "sha256": "3aa369983b2674c7f6d256ce2e098ccf10c60c5aeafedd437fb61d5c2b9623f9"
+  },
+  "INSTALLER/PACKAGE.json": {
+    "bytes": 2858,
+    "sha256": "63c452fc6f7573e10fc73eec7304583d9e785f0c6967fba43f3c9efb9a0585ed"
+  },
+  "INSTALLER/partitions.bin": {
+    "bytes": 3072,
+    "sha256": "abc23963addcba872803e202f58c4a6f739e40ba87fcb3fac430494fa045df81"
+  },
+  "INSTALLER/requirements.txt": {
+    "bytes": 31,
+    "sha256": "68f24598f2f9e1c4a8acd85e0d229be590c0a60aa95be8b999833833b01cb9be"
+  },
+  "INSTALLER/spiffs.bin": {
+    "bytes": 4128768,
+    "sha256": "78d331bea10541452c8c7dab9652368e4e5f9984052aee41c996dba6e228f11a"
+  },
+  "INSTALLER/update.py": {
+    "bytes": 21815,
+    "sha256": "57a255e1ed5a7ddf65753590ac11bbcccabc3f5d941aa1415bb89e765819bba3"
+  }
+}

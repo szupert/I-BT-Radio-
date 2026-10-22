@@ -41,4 +41,4 @@ Az érintés és a rotary ugyanazokat a menüpontokat éri el. A skinváltáshoz
 
 A korábbi [2026.10.11-i menüvizsgálat](results/STRESS_20261011_151229_617.json) történeti előzmény. A régi runner és WEB→BT-kísérlet nem írja felül a jelenlegi tiltásokat és nem igazolja az új menü fizikai működését. A kirajzolt sor, a végrehajtott művelet és a hallható hang három külön ellenőrzés.
 
-Az [R151 nyilvános béta telepítője](../../beta/V166_R151/README.md) már letölthető; firmware- és skinforrást nem tartalmaz.
+Az [R151 nyilvános béta telepítője](../../beta/16MB_PSRAM/V166_R151/README.md) már letölthető; firmware- és skinforrást nem tartalmaz.

@@ -1,0 +1,9 @@
+/.pio/
+/managed_components/
+**/__pycache__/
+*.pyc
+*.log
+*.elf
+*.map
+*.bin
+*.zip

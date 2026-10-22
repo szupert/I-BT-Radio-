@@ -1,0 +1,78 @@
+{
+  "release": "V166-R176-BETA",
+  "firmware": "V166-R176",
+  "flash_mb": 4,
+  "profile": "psram4",
+  "psram_required": true,
+  "fps_max": 20,
+  "fresh_install": "SMALL_4MB_V1",
+  "physical": "NOT_RUN",
+  "firmware_variants": [
+    {
+      "id": "psram4",
+      "minimum_revision_full": 100,
+      "maximum_revision_full": 399,
+      "image_map": {
+        "firmware.bin": "firmware.bin",
+        "bootloader.bin": "bootloader.bin"
+      }
+    }
+  ],
+  "files": {
+    "bootloader.bin": {
+      "bytes": 26352,
+      "sha256": "cfc94c92620ae5c39628ab3d89bf06d5f6eecbdd799b9c261daa7c1fd8170fc2"
+    },
+    "boot_app0.bin": {
+      "bytes": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    "firmware.bin": {
+      "bytes": 3129184,
+      "sha256": "7992a203053ab9d994d29991620dda6379f5bcea2affcc60bd0eff93cca88c3f"
+    },
+    "FONT_LICENSES.txt": {
+      "bytes": 4487,
+      "sha256": "c6ee0567859cb7cc8d992149bbd96ad359ef65fb7355f7feae0547555ffacd23"
+    },
+    "GEOMETRY.json": {
+      "bytes": 161,
+      "sha256": "c2a5f0714ae10c68bbb76fb15df91fec088b3ecbbc6ee484e1b9bf3d4bee6781"
+    },
+    "partitions.bin": {
+      "bytes": 3072,
+      "sha256": "d90b0f480968f1cde746d7d8746261b38ec098b63c7f45b1aa23698cca4a2236"
+    },
+    "requirements.txt": {
+      "bytes": 31,
+      "sha256": "68f24598f2f9e1c4a8acd85e0d229be590c0a60aa95be8b999833833b01cb9be"
+    },
+    "spiffs.bin": {
+      "bytes": 983040,
+      "sha256": "fb683183e459a80243d884c7be058ca11d91a036ca58ae023c65466d4cb1eeff"
+    },
+    "update.py": {
+      "bytes": 21815,
+      "sha256": "57a255e1ed5a7ddf65753590ac11bbcccabc3f5d941aa1415bb89e765819bba3"
+    }
+  },
+  "skins": [
+    "Alarm clock",
+    "MediaPlayer",
+    "Weather"
+  ],
+  "ir": "NEC_COMPILED_DEFAULT_OFF_GPIO_UNVERIFIED",
+  "language": "hu",
+  "diagnostics": "DISPATCH_RESTORED_PHYSICAL_PENDING",
+  "known_issues": [
+    "R176 physical verification pending",
+    "Light BT controller_init259 remains separate open issue",
+    "BT/SD playback is not automatically restarted by a radio-list save"
+  ],
+  "source_commit": "cd8c36f3b3d52c593dfd26766b05e4bd15f6a163",
+  "fixes": [
+    "Owner-acknowledged station save takes priority over audio",
+    "Full CSV readback and URL-identity resume",
+    "Exact MP3 suffix and version-guard root route"
+  ]
+}

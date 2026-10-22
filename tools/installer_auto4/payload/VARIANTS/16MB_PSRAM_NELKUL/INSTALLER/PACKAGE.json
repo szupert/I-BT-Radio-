@@ -1,0 +1,74 @@
+{
+  "release": "V166-R189-BETA",
+  "firmware": "V166-R189",
+  "flash_mb": 16,
+  "profile": "lite16",
+  "psram_required": false,
+  "fps_max": 5,
+  "fresh_install": "SMALL_16MB_V1",
+  "physical": "NOT_RUN",
+  "firmware_variants": [
+    {
+      "id": "lite16",
+      "minimum_revision_full": 100,
+      "maximum_revision_full": 399,
+      "image_map": {
+        "firmware.bin": "firmware.bin",
+        "bootloader.bin": "bootloader.bin"
+      }
+    }
+  ],
+  "files": {
+    "bootloader.bin": {
+      "bytes": 26128,
+      "sha256": "7d5441f997571f7451a4bceb395dd00af743feff7840928a60fbbddcaf52ffc7"
+    },
+    "boot_app0.bin": {
+      "bytes": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    "firmware.bin": {
+      "bytes": 2335744,
+      "sha256": "9d2fe50a22e2ebe6e40ead7d769e5be2d37eb6a44c915b8d1b77bb135b629046"
+    },
+    "FONT_LICENSES.txt": {
+      "bytes": 4487,
+      "sha256": "c6ee0567859cb7cc8d992149bbd96ad359ef65fb7355f7feae0547555ffacd23"
+    },
+    "GEOMETRY.json": {
+      "bytes": 164,
+      "sha256": "3aa369983b2674c7f6d256ce2e098ccf10c60c5aeafedd437fb61d5c2b9623f9"
+    },
+    "partitions.bin": {
+      "bytes": 3072,
+      "sha256": "abc23963addcba872803e202f58c4a6f739e40ba87fcb3fac430494fa045df81"
+    },
+    "requirements.txt": {
+      "bytes": 31,
+      "sha256": "68f24598f2f9e1c4a8acd85e0d229be590c0a60aa95be8b999833833b01cb9be"
+    },
+    "spiffs.bin": {
+      "bytes": 4128768,
+      "sha256": "78d331bea10541452c8c7dab9652368e4e5f9984052aee41c996dba6e228f11a"
+    },
+    "update.py": {
+      "bytes": 21815,
+      "sha256": "57a255e1ed5a7ddf65753590ac11bbcccabc3f5d941aa1415bb89e765819bba3"
+    }
+  },
+  "language": "hu",
+  "diagnostics": "DISPATCH_RESTORED_PHYSICAL_PENDING",
+  "known_issues": [
+    "R176 physical verification pending",
+    "Light BT controller_init259 remains separate open issue",
+    "BT/SD playback is not automatically restarted by a radio-list save"
+  ],
+  "source_commit": "3913fa97eb5fdcf99e1fc4ce9ffdd68160fa83b3",
+  "fixes": [
+    "Light-only retained internal RAM reserve exactly10000B by explicit user instruction; Pro24576B and separate30000/32768 pressure/recovery,500ms/2000ms protections retained",
+    "Centered current IPv4 between Menu and Back, uniform2x Menu/IP/Back font with separated text regions, existing touch targets retained",
+    "Play/Pause button with600ms accepted-input pulse rendered on UI owner; idle blue, actual playback green; no fake playback acknowledgement",
+    "Native64px MusicBrainz/CAA lookup and typed station-logo fallback inherited fromR188; physical download still blocked by contiguous-block admission in observedR187test, not claimed working",
+    "No changes to audio code,64KiB active artwork buffer gate, GPIO or partitions"
+  ]
+}
