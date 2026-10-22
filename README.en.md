@@ -28,7 +28,7 @@ I fixed the station-index watchdog path: 480 rows completed in 814 ms on hardwar
 
 [Magyar](README.md) · [Deutsch](README.de.md)
 
-I am building my own yoRadio-based ESP32-WROOM + PSRAM radio, focusing on SMALL. [Feature status](docs/Features.md) · [Menu](docs/menu/README.md) · [Wiring](hardware/README.md).
+Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
 
 ## Earlier Windows beta · R151
 
