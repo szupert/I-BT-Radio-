@@ -1,3 +1,11 @@
+# Source / Installer · 2026-10-22
+
+Full Light/Pro application sources and four hardware profiles are public. One-click Windows installers remain available. R2114MB/noPSRAM is diagnostic-only (BT/BLE/SD/WebUI OFF); Bluetooth restoration is a separate pending block. This is a development beta, not a stability claim.
+
+[Source](source/README.md) · [Installer](beta/README.md) · [Contribution blocks](docs/DEVELOPMENT_BLOCKS.md)
+
+---
+
 # I-BT-Radio — V166-R151 BETA · 19 October 2026
 
 ## Public skin sources · 2026.10.20.

@@ -11,3 +11,7 @@ Minden firmware-, kód-, hardverhibakeresési és dokumentációs feladat ELŐTT
 - Átadáskor rövid START_HERE/checkpoint frissítés, következő egyetlen feladat és pontos visszaállítási út.
 
 A PSRAM64H írás-visszaolvasási hibája nyitott, a működő 6404L konfigurációhoz nem nyúlunk. A két chipre vonatkozó állításokat külön tesztbizonyítékkal kezeljük.
+
+
+## 2026-10-22: public blockwise development
+Read docs/DEVELOPMENT_BLOCKS.md before changes. One logical block per commit/PR; retain existing implementations and proven behaviour. Light4MB Bluetooth/BLE precedes artwork. Read source/README.md for baseline and diagnostic limitations. Never publish credentials, NVS dumps or personal logs. The later explicit user RAM thresholds supersede the old64KiB planning text; do not reinterpret them.

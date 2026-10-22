@@ -1,3 +1,11 @@
+# Source / Installer · 2026-10-22
+
+Die vollständigen Light-/Pro-Anwendungsquellen und vier Hardwareprofile sind öffentlich. Die Windows-Einklick-Installer bleiben erhalten. R2114MB/ohnePSRAM ist eine Diagnoseversion (BT/BLE/SD/WebUI AUS); die Bluetooth-Wiederherstellung folgt als eigener Arbeitsblock. Entwicklungsbeta, keine Stabilitätszusage.
+
+[Source](source/README.md) · [Installer](beta/README.md) · [Contribution blocks](docs/DEVELOPMENT_BLOCKS.md)
+
+---
+
 # I-BT-Radio — V166-R151 BETA · 19. Oktober 2026
 
 ## Öffentliche Skin-Quellcodes · 2026.10.20.

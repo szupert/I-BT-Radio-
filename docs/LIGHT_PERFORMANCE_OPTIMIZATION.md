@@ -34,3 +34,7 @@ A források az API-kat és optimalizálási irányokat igazolják, **nem** a mi 
 - Ha **bármelyik** eltér, a WebUI új verziójú erőforrásokra navigál, legfeljebb egyszer az adott megnyitás során. A megnyitáskori egyszeri lekérésen túl nincs periodikus polling.
 - A szerververziót cache nélkül kérjük, a HTML újraellenőrzendő, a CSS/JS URL buildtag alapján verziózott. Frissítéskor ugyanaz a főverzió és R szám mellett megváltozott asset tag is kiváltja a frissítést.
 - Ez kizárólag WebUI újratöltés; **nem** indít firmware-újraflashelést, rádió-resetet vagy hangútvonal-váltást.
+
+
+## Aktuális pontosítás · 2026.10.22.
+A későbbi felhasználói RAM-küszöbök és az új prioritás a [fejlesztési blokkok](DEVELOPMENT_BLOCKS.md) alatt érvényesek. A korábbi64KiB terv nem írhatja felül a későbbi konkrét utasítást. Az R171/R172 és WebUI-TERV állítások történeti állapotok; a most publikált R211-source és annak diagnosztikai korlátozásai a source/README.md alatt találhatók.
