@@ -1,10 +1,18 @@
+# I-BT-Radio — Light / Pro
+
+![Light 4 MB](https://img.shields.io/badge/Light_4_MB-R216_b%C3%A9ta-blue) ![Pro](https://img.shields.io/badge/Pro-R176_b%C3%A9ta-purple)
+
+**Nyilvános kiadások:** Light 4 MB / PSRAM nélkül: **R216 béta** · Pro / PSRAM-mal: **R176 béta**. A hardverprofilok verziói külön követhetők; a repository címe és a telepítők útvonalai állandók.
+
+Az **R221 Light4MB** külön helyi tesztjelöltként készül; ez a fejléc nem jelenti az R221 telepítő GitHub-megjelenését vagy készülékes hangtesztjét.
+
 ## R216 Light4MB ·2026.10.22.
 
 [Menütesztelt béta és telepítő](https://github.com/szupert/I-BT-Radio-/tree/main/beta/4MB_PSRAM_NELKUL/R216) · [Aktuális Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light)
 
 Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú mérési béta; Wi-Fi hang, BT-OUT memória és veremtartalék továbbra nyitott. Az alábbi régebbi kiadások történeti állapotok.
 
-# I-BT-Radio — Light és Pro · nyilvános fejlesztői béta
+## A projekt és a nyilvános forrás
 
 ## Teljes forrás és négy hardverprofil · 2026. október 22.
 
@@ -12,7 +20,7 @@ Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú m
 
 A firmware, hangút, menü, WebUI, bootképernyő és skin alkalmazásforrása nyilvános. A további módosítások külön, visszavonható munkablokkokban és commitokban készülnek. Elsőbbség: Light4MB BT-IN/SD→BT-OUT, majd CLOCK/WEATHER BLE; az artwork további fejlesztése halasztva.
 
-**Béta, nem stabil kiadás.** A jelenlegi4MB/noPSRAM R211 célzott diagnosztika, BT/BLE/SD/WebUI OFF; az új BT/BLE-változat még készül. A többi hardverprofil korábbi binárisát verziószámmal és hash-sel őrizzük, nem nevezzük frissen teszteltnek. A telepítő beépített Python/esptool futtatókörnyezetet és automatikus hardverfelismerést tartalmaz; nem kell a forrást lefordítani a használatához.
+**Béta, nem stabil kiadás.** Az R211 korábbi célzott diagnosztika volt, BT/BLE/SD/WebUI OFF állapottal; az aktuális nyilvános Light4MB csomagot a fenti R216 hivatkozás jelöli. A többi hardverprofil korábbi binárisát verziószámmal és hash-sel őrizzük, nem nevezzük frissen teszteltnek. A telepítő beépített Python/esptool futtatókörnyezetet és automatikus hardverfelismerést tartalmaz; nem kell a forrást lefordítani a használatához.
 
 ## Korábbi kiadások és mérési feljegyzések
 
