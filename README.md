@@ -4,7 +4,7 @@
 
 **Nyilvános kiadások:** Light 4 MB / PSRAM nélkül: **R216 béta** · Pro / PSRAM-mal: **R176 béta**. A hardverprofilok verziói külön követhetők; a repository címe és a telepítők útvonalai állandók.
 
-Az **R222 Light4MB** a helyi LATEST tesztjelöltje: SD-lista, hosszabb BT-keresőmenü és PCM-tárelhelyezés javításokkal. Fordítás és gépi csomagellenőrzés sikeres; a készülékes SD-BT próba következik. Az R222 telepítő még nincs itt közzétéve. A FLAC nagy összefüggő munkaterület-igénye ismert Light/noPSRAM korlát maradt.
+Az **R222 Light4MB** helyi tesztjelölt; a gépi ellenőrzések sikeresek, de a készülékes SD-BT próba hibát talált: 130 fájl indexelve, üresnek látszó lista, hangátadás nélkül, BT-lezáráskor LoadProhibited összeomlással. Nem stabil kiadás, az R222 telepítő nincs itt közzétéve. A nyilvános telepítők verziói a fenti jelvényeken láthatók.
 
 ## R216 Light4MB ·2026.10.22.
 
