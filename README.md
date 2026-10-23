@@ -4,7 +4,7 @@
 
 **Nyilvános kiadások:** Light 4 MB / PSRAM nélkül: **R216 béta** · Pro / PSRAM-mal: **R176 béta**. A hardverprofilok verziói külön követhetők; a repository címe és a telepítők útvonalai állandók.
 
-Az **R221 Light4MB** külön helyi tesztjelöltként készül; ez a fejléc nem jelenti az R221 telepítő GitHub-megjelenését vagy készülékes hangtesztjét.
+Az **R221 Light4MB** helyi tesztjelöltként elkészült a LATEST-ben; a fordítás és a csomag gépi ellenőrzése sikeres. Az R221 telepítő még nincs közzétéve itt, a készülékes hangteszt következik.
 
 ## R216 Light4MB ·2026.10.22.
 
