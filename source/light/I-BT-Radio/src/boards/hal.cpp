@@ -9,6 +9,7 @@
 #endif
 #if defined(BOARD_CYD28) && FEATURE_ENCODER
 #include "../dual/rotary_pending.h"
+#include "../dual/rotary_button_capture.h"
 #include "../yoEncoder/yoEncoder.h"
 #include "../core/config.h"
 #endif
@@ -23,7 +24,8 @@ static dual::Debounce keys[11];
 static int encoderLastClk=HIGH;
 static int debugLastDt=HIGH, debugLastSw=HIGH;
 static uint32_t encoderLastEdgeMs=0;
-static uint32_t debugClkChanges=0, debugDtChanges=0, debugSwChanges=0;
+static uint32_t debugClkChanges=0, debugDtChanges=0;
+static volatile uint32_t debugSwChanges=0;
 static uint32_t debugClkRise=0, debugClkFall=0, debugDtRise=0, debugDtFall=0;
 static uint32_t debugCW=0, debugCCW=0;
 static int debugDirection=0; // +1 CW, -1 CCW, 0 none
@@ -89,6 +91,13 @@ bool expanderAvailable(){return mcpOK;}
 // Original yoRadio decoder: both phase interrupts, quadrature and acceleration.
 static yoEncoder nativeEncoder(DUAL_ENCODER_A,DUAL_ENCODER_B,4,false);
 static dual::RotaryPending rotaryPending;
+static dual::RotaryButtonCapture switchCapture;
+static portMUX_TYPE switchMux=portMUX_INITIALIZER_UNLOCKED;
+static void IRAM_ATTR switchEdge(){
+    const bool down=!digitalRead(DUAL_ENCODER_SW);
+    const uint32_t now=uint32_t(xTaskGetTickCountFromISR())*portTICK_PERIOD_MS;
+    portENTER_CRITICAL_ISR(&switchMux);++debugSwChanges;switchCapture.edge(down,now);portEXIT_CRITICAL_ISR(&switchMux);
+}
 static void IRAM_ATTR rotaryEdge(){nativeEncoder.readEncoder_ISR();}
 #endif
 static uint8_t transfer(uint8_t value) {
@@ -137,6 +146,7 @@ void begin() {
     nativeEncoder.begin();nativeEncoder.setBoundaries(-16384,16383,true);
     nativeEncoder.setAcceleration(config.store.encacc);nativeEncoder.readEncoder_ISR();
     nativeEncoder.setup(rotaryEdge);
+    attachInterrupt(digitalPinToInterrupt(DUAL_ENCODER_SW),switchEdge,CHANGE);
 #endif
 #if FEATURE_ADC_BUTTONS
     pinMode(DUAL_ADC_PIN,INPUT);analogSetPinAttenuation(DUAL_ADC_PIN,ADC_11db);
@@ -157,7 +167,7 @@ void poll(void(*emit)(Action)) {
         debugDtChanges++;
         if(dt) debugDtRise++; else debugDtFall++;
     }
-    if(sw!=debugLastSw) debugSwChanges++;
+    // Switch changes are counted at the GPIO edge, even during a slow LCD slice.
 
     static unsigned lastPage=0;
     static uint32_t lastMenuStep=0;
@@ -192,7 +202,11 @@ void poll(void(*emit)(Action)) {
     encoderLastClk=clk;
     debugLastDt=dt;
     debugLastSw=sw;
-    button(0,!sw,now,Action::Select,emit);
+    unsigned events;
+    portENTER_CRITICAL(&switchMux);events=switchCapture.poll(now);portEXIT_CRITICAL(&switchMux);
+    if(events&dual::RotaryButtonCapture::Down)emit(Action::EncoderDown);
+    if(events&dual::RotaryButtonCapture::Short)emit(Action::EncoderShort);
+    if(events&dual::RotaryButtonCapture::Long)emit(Action::EncoderLong);
 #endif
 #if FEATURE_ADC_BUTTONS
     static dual::Debounce adc;

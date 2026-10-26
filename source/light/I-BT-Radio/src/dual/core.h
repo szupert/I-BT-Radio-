@@ -3,6 +3,7 @@
 #include "logic.h"
 #include "clock_sync_policy.h"
 namespace dual {
+bool sdFilesAvailable(); // connected SD-BT picker can open files without teardown
 bool alarmFallbackValid();
 bool requestSurfaceSkin(unsigned skin); // UI-owner mailbox, RAM only
 void surfaceDiagnostics();
@@ -16,6 +17,7 @@ struct Snapshot {
     uint32_t generation=0, elapsed=0, duration=0, sampleRate=0, buffer=0, bufferCapacity=0, freeHeap=0, largestHeap=0, freePsram=0;
     uint32_t queueDrops=0, inputDrops=0, lowBufferEvents=0;
     int rssi=0; uint16_t bitrate=0;uint8_t volume=0;
+    uint8_t audioCodec=0,sourceBits=0;uint16_t formatKbps=0; // audio-owner snapshot; display only
     int8_t bass=0,middle=0,treble=0,balance=0;
     bool playing=false, sd=false, connected=false, pendingSave=false, ready=false, alarmActive=false;
     uint16_t sensorMv=0; bool sensorValid=false;
@@ -61,12 +63,15 @@ void clockConfigure(const char* server=nullptr);
 uint32_t clockSyncCount();
 void displayEvent(int type,int payload);
 Snapshot snapshot();
+Settings settingsSnapshot();
 void prepareTrackText(Snapshot& s); // presentation copy only; never alters decoder state
 serviceui::State serviceSettings();
 bool serviceDiagnostics();
 bool debugEnabled();
 bool uiOverloadActive();
+bool menuAwaitingBtHeadroom(); // display task only
 bool sourcePendingSd();
+const char* sourceRouteError();
 void send(Action action);
 bool webMenuSupported(unsigned page,unsigned item);
 bool webMenuActivate(unsigned page,unsigned item);

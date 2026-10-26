@@ -1,3 +1,7 @@
+#include "../core/options.h"
+#if IBT_NO_PSRAM
+#include "weather_light.inc"
+#else
 #include "weather.h"
 #include "weather_decode.h"
 #include "resource_limiter.h"
@@ -118,3 +122,5 @@ void tick(bool idle){
  }
 }
 }
+
+#endif

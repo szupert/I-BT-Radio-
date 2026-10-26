@@ -1,4 +1,6 @@
+#include "sd_bt_navigation.h"
 #include "memory_checkpoint.h"
+#include "bt_navigation_policy.h"
 #if IBT_COMPACT_UI
 #include "ir_receiver.h"
 #endif
@@ -33,8 +35,14 @@
 #include "../ui/frontend.h"
 #include "../ui/videoton_layout.h"
 #include "boot_progress.h"
+#if IBT_NO_PSRAM
+#include "../ui/light_boot_policy.h"
+static bool lightWifiMenuFromHub=false;
+#endif
 #include "connectivity_policy.h"
 #include "../ui/content.h"
+#include "../ui/light_navigation.h"
+#include "../ui/light_menu_layout.h"
 #if defined(BOARD_CYD28)
 #include "../ui/cassette_layout.h"
 #endif
@@ -45,6 +53,7 @@
 #include "../core/network.h"
 #include "../core/display.h"
 #include "../audioI2S/direct_stream_policy.h"
+#include "../audioI2S/flac_decoder/flac_decoder.h"
 #include "backup_sd.h"
 #include <Preferences.h>
 #include "vu_probe.h"
@@ -219,9 +228,11 @@ static uint32_t uiStressBaseGaps=0;
 static char uiStressReason[24]="idle"; // longest defined reason has 21 characters
 static bool uiStressTour=false,uiStressTourRestored=false;
 static bool uiStressFullScan=false;
+static bool btMenuHeadroomPending=false;
+bool menuAwaitingBtHeadroom(){return btMenuHeadroomPending;}
 static uint8_t uiStressScanPage=0,uiStressScanItem=0;
 static uint32_t uiStressScanItems=0,uiStressScanDisabled=0,uiStressScanRendered=0;
-static constexpr unsigned UiScanSlots=36+(IBT_COMPACT_UI?1:0);
+static constexpr unsigned UiScanSlots=(IBT_NO_PSRAM?38:36)+(IBT_COMPACT_UI?1:0);
 static uint8_t (*uiStressScanSeen)[2]=nullptr; // Allocate diagnostic coverage in PSRAM only when needed.
 static uint8_t uiStressAlarmSeen[4]{}; // Only the weekly alarm has more than 16 rows.
 static Settings uiStressOriginalSettings;
@@ -242,9 +253,12 @@ static bool manualWifiPage(unsigned p){
            p==PAGE_DNS||p==PAGE_DNS_ADDRESS||p==PAGE_DNS_VALUE;
 }
 static std::atomic<int> surfaceRequest{-1};
-static unsigned settingsSkin(const Settings& s){return s.alarm.clockHome?13:playerSkinId(s);}
+static unsigned settingsSkin(const Settings& s){return weather::active()?12:s.alarm.clockHome?13:playerSkinId(s);}
 static void publishSurface(const Settings& s){surfacepolicy::publish(page==PAGE_SERVICE?5:page==PAGE_BT_PLAYER&&!s.alarm.clockHome?14:settingsSkin(s));}
 bool requestSurfaceSkin(unsigned skin){
+#if IBT_NO_PSRAM
+ if(skin!=2&&skin!=3&&skin!=12&&skin!=13&&skin!=14)return false;
+#endif
 #if IBT_COMPACT_UI
  if(skin!=3&&skin!=12&&skin!=13&&skin!=14)return false;
 #endif
@@ -395,21 +409,41 @@ static void openBluetoothMenu(unsigned parent,unsigned row,unsigned selection){
     bluetoothParent=parent;bluetoothParentRow=row;
     page=PAGE_BLUETOOTH;selected=selection;redraw=true;
 }
+static void persistSetting(const Settings& s);
 static int localRoutePending=-1;static uint32_t localRouteAt=0;
 static bool speakerSearchPending=false;static uint8_t speakerSearchStep=0;static uint32_t speakerSearchAt=0;
+static sdroute::Error sourceRouteFailure=sdroute::Error::None;
+const char* sourceRouteError(){return sdroute::message(sourceRouteFailure);}
+static void sourceRouteFailed(sdroute::Error error,unsigned row){
+    speakerSearchPending=false;localRoutePending=-1;pendingConnectivity=-1;
+    pendingSourceAt=0;pendingSourceCancelSent=false;
+    sourceRouteFailure=error;page=75;selected=row;
+    btRateNotice(sourceRouteError());
+    Serial.printf("[SOURCE-ERROR] route=%s reason=%u page=75 selected=%u\n",row==2?"SD-BT":"SD-DAC",unsigned(error),row);
+}
+
 void bluetoothMode(int mode){
+    if(weather::active()){weather::setActive(false);publishSurface(snapshot().settings);}
     localRoutePending=-1;
     pendingConnectivity=-1; // An explicit BT choice supersedes deferred offline phone selection.
     if(mode!=0)speakerSearchPending=false;
-    if(mode==0&&config.getMode()==PM_WEB){
-        if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, probald ujra");return;}
+    if(mode==0){
+        // Preserve the actual entry page before the asynchronous SD preparation
+        // replaces it. The source chooser must not inherit an older BT-menu parent.
+        if(page!=PAGE_BLUETOOTH&&page!=PAGE_BT_SCAN&&page!=PAGE_BT_SAVED){bluetoothParent=page;bluetoothParentRow=selected;}
+        // Explicit output selection leaves a dedicated BT-input/clock/weather surface.
+        Settings route;portENTER_CRITICAL(&mux);route=state.settings;portEXIT_CRITICAL(&mux);route.alarm.clockHome=false;
+        if(!surfacepolicy::allows(surfacepolicy::forSkin(playerSkinId(route)),surfacepolicy::Route::SdBt)){
+            route.playerEnabled=true;route.mediaPlayerSkin=true;route.cassetteEnabled=false;route.vintageSkin=0;
+        }
+        cancelAlarmForUser();page=PAGE_HOME;persistSetting(route);publishSurface(route);
         speakerSearchPending=true;speakerSearchStep=0;speakerSearchAt=millis();
-        page=PAGE_SOURCE_PENDING;pendingSourceTarget=PM_SDCARD;pendingSourceAt=0;selected=0;redraw=true;return;
+        page=IBT_NO_PSRAM?PAGE_HOME:PAGE_SOURCE_PENDING;pendingSourceTarget=PM_SDCARD;pendingSourceAt=0;selected=0;redraw=true;return;
     }
     if(!player.sendCommand({PR_BT,mode})){btRateNotice("BT parancs var, probald ujra");redraw=true;return;}
     if(page!=PAGE_BLUETOOTH&&page!=PAGE_BT_SCAN&&page!=PAGE_BT_SAVED){bluetoothParent=page;bluetoothParentRow=selected;}
     cancelAlarmForUser();
-    const auto bs=snapshot().settings;
+    Settings bs;portENTER_CRITICAL(&mux);bs=state.settings;portEXIT_CRITICAL(&mux);
     page=mode==1?((bs.vintageSkin==5||bs.vintageSkin==6)?PAGE_HOME:PAGE_BT_PLAYER):mode==0?PAGE_BT_SCAN:PAGE_HOME;
     selected=0;redraw=true;
 }
@@ -624,7 +658,21 @@ void clockConfigure(const char* server) {
 Snapshot snapshot() {
     Snapshot s;portENTER_CRITICAL(&mux);s=state;portEXIT_CRITICAL(&mux);return s;
 }
-bool debugEnabled(){portENTER_CRITICAL(&mux);bool v=state.settings.debug;portEXIT_CRITICAL(&mux);return v;}
+Settings settingsSnapshot(){Settings s;portENTER_CRITICAL(&mux);s=state.settings;portEXIT_CRITICAL(&mux);return s;}
+#if IBT_NO_PSRAM
+struct UiActivity { bool playing,alarmActive,pendingSave; };
+static UiActivity uiActivitySnapshot(){
+    portENTER_CRITICAL(&mux);const UiActivity s{state.playing,state.alarmActive,state.pendingSave};portEXIT_CRITICAL(&mux);return s;
+}
+struct UiClockLight { uint8_t flags,start; };
+static UiClockLight uiClockLightSnapshot(){
+    portENTER_CRITICAL(&mux);const UiClockLight s{uint8_t((state.settings.alarm.nightClock?1u:0u)|(state.settings.alarm.clockHome?2u:0u)),state.settings.alarm.lightStart};portEXIT_CRITICAL(&mux);return s;
+}
+static bool uiPlayerEnabled(){
+    portENTER_CRITICAL(&mux);const bool enabled=state.settings.playerEnabled;portEXIT_CRITICAL(&mux);return enabled;
+}
+#endif
+  bool debugEnabled(){portENTER_CRITICAL(&mux);bool v=state.settings.debug;portEXIT_CRITICAL(&mux);return v;}
 bool uiOverloadActive(){return uiGovernor.inputOverloadActive(millis());}
 bool sourcePendingSd(){return pendingSourceTarget==PM_SDCARD;}
 static bool calibrateTouch(bool force=false){
@@ -651,6 +699,7 @@ void begin() {
         vuprobe::setRefresh(p.getUShort("vutimer",500));
 #if IBT_NO_PSRAM
         lightui::style.store(lightui::validStyle(p.getUChar("yovu",1)));
+        lightui::clockStyle.store(p.getUChar("yclock",0)==1?1:0);
         if(!p.getBool("yovuv1",false))vuprobe::setRefresh(100);
 #endif
         state.settings.language=Language(p.getUChar("lang",0));
@@ -688,8 +737,10 @@ void begin() {
         state.settings.alarm.source=p.getUChar("alm_src",0);
         state.settings.alarm.sdPlayMode=p.getUChar("alm_sdplay",0);
         alarmLastDay=p.getUInt("alarmday",0);
+#if !IBT_NO_PSRAM
         if(p.getBytesLength("eq10")==sizeof(state.settings.graphicEq))
             p.getBytes("eq10",&state.settings.graphicEq,sizeof(state.settings.graphicEq));
+#endif
         state.settings.sensorMode=p.getUChar("sensor",0);
         state.settings.batteryIndicator=p.getUChar("batshow",0)!=0;
         state.settings.batteryStep=p.getUChar("batstep",1);
@@ -716,7 +767,12 @@ void begin() {
         state.settings.retroColor=p.getUChar("retrocol",0);
         // R74 shipped this disabled, which hid the gesture even on touch panels.
         // Enable it once for R75; subsequent user choices remain persistent.
+        #if IBT_NO_PSRAM
+        state.settings.swipeSkins=p.getBool("modeswipe1",false)&&p.getUChar("swipeskin",0)!=0;
+        state.settings.tapSelected=p.getBool("tapselect",true);
+#else
         state.settings.swipeSkins=p.getUChar("swipev2",0)?p.getUChar("swipeskin",1)!=0:true;
+#endif
         state.settings.hlsEnabled=p.getUChar("hls",0)!=0;
         if(favoritePlaylistHash && p.getUInt("favhash",0)==favoritePlaylistHash && p.getBytesLength("favorites")==sizeof(favoriteBits))p.getBytes("favorites",favoriteBits,sizeof(favoriteBits));
         if(!p.getBool("light100v1",false)){
@@ -733,6 +789,10 @@ void begin() {
     lightui::style.store(0);vuprobe::dacEnabled.store(false);vuprobe::localBtEnabled.store(false);btinputvu::enabled.store(false);
 #endif
     sanitize(state.settings);
+#if IBT_NO_PSRAM
+    state.settings.cassetteEnabled=false;state.settings.reelAnimation=false;
+    state.settings.vintageSkin=0;state.settings.graphicEq.enabled=false;state.settings.sensorMode=0;
+#endif
 #if !FEATURE_ARTWORK
     state.settings.artworkEnabled=false;
 #endif
@@ -754,6 +814,9 @@ void begin() {
     artwork::begin();
 #if !IBT_STREAM_ART_DIAG
     btaudio::loadSavedDevice();
+#if IBT_NO_PSRAM
+    lightboot::readiness().btLoaded.store(true,std::memory_order_release);
+#endif
 #endif
     onlineart::begin();
     onlineart::setEnabled(surfacepolicy::artwork(surfacepolicy::current())&&state.settings.artworkEnabled&&state.settings.vintageSkin!=5&&state.settings.vintageSkin!=6&&(IBT_NO_PSRAM||!state.settings.playerEnabled||state.settings.vintageSkin||state.settings.mediaPlayerSkin),state.generation);
@@ -764,6 +827,9 @@ void begin() {
     calibrateTouch();
 #endif
     front::setRotation(state.settings.rotation);}
+#if IBT_NO_PSRAM
+    page=lightboot::page;selected=0; // The early flash picture is the first live UI page.
+#endif
     initialized=true;
     if(state.settings.networkMode&&!state.settings.alarm.clockHome){pendingConnectivity=state.settings.networkMode;connectivityStep=0;connectivityAt=0;}
     if(debugEnabled())Serial.printf("[DUAL] %s version=%s UI=%s commands=%s\n",state.device,DUAL_VERSION,frontendOK?"OK":"failed",commands?"OK":"failed");
@@ -800,12 +866,12 @@ bool r10DiagUi(R10DiagUiAction a){
     switch(a){
       case R10DiagUiAction::Menu: page=PAGE_MAIN;selected=0;break;
       case R10DiagUiAction::RotCW:
-        if(page!=PAGE_MAIN){page=PAGE_MAIN;selected=0;} else selected=(selected+1)%4;break;
+        if(page!=PAGE_MAIN){page=PAGE_MAIN;selected=0;} else selected=(selected+1)%content::itemCount(PAGE_MAIN);break;
       case R10DiagUiAction::RotCCW:
-        if(page!=PAGE_MAIN){page=PAGE_MAIN;selected=3;} else selected=(selected+3)%4;break;
+        if(page!=PAGE_MAIN){page=PAGE_MAIN;selected=content::itemCount(PAGE_MAIN)-1;} else selected=(selected+content::itemCount(PAGE_MAIN)-1)%content::itemCount(PAGE_MAIN);break;
       case R10DiagUiAction::Short:
         if(page==PAGE_MAIN){
-          page=selected==0?PAGE_STATIONS:selected==1?PAGE_SOUND:selected==2?PAGE_BLUETOOTH:PAGE_SETTINGS;
+          page=IBT_NO_PSRAM?lightnav::mainDestination(selected):selected==0?PAGE_STATIONS:selected==1?PAGE_SOUND:selected==2?PAGE_BLUETOOTH:PAGE_SETTINGS;
           selected=0;
         } else {page=PAGE_MAIN;selected=0;}
         break;
@@ -824,18 +890,12 @@ unsigned r10DiagSelected(){return selected;}
 bool r10UiSelfcheck(){
     if(!initialized||network.status==SOFT_AP)return false;
     r10DiagRecoverHome();
-    input(Action::Menu);
-    const bool opened=page==PAGE_MAIN;
-    input(Action::EncoderLong);
-    const bool longHome=page==PAGE_HOME;
-    input(Action::EncoderShort);
-    input(Action::EncoderDown);
-    input(Action::EncoderLong);
-    const bool comboMenu=page==PAGE_MAIN;
-    input(Action::EncoderLong);
-    const bool finalHome=page==PAGE_HOME;
+    r10DiagUi(R10DiagUiAction::Menu);const bool opened=page==PAGE_MAIN;
+    r10DiagUi(R10DiagUiAction::Long);const bool longHome=page==PAGE_HOME;
+    r10DiagUi(R10DiagUiAction::Menu);const bool comboMenu=page==PAGE_MAIN;
+    r10DiagUi(R10DiagUiAction::Long);const bool finalHome=page==PAGE_HOME;
     const bool ok=opened&&longHome&&comboMenu&&finalHome;
-    Serial.printf("[UI-SELFTEST] result=%s menu=%u long_home=%u short_long_menu=%u final_home=%u\n",
+    Serial.printf("[UI-SELFTEST] result=%s menu=%u long_home=%u menu_reopen=%u final_home=%u scope=NAVIGATION_ONLY hardware_switch=NOT_TESTED\n",
       ok?"PASS":"FAIL",opened?1:0,longHome?1:0,comboMenu?1:0,finalHome?1:0);
     return ok;
 }
@@ -1119,7 +1179,14 @@ __attribute__((noinline)) void prepareTrackText(Snapshot& s) {
     const bool btIn=btaudio::inputSelected();
     if(btIn){
         s.playing=btaudio::inputPlaying(); // Presentation follows phone pause/play, not merely BT selected.
+#if IBT_NO_PSRAM
+        btaudio::Device peer{};const bool named=btaudio::connectedDevice(peer);
+        tracktext::copy(s.station,sizeof(s.station),named?peer.name:"BT-forrás");
+        const auto rx=btaudio::inputStatus();s.buffer=rx.buffered;s.bufferCapacity=rx.capacity;
+        s.audioCodec=rx.rate?16:0;s.sampleRate=rx.rate;s.sourceBits=rx.rate?16:0;s.formatKbps=0; // Display-only SBC; source MP3/FLAC is not transmitted.
+#else
         tracktext::copy(s.station,sizeof(s.station),"BT IN");
+#endif
         if(btaudio::connected()){
             const auto media=btmedia::view();
             tracktext::copy(s.artist,sizeof(s.artist),media.artist);
@@ -1135,8 +1202,14 @@ void displayEvent(int type,int payload) {
     if(type==DSP_START){portENTER_CRITICAL(&mux);state.ready=true;portEXIT_CRITICAL(&mux);}
 }
     static constexpr uint8_t uiStressScanPages[]={PAGE_MAIN,PAGE_STATIONS,PAGE_SOUND,
-      PAGE_VOLUME_STREAM,73,PAGE_EQ,PAGE_EQ10,PAGE_EQ_PRESETS,PAGE_OUTPUTS,PAGE_BLUETOOTH,PAGE_BT_RATE,
-      PAGE_SETTINGS,PAGE_WIFI,PAGE_DISPLAY,PAGE_SURFACE,PAGE_RETRO_COLOR,PAGE_CONTROLS,
+      PAGE_VOLUME_STREAM,
+#if IBT_NO_PSRAM
+      68,75,76,77,79,80,81,
+#else
+      73,PAGE_EQ,PAGE_EQ10,PAGE_EQ_PRESETS,PAGE_SURFACE,
+#endif
+      PAGE_OUTPUTS,PAGE_BLUETOOTH,PAGE_BT_RATE,
+      PAGE_SETTINGS,PAGE_WIFI,PAGE_DISPLAY,PAGE_RETRO_COLOR,PAGE_CONTROLS,
       PAGE_STORAGE,PAGE_SYSTEM,PAGE_BACKUP_MENU,PAGE_DIAGNOSTICS,PAGE_IDLE,PAGE_VU_TIMER,PAGE_HARDWARE,PAGE_BAT_CAL,PAGE_BAT_DISPLAY,PAGE_DNS,PAGE_DNS_ADDRESS,60,61,62,63,64,70,71,72,
 #if IBT_COMPACT_UI
       74,
@@ -1146,6 +1219,7 @@ static_assert(sizeof(uiStressScanPages)==UiScanSlots+1);
 static unsigned scanSlot(unsigned p){for(unsigned i=0;i<sizeof(uiStressScanPages);i++)if(uiStressScanPages[i]==p)return i;return 255;}
 static unsigned menuCount(unsigned p){return content::itemCount(p);}
 static bool menuEnabled(unsigned p,unsigned item){
+    if(IBT_NO_PSRAM&&p==81)return item<content::itemCount(p);
 #if IBT_COMPACT_UI
     if(p==74)return item<17&&item!=15;
 #endif
@@ -1155,18 +1229,35 @@ static bool menuEnabled(unsigned p,unsigned item){
     if(p==PAGE_SURFACE)return item<4;
     if(p==PAGE_EQ||p==PAGE_EQ10||p==73)return false;
 #else
+#if IBT_NO_PSRAM
+    if(p==PAGE_SOUND)return item<content::itemCount(p);
+    if(p==PAGE_DISPLAY)return item<6;
+    if(p==PAGE_CONTROLS)return item<lightnav::controlsCount;
+    if(p==PAGE_HARDWARE)return item==1||(item==0&&sensors::available());
+    if(p==PAGE_STORAGE)return item<4;
+    if(p==PAGE_BAT_CAL||p==PAGE_BAT_DISPLAY||p==PAGE_ART_CACHE)return false;
+    if(p==PAGE_SURFACE||p==PAGE_EQ||p==PAGE_EQ10||p==PAGE_EQ_PRESETS||p==73)return false;
+    if(p==PAGE_BT_RATE&&IBT_NO_PSRAM&&item<4&&item!=0)return false;
+
+#else
     if(p==PAGE_MAIN&&item==4)return false;
     if(p==PAGE_SOUND&&(item==1||item==4))return false;
     if(p==PAGE_SETTINGS&&(item==3||item==4))return false;
     if(p==PAGE_DISPLAY)return item<7;
     if(p==PAGE_SURFACE||p==PAGE_ALARM||p==PAGE_EQ||p==PAGE_EQ10||p==73)return false;
-    if(p==PAGE_BT_RATE&&IBT_NO_PSRAM&&item<4&&item!=1)return false;
+    if(p==PAGE_BT_RATE&&IBT_NO_PSRAM&&item<4&&item!=0)return false;
 
+#endif
 #endif
 
     switch(p){
+      case 77:return item<8&&item!=6;
+      case 79:case 80:return item<10&&(item>=8||item<sensors::deviceCount());
       case 75:return item<5;
-      case PAGE_MAIN:return item<5;
+      case PAGE_MAIN:return item<content::itemCount(p);
+#if IBT_NO_PSRAM
+      case lightboot::page:return item<3;
+#endif
       case PAGE_STATIONS:return item<=2||(FEATURE_SD&&item==3)||(item>=4&&item<8);
       case PAGE_SOUND:return item<=5;
       case 73:return item<13&&item!=3;
@@ -1180,7 +1271,7 @@ static bool menuEnabled(unsigned p,unsigned item){
       case PAGE_SETTINGS:return item<content::itemCount(p);
       case 72:return item<9;
       case PAGE_ALARM:return item<7;
-      case 64:return item<content::itemCount(p)&&item!=4;
+      case 64:return item<content::itemCount(p)&&item!=(IBT_NO_PSRAM?3:4);
       case 70:return item==4||(item<3&&sensors::available());
       case 71:return item==8||item<sensors::deviceCount();
       case 60:case 61:case 62:case 63:case 68:return item<content::itemCount(p);
@@ -1189,13 +1280,17 @@ static bool menuEnabled(unsigned p,unsigned item){
       case PAGE_BAT_DISPLAY:return item<4;
       case PAGE_VU_TIMER:return item<content::itemCount(p);
       case PAGE_IDLE:return item<8;
-      case PAGE_WIFI:return item<9;
+      case PAGE_WIFI:
+#if IBT_NO_PSRAM
+        if(item==1||item==3)return !btaudio::wanted()&&btaudio::idle()&&!network.connectionBusy();
+#endif
+        return item<9;
       case PAGE_DNS:return item<7;
       case PAGE_DNS_ADDRESS:return item<6;
       case PAGE_DISPLAY:return item<content::itemCount(p);
       case PAGE_SURFACE:return item<15&&item!=4;
       case PAGE_RETRO_COLOR:return item<10;
-      case PAGE_CONTROLS:return item<=4||item==6||(IBT_COMPACT_UI&&item==5);
+      case PAGE_CONTROLS:return IBT_NO_PSRAM?item<lightnav::controlsCount:item<=4||item==6||(IBT_COMPACT_UI&&item==5);
       case PAGE_STORAGE:return item==0||(FEATURE_SD&&item==1)||item==2||item==3||item==4;
       case PAGE_SYSTEM:return item<=3||(FEATURE_SD&&item==4)||item==5;
       case PAGE_BACKUP_MENU:return item<=4;
@@ -1233,7 +1328,7 @@ static void persistSetting(const Settings &s){
         // Exercise the real menu editor in RAM; do not wear flash during a sweep.
         portENTER_CRITICAL(&mux);state.settings=s;portEXIT_CRITICAL(&mux);return;
     }
-    const auto previous=snapshot().settings;
+    Settings previous;portENTER_CRITICAL(&mux);previous=state.settings;portEXIT_CRITICAL(&mux);
     if(alarmPhase!=AlarmPhase::Idle&&(previous.brightness!=s.brightness||previous.sensorMode!=s.sensorMode)){
         // Keep the alarm's audio schedule, but the user's light selection wins
         // for this occurrence, including a switch back to the ambient sensor.
@@ -1359,6 +1454,7 @@ static void alarmTick(uint32_t now) {
         alarmEndEpoch=mktime(&end);
         alarmStartEpoch=stamp;
         if(alarmEndEpoch<=stamp)return;
+        if(weather::active()){weather::setActive(false);publishSurface(snapshot().settings);}
         alarmLastDay=alarmclock::dayKey(local.tm_year+1900,local.tm_yday);
         alarmRequestEpoch.store(alarmLastDay,std::memory_order_release);
         releaseAlarmSd();
@@ -1551,9 +1647,22 @@ static void alarmTick(uint32_t now) {
     }
 }
 static void openChannels() {
-    stationListParent=page==PAGE_STATIONS?PAGE_STATIONS:PAGE_HOME;
+#ifdef USE_SD
+    Serial.printf("[SD-LIST-NAV] page=4 mode=%u total=%u catalog=%u indexed=%u\n",
+        unsigned(config.getMode()),unsigned(config.playlistLength()),
+        unsigned(sdman.catalogReady.load()),unsigned(sdman.indexedTracks.load()));
+#endif
+    stationListParent=page==PAGE_STATIONS?PAGE_STATIONS:page==PAGE_BT_SCAN?PAGE_BT_SCAN:PAGE_HOME;
     channelCursor=wrapStation(config.lastStation()?config.lastStation():1);
     selected=channelCursor;page=PAGE_STATIONS_LIST;stationPreview=false;redraw=true;
+}
+bool sdFilesAvailable(){
+#if IBT_NO_PSRAM && defined(USE_SD)
+    return config.getMode()==PM_SDCARD&&sdman.catalogReady.load()&&
+        sdman.indexedTracks.load()>0&&btaudio::outputSelected()&&btaudio::connected();
+#else
+    return false;
+#endif
 }
 static void openMainMenu() {
     page=PAGE_MAIN;selected=0;stationPreview=false;redraw=true;artwork::redraw(snapshot().generation);
@@ -1698,9 +1807,14 @@ static void goBack(unsigned from){
 #if IBT_COMPACT_UI
     if(from==74){irreceiver::cancel();page=PAGE_CONTROLS;selected=5;redraw=true;return;}
 #endif
+#if IBT_NO_PSRAM
+    if(from==77&&weather::active()){page=PAGE_HOME;selected=0;redraw=true;return;}
+    if(from==lightboot::page){lightboot::session().wifiMenuPending.store(false);page=PAGE_HOME;selected=0;redraw=true;return;}
+    if(from==PAGE_WIFI&&lightWifiMenuFromHub){lightWifiMenuFromHub=false;lightboot::session().reopen();page=lightboot::page;selected=0;redraw=true;return;}
+#endif
     backupArmedAt=0;
     restartArmedAt=0;
-    if(from==PAGE_SOUND&&!soundFromSettings){page=PAGE_MAIN;selected=1;redraw=true;return;}
+    if(from==PAGE_SOUND&&!soundFromSettings){page=PAGE_MAIN;selected=IBT_NO_PSRAM?0:1;redraw=true;return;}
     const auto parent=menustructure::parent(from);
     if(parent.page!=255){page=parent.page;selected=parent.row;redraw=true;return;}
     switch(from){
@@ -1708,11 +1822,13 @@ static void goBack(unsigned from){
       case 73:monoEdit=false;page=PAGE_SOUND;selected=4;break;
       case PAGE_SOUND:page=PAGE_MAIN;selected=1;break;
       case PAGE_BLUETOOTH:page=bluetoothParent;selected=bluetoothParentRow;break;
-      case PAGE_SETTINGS:page=PAGE_MAIN;selected=3;break;
+      case PAGE_SETTINGS:page=PAGE_MAIN;selected=IBT_NO_PSRAM?2:3;break;
       case 60:case 61:case 62:case 63:case 64:page=PAGE_ALARM;selected=from==63?3:from==62?4:from-59;break;
       case 67:page=60;selected=alarmTimeDraft.ending?1:0;break;
-      case 68:page=64;selected=3;break;
-      case 70:page=bleMenuParent;selected=bleMenuParent==49?1:6;break;
+      case 68:page=64;selected=IBT_NO_PSRAM?2:3;break;
+      case 77:page=weather::active()?PAGE_HOME:PAGE_MAIN;selected=weather::active()?0:4;break;
+      case 79:case 80:page=77;selected=from==79?3:4;break;
+      case 70:page=bleMenuParent;selected=bleMenuParent==49?(IBT_NO_PSRAM?0:1):(IBT_NO_PSRAM?4:6);break;
       case 71:page=70;selected=2;break;
       case 69:page=68;selected=clockStore->editIndex;clockStore->entry=WifiPasswordUi{};break;
       case PAGE_DNS:page=PAGE_WIFI;selected=4;break;
@@ -1726,7 +1842,7 @@ static void goBack(unsigned from){
       case PAGE_EQ:page=PAGE_SOUND;selected=1;break;
       case PAGE_EQ10:page=PAGE_EQ;selected=3;break;
       case PAGE_EQ_PRESETS:page=eqPresetParent;selected=page==PAGE_EQ10?10:0;break;
-      case PAGE_OUTPUTS:page=PAGE_SOUND;selected=2;break;
+      case PAGE_OUTPUTS:page=PAGE_SOUND;selected=IBT_NO_PSRAM?1:2;break;
       case PAGE_FIRMWARE_INFO:page=PAGE_SYSTEM;selected=1;break;
       case PAGE_MEMORY:page=memoryParent;selected=memoryParent==PAGE_STORAGE?0:1;break;
       case PAGE_ROTARY_DEBUG:page=PAGE_DIAGNOSTICS;selected=3;break;
@@ -1752,11 +1868,16 @@ static void goBack(unsigned from){
       case PAGE_BACKUP_RESULT:page=PAGE_BACKUP_MENU;selected=0;break;
       case PAGE_BT_INFO:page=PAGE_BLUETOOTH;selected=3;break;
       case PAGE_BT_RATE:page=PAGE_BLUETOOTH;selected=4;break;
-      case PAGE_BT_PLAYER:page=PAGE_BLUETOOTH;selected=0;break;
+      case PAGE_BT_PLAYER:page=bluetoothParent==75?75:PAGE_BLUETOOTH;selected=page==75?bluetoothParentRow:0;break;
       case PAGE_BT_SCAN:
+#if IBT_NO_PSRAM
+        // Back only cancels an unconnected search. An established audio link
+        // belongs to the selected route, not to the lifetime of this page.
+        if(!btaudio::connected()&&!btaudio::transmitting())
+#endif
         if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, próbáld újra");redraw=true;return;}
-        page=PAGE_BLUETOOTH;selected=1;break;
-      case 75:page=PAGE_HOME;selected=0;localRoutePending=-1;speakerSearchPending=false;break;
+        page=bluetoothParent==75?75:PAGE_BLUETOOTH;selected=page==75?bluetoothParentRow:1;break;
+      case 75:sourceRouteFailure=sdroute::Error::None;page=PAGE_HOME;selected=0;localRoutePending=-1;speakerSearchPending=false;break;
       case PAGE_BT_SAVED:page=PAGE_BLUETOOTH;selected=6;break;
       case PAGE_DAC_INFO:page=PAGE_OUTPUTS;selected=0;break;
       case PAGE_FS_INFO:page=PAGE_STORAGE;selected=3;break;
@@ -1767,8 +1888,23 @@ static void goBack(unsigned from){
     }
     redraw=true;
 }
+#if IBT_NO_PSRAM
+// A held Back is navigation, never a request to change/stop the audio route.
+static void lightMenuHome(){
+    if(page==PAGE_SOURCE_PENDING){const unsigned from=page;goBack(from);if(page==from)return;}
+    if(page==PAGE_WIFI_PASSWORD)clearWifiPassword();
+    if(page==PAGE_WIFI_SCAN)network.cancelScan();
+    if(page==69)clockStore->entry=WifiPasswordUi{};
+    backupArmedAt=restartArmedAt=0;monoEdit=false;alarmTimeError=false;
+    lightWifiMenuFromHub=false;lightboot::session().wifiMenuPending.store(false);
+    pendingConnectivity=-1;localRoutePending=-1;speakerSearchPending=false;
+    page=PAGE_HOME;selected=0;stationPreview=false;shortPending=false;secondDown=false;
+    front::invalidate();redraw=true;
+}
+#endif
 static void selectConnectivity(unsigned mode){
     if(!connectivity::valid(mode))return;
+    if(weather::active()){weather::setActive(false);publishSurface(snapshot().settings);}
     Settings s=snapshot().settings;
     if(mode==0&&s.networkMode==0&&!network.offlinePlayer())return;
     s.networkMode=uint8_t(mode);
@@ -1781,28 +1917,65 @@ static void selectConnectivity(unsigned mode){
     if(mode==0&&bootprogress::hold(s.bootScreen,playerSkinId(s)))front::bootRestart(s.bootScreen,s.vintageSkin,playerSkinId(s));
 #endif
 }
+#if IBT_NO_PSRAM
+static void lightBootChoose(unsigned choice){
+ if(choice>2)return;
+ lightboot::session().automatic=false;
+ lightboot::session().wifiMenuPending.store(false);
+ Serial.printf("[LIGHT-BOOT] select=%s setup_done=%u\n",choice==0?"WIFI_MENU":choice==1?"SD_DAC":"BT_DAC",unsigned(bootprogress::state().setupDone.load()));
+ if(choice==0){
+  // A new-network request supersedes stale, unsent route intents.
+  // Any active BT owner must acknowledge shutdown before Wi-Fi can start.
+  pendingConnectivity=-1;speakerSearchPending=false;localRoutePending=-1;
+  if((btaudio::wanted()||!btaudio::idle())&&!player.sendCommand({PR_BT,-2})){
+   btRateNotice("BT foglalt, próbáld újra");return;
+  }
+  lightWifiMenuFromHub=true;
+  lightboot::session().wifiMenuPending.store(true);
+  network.enterOfflinePlayer(1); // Cancel any association through its owner.
+  return;
+ }
+ lightWifiMenuFromHub=false;
+ const bool closeBt=choice==1&&(btaudio::wanted()||!btaudio::idle());
+ if(closeBt&&!player.sendCommand({PR_BT,-2})){btRateNotice("BT foglalt, próbáld újra");return;}
+ selectConnectivity(choice); // Existing SD-DAC / phone BT-DAC state machines.
+ if(closeBt)connectivityStep=1; // The SD owner waits for the SDK teardown ACK before playing.
+}
+#endif
 static void serviceConnectivity(){
+#if IBT_NO_PSRAM
+    if(lightboot::session().wifiMenuPending.load()&&bootprogress::state().setupDone.load()&&
+       network.offlineReady()&&!btaudio::wanted()&&btaudio::idle()){
+        lightboot::session().wifiMenuPending.store(false);
+        lightWifiMenuFromHub=false;
+        network.requestSetup(); // AP + local new-network screen, no saved-network search.
+        page=PAGE_HOME;selected=0;front::invalidate();redraw=true;
+    }
+#endif
     if(localRoutePending>=0){
         if(uint32_t(millis()-localRouteAt)>30000){localRoutePending=-1;btRateNotice("Hangútváltás nem fejeződött be");return;}
         if(!btaudio::idle()||player.queueDepth()!=0)return;
         const auto target=playMode_e(localRoutePending);
         if(target==PM_WEB&&network.offlinePlayer()){network.enterOnlinePlayer();return;}
-        if(config.getMode()!=target){
-            if(player.sendCommand({PR_SOURCE,target})){pendingSourceTarget=target;pendingSourceAt=millis();pendingSourceCancelSent=false;localRoutePending=-1;page=PAGE_SOURCE_PENDING;redraw=true;}
-        }else{localRoutePending=-1;page=PAGE_HOME;selected=0;redraw=true;}
+        // Select/start only the requested source after BT shutdown ACK.
+        playerRequestParams_t request{PR_SOURCE,target};request.sourceAutoplay=true;
+        if(player.sendCommand(request)){pendingSourceTarget=target;pendingSourceAt=millis();pendingSourceCancelSent=false;localRoutePending=-1;page=PAGE_SOURCE_PENDING;redraw=true;}
         return;
     }
     if(speakerSearchPending){
-        if(uint32_t(millis()-speakerSearchAt)>30000){speakerSearchPending=false;page=PAGE_BLUETOOTH;selected=1;btRateNotice("SD/BT keresés nem indult el");return;}
-        if(!btaudio::idle()||player.queueDepth()!=0)return;
+        if(uint32_t(millis()-speakerSearchAt)>30000){sourceRouteFailed(sdroute::Error::Timeout,2);return;}
+        if(player.queueDepth()!=0)return;
+        if(speakerSearchStep==0){if(player.sendCommand({PR_STOP,0})){speakerSearchStep=1;Serial.println("[ROUTE-SD-BT] step=STOP_QUEUED");}return;}
+        if(speakerSearchStep==1){if(player.sendCommand({PR_BT,-2})){speakerSearchStep=2;Serial.println("[ROUTE-SD-BT] step=BT_OFF_QUEUED");}return;}
+        if(!btaudio::idle())return;
         if(config.getMode()!=PM_SDCARD||!sdman.catalogReady.load()){
-            if(!speakerSearchStep&&player.sendCommand({PR_SOURCE,PM_SDCARD}))speakerSearchStep=1;
-            if(speakerSearchStep&&(player.sdPrepareState()==SdPrepareState::Failed||player.sdPrepareState()==SdPrepareState::Cancelled)){
-                speakerSearchPending=false;page=PAGE_BLUETOOTH;selected=1;btRateNotice("SD-kártya nem érhető el");
+            if(speakerSearchStep==2&&player.sendCommand({PR_SOURCE,PM_SDCARD})){speakerSearchStep=3;Serial.println("[ROUTE-SD-BT] step=SD_QUEUED resume=0");}
+            if(speakerSearchStep>=3&&(player.sdPrepareState()==SdPrepareState::Failed||player.sdPrepareState()==SdPrepareState::Cancelled)){
+                sourceRouteFailed(player.sdPrepareError(),2);
             }
             return;
         }
-        if(player.sendCommand({PR_BT,0})){speakerSearchPending=false;cancelAlarmForUser();page=PAGE_BT_SCAN;selected=0;redraw=true;}
+        if(player.sendCommand({PR_BT,0})){Serial.println("[ROUTE-SD-BT] step=SCAN_QUEUED source=SD");speakerSearchPending=false;cancelAlarmForUser();page=PAGE_BT_SCAN;selected=0;redraw=true;}
         return;
     }
     if(pendingConnectivity<1||!player.audioTaskHandle()||!network.offlineReady())return;
@@ -1812,7 +1985,7 @@ static void serviceConnectivity(){
     if(target==2){if(!btaudio::inputSelected()){if(player.queueDepth()!=0||!player.sendCommand({PR_BT,1}))return;cancelAlarmForUser();}page=snapshot().settings.vintageSkin>=5?PAGE_HOME:PAGE_BT_PLAYER;selected=0;redraw=true;pendingConnectivity=-1;return;}
     if(btaudio::inputSelected()){if(connectivityStep==0&&player.sendCommand({PR_BT,-1})){cancelAlarmForUser();connectivityStep=1;}return;}
     if(connectivityStep==1&&!btaudio::idle())return;
-    if(connectivityStep>=2&&(player.sdPrepareState()==SdPrepareState::Failed||player.sdPrepareState()==SdPrepareState::Cancelled)){pendingConnectivity=-1;page=PAGE_HOME;btRateNotice("SD forras nem erheto el");return;}
+    if(connectivityStep>=2&&(player.sdPrepareState()==SdPrepareState::Failed||player.sdPrepareState()==SdPrepareState::Cancelled)){sourceRouteFailed(player.sdPrepareError(),1);return;}
     if(config.getMode()!=PM_SDCARD||!sdman.catalogReady.load()){
         if(connectivityStep<2&&player.sendCommand({PR_SOURCE,PM_SDCARD})){connectivityStep=2;page=PAGE_SOURCE_PENDING;pendingSourceTarget=PM_SDCARD;pendingSourceAt=millis();pendingSourceCancelSent=false;redraw=true;}
         return;
@@ -1825,6 +1998,20 @@ static void serviceConnectivity(){
     }
     pendingConnectivity=-1;page=PAGE_HOME;selected=0;front::invalidate();redraw=true;
 }
+#if IBT_NO_PSRAM
+static void showLightMode(unsigned choice){
+    pendingConnectivity=-1;localRoutePending=-1;speakerSearchPending=false;
+    lightboot::session().wifiMenuPending=false;
+    Settings s=snapshot().settings;s.alarm.clockHome=choice==lightnav::Clock;
+    weather::setActive(choice==lightnav::Weather);
+    if(choice==lightnav::Weather){
+        cancelAlarmForUser();portENTER_CRITICAL(&mux);state.settings=s;portEXIT_CRITICAL(&mux);
+        publishSurface(s);weather::refresh();player.serviceStop();player.sendCommand({PR_STOP,0});
+        if(btaudio::wanted()||!btaudio::idle())player.sendCommand({PR_BT,-2});
+    }else persistSetting(s); // Return to player does not issue an unsolicited Play.
+    page=PAGE_HOME;selected=0;front::invalidate();redraw=true;
+}
+#endif
 static void activateMenu(unsigned p,unsigned item){
 #if IBT_COMPACT_UI
     if(p==74){if(item==16)goBack(p);else irreceiver::menu(item);redraw=true;return;}
@@ -1833,11 +2020,28 @@ static void activateMenu(unsigned p,unsigned item){
     if(p!=PAGE_SYSTEM||item!=3)restartArmedAt=0;
     if(p!=PAGE_BACKUP_MENU || (item!=1 && item!=3))backupArmedAt=0;
     if(!menuEnabled(p,item)){redraw=true;return;}
+#if IBT_NO_PSRAM
+    if(p==PAGE_SOUND){if(item==0){page=PAGE_VOLUME_STREAM;selected=0;}else if(item==1){page=PAGE_OUTPUTS;selected=0;}else goBack(p);redraw=true;return;}
+#endif
+#if IBT_NO_PSRAM
+    if(p==lightboot::page){lightBootChoose(item);return;}
+#endif
     if(p==PAGE_MAIN){
+#if IBT_NO_PSRAM
+        if(item==4){showLightMode(lightnav::Weather);return;}
+        if(item==5){showLightMode(lightnav::Player);return;}
+        if(weather::active()){weather::setActive(false);publishSurface(snapshot().settings);}
+        if(item==0){soundFromSettings=false;page=PAGE_SOUND;selected=0;redraw=true;return;}
+        if(item==1){openBluetoothMenu(PAGE_MAIN,1,0);return;}
+        if(item==2){page=PAGE_SETTINGS;selected=0;redraw=true;return;}
+        if(item==3){showLightMode(lightnav::Clock);return;}
+        return;
+#endif
         if(item==4){Settings s=snapshot().settings;s.alarm.clockHome=!s.alarm.clockHome;persistSetting(s);page=PAGE_HOME;front::invalidate();}
         else {if(item==2){openBluetoothMenu(PAGE_MAIN,2,0);return;}if(item==1)soundFromSettings=false;page=item==0?PAGE_STATIONS:item==1?PAGE_SOUND:PAGE_SETTINGS;}
         selected=0;redraw=true;return;
     }
+    if(weather::active()&&(p==PAGE_STATIONS||p==75)){weather::setActive(false);publishSurface(snapshot().settings);}
     if(p==PAGE_STATIONS){
         if(item==5){bluetoothMode(1);return;}
         if(item==6){openBluetoothMenu(PAGE_STATIONS,6,2);return;}
@@ -1873,11 +2077,12 @@ static void activateMenu(unsigned p,unsigned item){
     if(p==73){if(item==12){goBack(p);return;}static const int8_t map[]={0,1,2,-1,3,4,5,6,7,8,9,10};if(item<12&&map[item]>=0)monodsp::change(unsigned(map[item]),1);redraw=true;return;}
     if(p==PAGE_SOUND){if(item==4){page=73;selected=0;redraw=true;return;}if(item==0)page=PAGE_VOLUME_STREAM;else if(item==1)page=PAGE_EQ;else if(item==2)page=PAGE_OUTPUTS;else if(item==3){openBluetoothMenu(PAGE_SOUND,3,0);return;}else {goBack(p);return;}selected=0;redraw=true;return;}
     if(p==75){
-        if(item>=4){localRoutePending=-1;speakerSearchPending=false;page=PAGE_HOME;selected=0;redraw=true;return;}
+        sourceRouteFailure=sdroute::Error::None;
+        if(item>=4){goBack(75);return;}
         pendingConnectivity=-1;speakerSearchPending=false;localRoutePending=-1;
         if(item==3){bluetoothMode(1);return;}
         if(item==2){bluetoothMode(0);return;}
-        if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, próbáld újra");return;}
+        if(!player.sendCommand({PR_BT,-2})){btRateNotice("BT foglalt, próbáld újra");return;}
         localRoutePending=item==0?PM_WEB:PM_SDCARD;localRouteAt=millis();cancelAlarmForUser();redraw=true;return;
     }
     if(p==PAGE_BLUETOOTH){
@@ -1920,6 +2125,9 @@ static void activateMenu(unsigned p,unsigned item){
         persistSetting(s);if(frontendOK)front::invalidate();redraw=true;return;
     }
     if(p==PAGE_HARDWARE){
+#if IBT_NO_PSRAM
+        if(item==0){bleMenuParent=PAGE_HARDWARE;page=70;selected=0;}else goBack(p);redraw=true;return;
+#endif
         if(item==0){Settings s=snapshot().settings;s.sensorMode=(s.sensorMode+1)%3;
             if(s.sensorMode!=1&&s.brightness==0){s.brightness=100;board::brightness(100);}
             persistSetting(s);}
@@ -1939,9 +2147,16 @@ static void activateMenu(unsigned p,unsigned item){
         }else goBack(p);
         redraw=true;return;
     }
+#if IBT_NO_PSRAM
+    if(p==81){
+        if(item>=menustructure::advancedCount){goBack(p);return;}
+        page=menustructure::advanced[item].page;if(page==PAGE_SOUND)soundFromSettings=true;selected=0;redraw=true;return;
+    }
+#endif
     if(p==PAGE_SETTINGS){
         if(item>=menustructure::settingsCount){goBack(p);return;}
-        page=menustructure::settings[item].page;if(page==PAGE_SOUND)soundFromSettings=true;selected=0;redraw=true;return;
+        page=menustructure::settings[item].page;
+        if(page==PAGE_SOUND)soundFromSettings=true;selected=0;redraw=true;return;
     }
     if(p==PAGE_BACKUP_MENU){
         if(item<4){
@@ -2010,13 +2225,30 @@ static void activateMenu(unsigned p,unsigned item){
             }
         redraw=true;return;
     }
+#if IBT_NO_PSRAM
+    if(p==77){
+        if(item==0){activateMenu(PAGE_MAIN,4);return;}
+        if(item==1){activateMenu(PAGE_MAIN,4);return;}
+        else if(item==2){sensors::discover();activateMenu(PAGE_MAIN,4);return;}
+        else if(item==3||item==4){page=item==3?79:80;selected=0;}
+        else if(item==5){auto c=weather::configuration();c.intervalMinutes=c.intervalMinutes==15?30:c.intervalMinutes==30?60:15;weather::configure(c);}
+        else if(item==7)goBack(p);
+        redraw=true;return;
+    }
+    if(p==79||p==80){if(item<8)sensors::selectRole(item,p==79?0:1);else if(item==8)sensors::clearRole(p==79?0:1);goBack(p);redraw=true;return;}
+#endif
     if(p==70){if(item==0)sensors::toggle();else if(item==1){Serial.println("[BLE-MENU] page=70 item=1 action=SEARCH");sensors::discover();Settings s=snapshot().settings;s.alarm.clockHome=true;persistSetting(s);page=PAGE_HOME;selected=0;front::invalidate();}else if(item==2){page=71;selected=0;}else if(item==4)goBack(p);redraw=true;return;}
     if(p==71){if(item<8)sensors::select(item);else goBack(p);redraw=true;return;}
-    if(p==64&&item>=7&&item<=9){Settings s=snapshot().settings;if(item==7)s.alarm.clockStyle=(s.alarm.clockStyle+1)%4;else if(item==8)s.alarm.clockColor=(s.alarm.clockColor+1)%9;else s.alarm.textColor=(s.alarm.textColor+1)%9;persistSetting(s);redraw=true;return;}
-    if(p==64&&item==6){bleMenuParent=64;page=70;selected=0;redraw=true;return;}
+    if(!IBT_NO_PSRAM&&p==64&&item>=7&&item<=9){Settings s=snapshot().settings;if(item==7)s.alarm.clockStyle=(s.alarm.clockStyle+1)%4;else if(item==8)s.alarm.clockColor=(s.alarm.clockColor+1)%9;else s.alarm.textColor=(s.alarm.textColor+1)%9;persistSetting(s);redraw=true;return;}
+    if(!IBT_NO_PSRAM&&p==64&&item==6){bleMenuParent=64;page=70;selected=0;redraw=true;return;}
+#if IBT_NO_PSRAM
+    if(p==64&&item==2){page=68;selected=0;redraw=true;return;}
+    if(p==64&&item==3)return; // timezone information only
+    if(p==64&&item==4){bleMenuParent=64;page=70;selected=0;redraw=true;return;}
+#endif
     if(p==68){if(item<4)openNtpServer(item);else goBack(p);return;}
-    if(p==64&&item==3){page=68;selected=0;redraw=true;return;}
-    if(p==64&&item==4){redraw=true;return;} // Fixed Hungary/CET-CEST timezone information.
+    if(!IBT_NO_PSRAM&&p==64&&item==3){page=68;selected=0;redraw=true;return;}
+    if(!IBT_NO_PSRAM&&p==64&&item==4){redraw=true;return;} // Fixed Hungary/CET-CEST timezone information.
     if(p==PAGE_ALARM&&item==0){Settings s=snapshot().settings;alarmui::toggle(s.alarm);persistSetting(s);redraw=true;return;}
     if(p==62&&item==0){Settings s=snapshot().settings;alarmui::profile(s.alarm);persistSetting(s);redraw=true;return;}
     if(p==PAGE_ALARM&&item>=1){
@@ -2035,6 +2267,9 @@ static void activateMenu(unsigned p,unsigned item){
     }
     if(p==PAGE_ALARM){
         if(item==32){weather::toggle();redraw=true;return;}
+#if IBT_NO_PSRAM
+        if(item==37){lightui::clockStyle.store(lightui::clockStyle.load()?0:1);persistSetting(snapshot().settings);front::invalidate();redraw=true;return;}
+#endif
         if(item>=27&&item!=28){goBack(p);return;}
         Settings s=snapshot().settings;auto &a=s.alarm;
         if(item>=17&&item<=23){a.daysMask^=uint8_t(1u<<(item-17));persistSetting(s);redraw=true;return;}
@@ -2079,13 +2314,19 @@ static void activateMenu(unsigned p,unsigned item){
     if(p==PAGE_DISPLAY){
 #if IBT_NO_PSRAM
         if(item==2){page=PAGE_VU_TIMER;selected=0;redraw=true;}
-        else if(item<6){static const unsigned map[]={2,1,0,5,7,3};editDisplay(map[item]);front::invalidate();redraw=true;}
+        else if(item<5){static const unsigned map[]={2,1,0,5,7};editDisplay(map[item]);front::invalidate();redraw=true;}
         else goBack(p);
 #else
         if(item==4){page=PAGE_SURFACE;selected=0;redraw=true;}else if(item==8){page=72;selected=0;redraw=true;}else if(item==9){page=PAGE_BAT_DISPLAY;selected=0;redraw=true;}else if(item==10){page=PAGE_VU_TIMER;selected=0;redraw=true;}else if(item<8)editDisplay(item);else goBack(p);
 #endif
         return;}
     if(p==PAGE_CONTROLS){
+#if IBT_NO_PSRAM
+        if(item==3){page=PAGE_IDLE;selected=0;redraw=true;return;}
+        if(item==4){Settings s=snapshot().settings;s.swipeSkins=!s.swipeSkins;persistSetting(s);redraw=true;return;}
+        if(item==5){Settings s=snapshot().settings;s.tapSelected=!s.tapSelected;persistSetting(s);redraw=true;return;}
+        if(item>=6){goBack(p);return;}
+#endif
 #if IBT_COMPACT_UI
         if(item==5){page=74;selected=0;redraw=true;return;}
 #endif
@@ -2099,6 +2340,7 @@ static void activateMenu(unsigned p,unsigned item){
             redraw=true;
         }else if(item==2){page=PAGE_BUTTON_MAP;selected=0;redraw=true;}else goBack(p);return;
     }
+    if(IBT_NO_PSRAM&&p==PAGE_STORAGE&&item>=2){if(item==2){page=PAGE_FS_INFO;selected=0;redraw=true;}else goBack(p);return;}
     if(p==PAGE_STORAGE){if(item==0){memoryParent=PAGE_STORAGE;page=PAGE_MEMORY;selected=0;redraw=true;}else if(item==1&&FEATURE_SD){page=PAGE_SD_INFO;selected=0;redraw=true;}else if(item==2||item==3){page=item==2?PAGE_ART_CACHE:PAGE_FS_INFO;selected=0;redraw=true;}else goBack(p);return;}
     if(p==PAGE_SYSTEM){
         if(item==0)editSystem(item);
@@ -2125,6 +2367,7 @@ static void activateMenu(unsigned p,unsigned item){
     if(p==PAGE_VOLUME_STREAM){if(item<=2)editVolumeStream(item);else if(item==3)send(Action::Balance);else goBack(p);return;}
     if(p==PAGE_EQ){if(item<3)send(item==0?Action::EqBass:item==1?Action::EqMiddle:Action::EqTreble);
         else if(item==3){page=PAGE_EQ10;selected=0;redraw=true;}else goBack(p);return;}
+#if !IBT_NO_PSRAM
     if(p==PAGE_EQ10){
         if(item<eq10::Bands){Settings s=snapshot().settings;
             const int next=s.graphicEq.db[item]>=6?-12:int(s.graphicEq.db[item])+2;
@@ -2138,9 +2381,16 @@ static void activateMenu(unsigned p,unsigned item){
             if(eq10::apply(s.graphicEq,item)){persistSetting(s);player.requestGraphicEq();}
             goBack(p);
         }else goBack(p);return;}
+#endif
     if(p==PAGE_OUTPUTS){if(item==0){if(!player.sendCommand({PR_BT,-1})){btRateNotice("BT foglalt, próbáld újra");redraw=true;return;}cancelAlarmForUser();page=PAGE_DAC_INFO;selected=0;redraw=true;}else if(item==2||item==3){openBluetoothMenu(PAGE_OUTPUTS,item,item==2?1:0);}else goBack(p);return;}
 }
 bool webMenuSupported(unsigned p,unsigned item){
+#if IBT_NO_PSRAM
+    if(p==lightboot::page)return item==0;
+#endif
+    if(IBT_NO_PSRAM&&p==PAGE_MAIN)return item<5;
+    if(IBT_NO_PSRAM&&(p==77||p==79||p==80))return menuEnabled(p,item);
+    if(IBT_NO_PSRAM&&(p==47||p==57||p==58||p==73))return false;
     switch(p){
       case 73:return item<12&&item!=3;
       case PAGE_VOLUME_STREAM:return item<=2;
@@ -2158,10 +2408,10 @@ bool webMenuSupported(unsigned p,unsigned item){
       case 72:return item<8;
       case PAGE_RETRO_COLOR:return item<9;
       case PAGE_ALARM:return item<7;
-      case 64:return item<content::itemCount(p)&&item!=4;
+      case 64:return item<content::itemCount(p)&&item!=(IBT_NO_PSRAM?3:4);
       case 60:case 61:case 62:case 63:return item<content::itemCount(p);
-      case PAGE_DISPLAY:return IBT_NO_PSRAM?(item<6&&item!=2):(item<=3||(item>=5&&item<=7));
-      case PAGE_CONTROLS:return item==0||item==3;
+      case PAGE_DISPLAY:return IBT_NO_PSRAM?(item<5&&item!=2):(item<=3||(item>=5&&item<=7));
+      case PAGE_CONTROLS:return item==0||(!IBT_NO_PSRAM&&item==3);
       case PAGE_SYSTEM:return item==0;
       case PAGE_DIAGNOSTICS:return item==0;
       default:return false;
@@ -2202,7 +2452,7 @@ static void btPlayerKey(unsigned key){
 static void doShortPress() {
     if(page==PAGE_BT_SAVED){if(selected==4)bluetoothMode(0);else reconnectDevice(selected);return;}
     if(page==PAGE_BT_SCAN){
-        if(btaudio::deviceCount())btaudio::selectDevice(selected);
+        if(btaudio::pickerCount())btaudio::selectPickerDevice(selected);
         else if(!btaudio::scanning())btaudio::restartScan();
         return;
     }
@@ -2233,6 +2483,15 @@ static void input(Action a) {
             return;
         }
     }
+#if IBT_NO_PSRAM
+    if(page==lightboot::page){
+        if(a==Action::RotCW||a==Action::Next||a==Action::VolUp){selected=(selected+1)%3;redraw=true;}
+        else if(a==Action::RotCCW||a==Action::Prev||a==Action::VolDown){selected=(selected+2)%3;redraw=true;}
+        else if(a==Action::EncoderShort||a==Action::Select)lightBootChoose(selected);
+        else if((a==Action::Menu||a==Action::EncoderLong)&&bootprogress::state().setupDone.load())goBack(page);
+        return;
+    }
+#endif
     // Handle the second held press before the clock/editor can consume it.
     const bool clockGesturePage=page==PAGE_HOME||page==67;
     if(clockMenuPending&&a==Action::EncoderDown&&clockGesturePage){
@@ -2243,6 +2502,14 @@ static void input(Action a) {
         clockMenuPending=false;shortPending=false;secondDown=false;stationPreview=false;openMainMenu();return;
     }
     if(!clockGesturePage)clockMenuPending=false;
+#if IBT_NO_PSRAM
+    if(page==PAGE_HOME&&weather::active()){
+        const bool visible=weather::controlsVisible(millis());weather::wake(millis());redraw=true;
+        if(a==Action::Menu||a==Action::EncoderLong){page=77;selected=0;return;}
+        if(visible&&(a==Action::EncoderShort||a==Action::Select)){weather::setActive(false);publishSurface(snapshot().settings);page=PAGE_MAIN;selected=4;front::invalidate();}
+        return;
+    }
+#endif
     if(page==PAGE_HOME&&snapshot().settings.alarm.clockHome){
         if(a==Action::RotCW||a==Action::RotCCW||a==Action::Next||a==Action::Prev||a==Action::VolUp||a==Action::VolDown){clockMenuPending=false;shortPending=false;secondDown=false;unsigned f=clockHomeFocus();clockFocus.store((f+((a==Action::RotCW||a==Action::Next||a==Action::VolUp)?1:10))%11,std::memory_order_relaxed);redraw=true;return;}
         if(a==Action::EncoderDown){clockPressWakeOnly=!clockWasVisible;return;}
@@ -2369,11 +2636,12 @@ static void input(Action a) {
         return;
     }
     if(page==PAGE_BT_SCAN){
-        unsigned n=btaudio::deviceCount();
+        unsigned devices=btaudio::pickerCount();
+        const unsigned n=devices;
         if(n){
             if(a==Action::RotCW||a==Action::VolUp||a==Action::Next)selected=(selected+1)%n;
             else if(a==Action::RotCCW||a==Action::VolDown||a==Action::Prev)selected=(selected+n-1)%n;
-            else if(a==Action::Select||a==Action::Toggle)btaudio::selectDevice(selected);
+            else if(a==Action::Select||a==Action::Toggle){btaudio::selectPickerDevice(selected);}
         }else if((a==Action::Select||a==Action::Toggle)&&!btaudio::scanning())btaudio::restartScan();
         return;
     }
@@ -2450,6 +2718,14 @@ static void input(Action a) {
 static bool __attribute__((noinline)) homeSkinSwipe(Point from,Point to,Size dim,uint32_t elapsed,unsigned heldSkin){
     if(page!=PAGE_HOME||uiStressActive||front::skinPreviewActive()||network.status==SOFT_AP||
        !skinSwipeGesture(from,to,dim,elapsed))return false;
+#if IBT_NO_PSRAM
+    bool swipe,clockFace;portENTER_CRITICAL(&mux);
+    swipe=state.settings.swipeSkins;clockFace=state.settings.alarm.clockHome;portEXIT_CRITICAL(&mux);
+    if(!swipe||surfacepolicy::skin()!=heldSkin)return false;
+    if(!uiGovernor.admit(millis(),UiGovernor::Kind::Critical,player.isRunning()))return false;
+    const unsigned current=weather::active()?lightnav::Weather:clockFace?lightnav::Clock:lightnav::Player;
+    showLightMode(lightnav::next(current,to.x<from.x));return true;
+#else
     Settings s;uint32_t generation;char title[192];
     portENTER_CRITICAL(&mux);s=state.settings;generation=state.generation;strlcpy(title,state.title,sizeof(title));portEXIT_CRITICAL(&mux);
     if(s.alarm.clockHome||!s.swipeSkins||playerSkinId(s)!=heldSkin)return false;
@@ -2474,6 +2750,7 @@ static bool __attribute__((noinline)) homeSkinSwipe(Point from,Point to,Size dim
         if(title[0])onlineart::requestTrack(title,generation);
     }
     if(frontendOK)front::invalidate();redraw=true;return true;
+#endif
 }
 // Touch handling has large Snapshot temporaries. Keep its stack frame out of
 // the rendering call chain; both execute serially on the same UI owner.
@@ -2488,10 +2765,25 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
     if(nowDown||down)menuActivityAt=now;
     if(nowDown&&!down){
         pressed=now;start=p;last=p;longPress=false;dragged=false;
-        unsigned rotation;portENTER_CRITICAL(&mux);rotation=state.settings.rotation;portEXIT_CRITICAL(&mux);
+        unsigned rotation;bool clockFace;portENTER_CRITICAL(&mux);rotation=state.settings.rotation;clockFace=state.settings.alarm.clockHome;portEXIT_CRITICAL(&mux);
         const unsigned skin=surfacepolicy::skin();
         contact.begin(p.x,p.y,page,skin,rotation,now);
         dragAnchor=toLogical(p,front::nativeSize(),rotation).y;
+#if IBT_NO_PSRAM
+        if(page==PAGE_HOME&&network.status!=SOFT_AP&&!weather::active()&&!clockFace){
+            const auto point=toLogical(p,front::nativeSize(),rotation);
+            const int button=lightui::homeButton(point.x,point.y);
+            if(button>=0)front::playerButtonPressed(unsigned(button));
+        }else if(page==PAGE_BT_PLAYER){
+            const auto point=toLogical(p,front::nativeSize(),rotation);
+            const auto hit=btspeakerui::hit(point.x,point.y);
+            if(hit==btspeakerui::Control::Previous)front::playerButtonPressed(0);
+            else if(hit==btspeakerui::Control::Toggle)front::playerButtonPressed(1);
+            else if(hit==btspeakerui::Control::Next)front::playerButtonPressed(2);
+            else if(hit==btspeakerui::Control::Menu)front::playerButtonPressed(4);
+        }
+#endif
+
     }
     if(nowDown&&down){last=p;contact.observe(p.x,p.y);if(page!=contact.page||surfacepolicy::skin()!=contact.skin)contact.consume();}
     if(sensedDown&&down&&!longPress&&!dragged&&!contact.consumed&&page==contact.page&&page==PAGE_HOME){
@@ -2499,20 +2791,34 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
         if(homeSkinSwipe(toLogical(start,native,rotation),toLogical(last,native,rotation),logicalSize(native,rotation),uint32_t(now-pressed),contact.skin))
             contact.consume();
     }
-    if(sensedDown&&down&&!longPress&&(page==PAGE_STATIONS_LIST||page==PAGE_FAVORITES_LIST)){
-        const auto a=toLogical(start,front::nativeSize(),snapshot().settings.rotation),b=toLogical(last,front::nativeSize(),snapshot().settings.rotation);
-        if(a.y>=40&&(dragged||uiinteraction::verticalDrag(b.x-a.x,b.y-a.y))){
-            dragged=true;const int delta=(b.y-dragAnchor)/26;
+    if(sensedDown&&down&&!longPress&&page==contact.page&&!contact.consumed&&(page==PAGE_STATIONS_LIST||page==PAGE_FAVORITES_LIST||(IBT_NO_PSRAM&&page==PAGE_SEARCH_RESULTS))){
+        const auto a=toLogical(start,front::nativeSize(),contact.rotation),b=toLogical(last,front::nativeSize(),contact.rotation);
+        if(a.y>=(IBT_NO_PSRAM?litelist::top:40)&&(dragged||uiinteraction::verticalDrag(b.x-a.x,b.y-a.y))){
+            dragged=true;const int delta=(b.y-dragAnchor)/(IBT_NO_PSRAM?litelist::step:26);
             if(delta){if(page==PAGE_FAVORITES_LIST){for(int i=0;i<abs(delta);++i)selected=nextFavorite(selected,delta>0);}
+                else if(page==PAGE_SEARCH_RESULTS)selected=uiinteraction::scroll(selected,searchFound,delta);
                 else {const unsigned count=config.playlistLength();selected=count?1+uiinteraction::scroll(selected?selected-1:0,count,delta):0;}
                 dragAnchor=b.y;redraw=true;}
         }
     }
-    if(sensedDown&&down&&!longPress&&content::isMenuPage(page)){
+#if IBT_NO_PSRAM
+    if(sensedDown&&down&&!longPress&&page==PAGE_BT_SCAN&&page==contact.page&&!contact.consumed){
+        const auto a=toLogical(start,front::nativeSize(),contact.rotation),b=toLogical(last,front::nativeSize(),contact.rotation);
+        const unsigned count=btaudio::pickerCount();
+        if(a.y>=36&&count&&(dragged||uiinteraction::verticalDrag(b.x-a.x,b.y-a.y))){
+            dragged=true;
+            if(selected>=count)selected=count-1;
+            const int delta=(dragAnchor-b.y)/26; // Swipe up reveals later devices.
+            if(delta){selected=uiinteraction::scroll(selected,count,delta);dragAnchor=b.y;redraw=true;}
+        }
+    }
+#endif
+    if(sensedDown&&down&&!longPress&&content::isMenuPage(page)&&(!IBT_NO_PSRAM||page!=76)){
         const auto dim=logicalSize(front::nativeSize(),snapshot().settings.rotation);
         const auto a=toLogical(start,front::nativeSize(),snapshot().settings.rotation),b=toLogical(last,front::nativeSize(),snapshot().settings.rotation);
         const unsigned count=menuCount(page);const bool alarm=alarmui::menu(page);
-        const int top=alarm?alarmui::rowTop:53,step=alarm?alarmui::rowHeight:count>8?22:count?(dim.h-60)/int(count):22;
+        const int top=IBT_NO_PSRAM?lightmenu::top(page):alarm?alarmui::rowTop:53;
+        const int step=IBT_NO_PSRAM?lightmenu::step(page,count,alarm,dim.h):alarm?alarmui::rowHeight:count>8?22:count?(dim.h-60)/int(count):22;
         if(a.y>=top&&count&&(dragged||uiinteraction::verticalDrag(b.x-a.x,b.y-a.y))){
             dragged=true;const int delta=(b.y-dragAnchor)/step;
             if(delta){selected=uiinteraction::scroll(selected,count,delta);dragAnchor=b.y;redraw=true;}
@@ -2521,7 +2827,17 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
     if(sensedDown&&down&&!longPress&&!dragged&&contact.tap(page)&&uint32_t(now-pressed)>=800) {
         const Size native=front::nativeSize();const unsigned rotation=snapshot().settings.rotation;
         const Point a=toLogical(start,native,rotation),b=toLogical(last,native,rotation);
-        if(abs(b.x-a.x)<12&&abs(b.y-a.y)<12){longPress=true;input(Action::EncoderLong);}
+        if(abs(b.x-a.x)<12&&abs(b.y-a.y)<12){
+            longPress=true;
+#if IBT_NO_PSRAM
+            const auto dim=logicalSize(native,rotation);
+            if(page!=PAGE_HOME&&page!=PAGE_BT_PLAYER&&page!=lightboot::page&&
+               (lightmenu::heldBack(a.x,a.y,b.x,b.y,uint32_t(now-pressed),dim.w)||
+                (page==67&&a.y<32&&a.x<80))){contact.consume();lightMenuHome();}
+            else
+#endif
+            input(Action::EncoderLong);
+        }
     }
     if(!nowDown&&down&&!longPress&&!dragged&&contact.tap(page)&&uint32_t(now-pressed)>=40) {
         Snapshot snap=snapshot();Size native=front::nativeSize();Size dim=logicalSize(native,snap.settings.rotation);
@@ -2529,7 +2845,7 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
         Point qLast=toLogical(last,native,snap.settings.rotation);
         const bool clockHomeTouch=page==PAGE_HOME&&snap.settings.alarm.clockHome;
         const bool clockSwitchTouch=false; // Clock is entered from the main menu.
-        bool essentialTouch=clockHomeTouch||clockSwitchTouch||page==67||page==PAGE_SERVICE||q.y<40||
+        bool essentialTouch=weather::active()||clockHomeTouch||clockSwitchTouch||page==67||page==PAGE_SERVICE||(IBT_NO_PSRAM&&page==76)||q.y<40||
             (page==PAGE_HOME&&snap.settings.vintageSkin==6&&videotono::hit(q.x,q.y)!=videotono::Hit::None)||
             
             (page==PAGE_HOME&&snap.settings.playerEnabled&&snap.settings.mediaPlayerSkin&&dim.w==320&&dim.h==240&&q.y>=145)||
@@ -2550,11 +2866,34 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
             input(q.x>=dim.w-52&&q.y>=dim.h-52?Action::Menu:q.x<dim.w/2?Action::Prev:Action::Next);
         } else
 #endif
+#if IBT_NO_PSRAM
+        if(page==lightboot::page){
+            const auto hit=lightboot::hit(q.x,q.y,dim.w,dim.h);
+            if(hit!=lightboot::Hit::None)Serial.printf("[LIGHT-BOOT-TOUCH] x=%d y=%d rotation=%u hit=%u\n",q.x,q.y,unsigned(snap.settings.rotation),unsigned(hit));
+            if(hit==lightboot::Hit::Back){if(bootprogress::state().setupDone.load())goBack(page);}
+            else if(hit!=lightboot::Hit::None)lightBootChoose(unsigned(hit)-1);
+        }else
+#endif
+#if IBT_NO_PSRAM
+        if(page==PAGE_HOME&&weather::active()&&network.status!=SOFT_AP){
+            const bool visible=weather::controlsVisible(now);weather::wake(now);redraw=true;
+            if(visible&&q.y>=212&&q.y<236&&q.x>=228&&q.x<308){weather::setActive(false);publishSurface(snapshot().settings);page=PAGE_MAIN;selected=4;front::invalidate();}
+            else if(visible&&q.y<40){page=77;selected=0;redraw=true;}
+        }else
+#endif
+#if IBT_NO_PSRAM
+        if(page!=PAGE_HOME&&page!=PAGE_BT_PLAYER&&page!=lightboot::page&&page!=67&&page!=PAGE_SERVICE&&lightmenu::back(q.x,q.y,dim.w)){
+            goBack(page);
+        }else
+#endif
         if(page==PAGE_HOME&&network.status!=SOFT_AP&&!clockHomeTouch){
             const int button=lightui::homeButton(q.x,q.y);
             if(button>=0){const Action buttons[]={Action::Prev,Action::Toggle,Action::Next,Action::Source,Action::Menu};if(button==4&&btaudio::outputSelected()){page=PAGE_BT_SCAN;selected=0;redraw=true;}else input(buttons[button]);}
             else if(q.y>=170&&q.y<196&&q.x>=8&&q.x<312){if(player.sendCommand({PR_VOL,constrain((q.x-8)*254/303,0,254)})){cancelAlarmForUser();redraw=true;}}
-            else if(q.y<28)openChannels();
+#if IBT_NO_PSRAM
+            else if(lightnav::wifiHit(q.x,q.y,btaudio::connected())){lightWifiMenuFromHub=false;page=PAGE_WIFI;selected=0;redraw=true;}
+#endif
+            else if(config.getMode()==PM_SDCARD?sdbtnavigation::libraryTap(q.x,q.y):q.y<28)openChannels();
         }else if(clockHomeTouch){
             const bool awake=clockControlsVisible();clockWake();redraw=true;
             if(!awake){/* Wake only: header changes, clock pixels stay intact. */}
@@ -2564,7 +2903,7 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
                 else {const unsigned day=unsigned(q.x-102)*7/unsigned(dim.w-102);if(day<7){Settings s=snapshot().settings;s.alarm.daysMask^=uint8_t(1u<<day);persistSetting(s);}}
             }
             else if(q.y>=4&&q.y<29&&q.x>=5&&q.x<dim.w/2-5){
-                Settings s=snapshot().settings;page=PAGE_MAIN;selected=4;front::invalidate();redraw=true;
+                Settings s=snapshot().settings;page=PAGE_MAIN;selected=IBT_NO_PSRAM?3:4;front::invalidate();redraw=true;
             }else if(q.y>=4&&q.y<29&&q.x>=dim.w/2+5&&q.x<dim.w-5){
                 page=PAGE_ALARM;selected=0;redraw=true;
             }
@@ -2629,8 +2968,12 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
                 unsigned index=first+unsigned((q.y-46)/28);if(index<count){selected=index;chooseScannedWifi(index);redraw=true;}
             }else if(q.y>=dim.h-40&&q.x<120&&network.scanCount())openSelectedWifiPassword(selected);
         } else if(page==PAGE_STATIONS_LIST||page==PAGE_FAVORITES_LIST){
-            if(q.y<(page==PAGE_STATIONS_LIST&&snap.settings.playerEnabled?23:40))goBack(page);
-            else {uint16_t n=stationAtTouch(start,page);if(n){selected=n;commitStation(n);}}
+            if(q.y<(IBT_NO_PSRAM?28:(page==PAGE_STATIONS_LIST&&snap.settings.playerEnabled?23:40)))goBack(page);
+            else {uint16_t n=stationAtTouch(start,page);if(n){
+#if IBT_NO_PSRAM
+                if(snap.settings.tapSelected)n=uint16_t(selected);
+#endif
+                if(n&&n<=config.playlistLength()){selected=n;commitStation(n);}}}
         } else if(content::isMenuPage(page)&&q.y>=5&&q.y<30&&q.x>=8&&q.x<72){
             page=PAGE_MAIN;selected=0;redraw=true;
         } else if(page==PAGE_MAIN&&q.y>=5&&q.y<30&&q.x>=dim.w-81&&q.x<dim.w-7){
@@ -2643,11 +2986,11 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
                 if(i==4){selected=4;bluetoothMode(0);}
                 else if(i<btaudio::savedDeviceCount()){selected=i;reconnectDevice(i);}}
         } else if(page==PAGE_BT_SCAN){
-            unsigned n=btaudio::deviceCount(),rows=unsigned((dim.h-36)/26);
+            unsigned n=btaudio::pickerCount(),rows=unsigned((dim.h-36)/26);
             unsigned first=selected>=rows/2?selected-rows/2:0;
             if(n>rows&&first>n-rows)first=n-rows;
             if(q.y<36&&q.x<dim.w-32)goBack(page);
-            else if(q.y>=36&&q.y<36+int(rows)*26){unsigned i=first+unsigned((q.y-36)/26);if(i<n){selected=i;btaudio::selectDevice(i);}
+            else if(q.y>=36&&q.y<36+int(rows)*26){unsigned i=first+unsigned((q.y-36)/26);if(i<n){selected=i;btaudio::selectPickerDevice(i);}
                 else if(!n&&!btaudio::scanning())btaudio::restartScan();}
         } else if(page==PAGE_BT_PLAYER){
             using Key=btspeakerui::Control;
@@ -2669,6 +3012,15 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
                 }
             }
         } else if(page==PAGE_SEARCH_RESULTS){
+#if IBT_NO_PSRAM
+            if(q.y<28)goBack(page);
+            else {unsigned first=0;const int row=litelist::row(q.x,q.y);
+                if(front::menuViewport(page,first)&&row>=0&&unsigned(row)<litelist::searchRows&&first+unsigned(row)<searchFound){
+                    const unsigned i=lightmenu::activation(selected,first+unsigned(row),searchFound,snap.settings.tapSelected);
+                    const uint16_t n=stationSearchResult(i);if(n){selected=i;commitStation(n);}
+                }
+            }
+#else
             if(q.y<40||q.y>=dim.h-34)goBack(page);
             else if(q.y>=56&&q.y<56+6*23){
                 unsigned first=selected>=2?selected-2:0;
@@ -2676,6 +3028,7 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
                 unsigned i=first+unsigned((q.y-56)/23);
                 uint16_t n=stationSearchResult(i);if(n){selected=i;commitStation(n);}
             }
+#endif
         } else if(page==PAGE_BAT_VALUE||page==PAGE_DNS_VALUE){
             if(q.y<40)goBack(page);
             else if(q.y>=180){if(q.x<106)input(Action::RotCCW);else if(q.x>213)input(Action::RotCW);else goBack(page);}
@@ -2695,20 +3048,20 @@ static void __attribute__((noinline)) uiTouchTick(uint32_t now) {
 #else
                 const bool rowsReady=true;
 #endif
-                int rowHeight=alarmMenu?alarmui::rowHeight:longMenu?22:(dim.h-60)/int(count);
+                int rowHeight=IBT_NO_PSRAM?lightmenu::step(page,count,alarmMenu,dim.h):alarmMenu?alarmui::rowHeight:longMenu?22:(dim.h-60)/int(count);
                 const unsigned visible=alarmMenu?alarmui::visible(count):longMenu?8:count;
-                const int rowTop=IBT_NO_PSRAM?49:alarmMenu?alarmui::rowTop:53;
+                const int rowTop=IBT_NO_PSRAM?lightmenu::top(page):alarmMenu?alarmui::rowTop:53;
                 int row=(q.y-rowTop)/rowHeight;
                 if(count>visible&&q.x>=dim.w-16&&q.y>=rowTop&&q.y<rowTop+int(visible)*rowHeight){
                     selected=unsigned(q.y-rowTop)*(count-1)/(visible*rowHeight-1);
                     redraw=true; // Touching the scrollbar scrolls, never edits a setting.
-                }else if(rowsReady&&q.y>=rowTop&&row>=0&&row<int(visible)){selected=first+(unsigned)row;activateMenu(page,selected);}
+                }else if(rowsReady&&q.y>=rowTop&&row>=0&&row<int(visible)){selected=IBT_NO_PSRAM?lightmenu::activation(selected,first+unsigned(row),count,snap.settings.tapSelected):first+unsigned(row);activateMenu(page,selected);}
             } else if(page!=PAGE_HOME){goBack(page);}
             else {
 #if IBT_NO_PSRAM
                 const int button=lightui::homeButton(q.x,q.y);
                 if(button>=0){const Action actions[]={Action::Prev,Action::Toggle,Action::Next,Action::Source,Action::Menu};input(actions[button]);}
-                else if(q.y<28)openChannels();
+                else if(config.getMode()==PM_SDCARD?sdbtnavigation::libraryTap(q.x,q.y):q.y<28)openChannels();
 #else
 #if defined(BOARD_CYD28)
                 if(snap.settings.playerEnabled&&snap.settings.vintageSkin==6&&dim.w==320&&dim.h==240){
@@ -2864,7 +3217,13 @@ void uiLoop() {
 #if IBT_COMPACT_UI
     irTickUI();
 #endif
+#if IBT_NO_PSRAM
+    const bool startupPageOwned=page==lightboot::page&&lightboot::session().automatic;
+#endif
     serviceConnectivity(); // keep the connection owner running during boot overlays
+#if IBT_NO_PSRAM
+    if(startupPageOwned)page=lightboot::page; // Saved offline routes must not hide the first picture early.
+#endif
 #if defined(BOARD_CYD28)
     front::btClockTick();
     if(bootprogress::state().armed.load()){
@@ -2907,15 +3266,30 @@ void uiLoop() {
     portEXIT_CRITICAL(&mux);
     uint16_t mv=0;bool valid=board::sensorSample(mode,millis(),mv);
     static uint8_t appliedBrightness=100;
+#if IBT_NO_PSRAM
+    const auto clockLight=uiClockLightSnapshot();
+#else
     const auto alarmSetting=snapshot().settings.alarm;
+#endif
     const bool manualAlarmLight=alarmPhase!=AlarmPhase::Idle&&alarmLastLight==AlarmManualLight;
-    const bool nightClockLight=!manualAlarmLight&&alarmSetting.nightClock&&alarmSetting.clockHome&&
+    const bool nightClockLight=!manualAlarmLight&&
+#if IBT_NO_PSRAM
+        (clockLight.flags&3u)==3u&&
+#else
+        alarmSetting.nightClock&&alarmSetting.clockHome&&
+#endif
         page==PAGE_HOME&&!player.isRunning();
     const bool alarmControlsLight=(alarmPhase!=AlarmPhase::Idle&&!manualAlarmLight)||nightClockLight;
     static bool wasAlarmLight=false;
     if(wasAlarmLight&&!alarmControlsLight)appliedBrightness=255;
     if(!wasAlarmLight&&nightClockLight&&alarmPhase==AlarmPhase::Idle)
-        board::brightness(alarmSetting.lightStart);
+        board::brightness(
+#if IBT_NO_PSRAM
+            clockLight.start
+#else
+            alarmSetting.lightStart
+#endif
+        );
     wasAlarmLight=alarmControlsLight;
     if(!alarmControlsLight&&mode==1&&requestedBrightness==0&&valid){
         const uint8_t target=light::brightness(mv);
@@ -2946,28 +3320,48 @@ void uiLoop() {
         if(uiStressActive)r10UiStressStop("surface_change");
         Settings setting=snapshot().settings;
         const unsigned id=unsigned(requestedSkin);
+#if IBT_NO_PSRAM
+        if(id==12){activateMenu(PAGE_MAIN,4);surfaceDiagnostics();}else {
+#endif
+        weather::setActive(id==12);
         setting.alarm.clockHome=id==13;
         if(id!=5&&id!=13&&id!=14){setting.playerEnabled=id>=2;setting.mediaPlayerSkin=id==3;setting.kajonSkin=false;setting.cassetteEnabled=id==1;setting.vintageSkin=vintageForSkin(id);}
         // A diagnostic skin selection is RAM-only, never a flash write.
         portENTER_CRITICAL(&mux);state.settings=setting;portEXIT_CRITICAL(&mux);
         page=id==5?PAGE_SERVICE:id==14?PAGE_BT_PLAYER:PAGE_HOME;selected=0;
         publishSurface(setting);front::invalidate();redraw=true;surfaceDiagnostics();
+#if IBT_NO_PSRAM
+        }
+#endif
     }
     {
-        const auto setting=snapshot().settings;publishSurface(setting);
+#if IBT_NO_PSRAM
+        const auto setting=settingsSnapshot();
+#else
+        const auto setting=snapshot().settings;
+#endif
+        publishSurface(setting);
         const auto surface=surfacepolicy::current();
         static uint32_t policyStopAt=0;static bool policyStopped=false;
         const bool alarmOwns=alarmPhase!=AlarmPhase::Idle&&alarmPhase!=AlarmPhase::Ending;
         const bool stopClock=surface==surfacepolicy::Surface::Clock&&((!alarmOwns&&(player.isRunning()||player.serviceActive()))||btaudio::wanted()||!btaudio::idle());
         if(surface!=surfacepolicy::Surface::Service&&player.serviceActive()&&!alarmFallbackValid())player.serviceStop();
+        const bool weatherOnly=IBT_NO_PSRAM&&surface==surfacepolicy::Surface::Weather;
+        const bool stopWeather=weatherOnly&&(player.isRunning()||player.serviceActive()||btaudio::wanted()||!btaudio::idle());
         const bool stopOutput=(surface==surfacepolicy::Surface::Weather||surface==surfacepolicy::Surface::BtInput)&&btaudio::outputSelected();
-        if((stopClock||stopOutput)&&(!policyStopped||uint32_t(millis()-policyStopAt)>=500)){
+        static bool weatherOnline=false;
+        if(!weatherOnly)weatherOnline=false;
+        if(weatherOnly&&!weatherOnline&&!btaudio::wanted()&&btaudio::idle()){
+            weatherOnline=true;if(network.offlinePlayer())network.enterOnlinePlayer();
+        }
+        if((stopClock||stopOutput||stopWeather)&&(!policyStopped||uint32_t(millis()-policyStopAt)>=500)){
             policyStopAt=millis();policyStopped=true;
             const uint32_t token=alarmOwns?alarmRequestEpoch.load():0;
-            if(stopClock&&!alarmOwns){player.serviceStop();player.sendCommand({PR_STOP,0});}
+            if(stopWeather){player.serviceStop();player.sendCommand({PR_STOP,0});if(btaudio::wanted()||!btaudio::idle())player.sendCommand({PR_BT,-2});}
+            else if(stopClock&&!alarmOwns){player.serviceStop();player.sendCommand({PR_STOP,0});}
             else player.sendCommand({PR_BT,-1,token});
             Serial.printf("[SURFACE-GATE] action=STOP_FORBIDDEN surface=%s alarm=%u\n",surfacepolicy::name(surface),unsigned(alarmOwns));
-        }else if(!stopClock&&!stopOutput)policyStopped=false;
+        }else if(!stopClock&&!stopOutput&&!stopWeather)policyStopped=false;
         static int artSurface=-1;
         if(artSurface!=int(surface)){artSurface=int(surface);onlineart::setEnabled(surfacepolicy::artwork(surface)&&setting.artworkEnabled&&setting.vintageSkin!=5&&setting.vintageSkin!=6,snapshot().generation);}
     }
@@ -2982,6 +3376,8 @@ void uiLoop() {
         if(pendingSourceTarget==PM_SDCARD){
             if(status==SdPrepareState::Ready && config.getMode()==PM_SDCARD){
                 pendingSourceAt=0;if(page==PAGE_SOURCE_PENDING){page=PAGE_HOME;selected=0;redraw=true;}
+            }else if(status==SdPrepareState::Failed||status==SdPrepareState::Cancelled){
+                pendingSourceAt=0;if(page==PAGE_SOURCE_PENDING)sourceRouteFailed(player.sdPrepareError(),1);
             }else if(uint32_t(millis()-pendingSourceAt)>52000 &&
                      status!=SdPrepareState::Failed && status!=SdPrepareState::Cancelled &&
                      !pendingSourceCancelSent){
@@ -2991,14 +3387,27 @@ void uiLoop() {
             pendingSourceAt=0;if(page==PAGE_SOURCE_PENDING){page=PAGE_HOME;selected=0;redraw=true;}
         }
     }
-    if((page==PAGE_BT_SCAN||page==PAGE_BT_SAVED)&&btaudio::transmitting()){
+    if(IBT_NO_PSRAM){
+        static bool pickerLinkWasConnected=false;
+        const bool linkConnected=btaudio::outputSelected()&&btaudio::connected();
+        const bool home=sdbtnavigation::returnHome(pickerLinkWasConnected,linkConnected,
+            page==PAGE_BT_SCAN||page==PAGE_BT_SAVED||page==PAGE_SOURCE_PENDING);
+        pickerLinkWasConnected=linkConnected;
+        if(home){page=PAGE_HOME;selected=0;front::invalidate();redraw=true;}
+    }else if((page==PAGE_BT_SCAN||page==PAGE_BT_SAVED)&&btaudio::transmitting()){
         page=PAGE_HOME;selected=0;redraw=true;
     }
     if(page==PAGE_WIFI_PASSWORD&&clockStore->wifi.submitted&&network.status!=SOFT_AP){
         clearWifiPassword();page=PAGE_HOME;selected=0;redraw=true;
     }
     uint32_t now=millis();
-    {const auto s=snapshot();weather::tick(surfacepolicy::ble(surfacepolicy::current())&&page==PAGE_HOME&&!s.alarmActive&&!s.pendingSave&&!player.isRunning()&&player.status()==STOPPED&&!btaudio::wanted());
+    {
+#if IBT_NO_PSRAM && !FEATURE_ARTWORK
+    const auto s=uiActivitySnapshot();
+#else
+    const auto s=snapshot();
+#endif
+    weather::tick(surfacepolicy::ble(surfacepolicy::current())&&page==PAGE_HOME&&!s.alarmActive&&!s.pendingSave&&!player.isRunning()&&player.status()==STOPPED&&!btaudio::wanted());
 #if IBT_NO_PSRAM && FEATURE_ARTWORK
     onlineart::listeningTick(s.generation,s.elapsed,s.playing&&!s.sd&&s.connected&&!btaudio::wanted());
 #endif
@@ -3022,15 +3431,24 @@ void uiLoop() {
     if(page!=idlePage){idlePage=page;menuActivityAt=now;}
     uint16_t idleSeconds;
     portENTER_CRITICAL(&mux);idleSeconds=state.settings.menuIdleSeconds;portEXIT_CRITICAL(&mux);
+#if IBT_NO_PSRAM
+    if(page==lightboot::page&&lightboot::session().dismiss(now,bootprogress::state().setupDone.load(),network.status==CONNECTED&&WiFi.status()==WL_CONNECTED,network.offlineReady(),!front::renderPending())){
+        page=PAGE_HOME;selected=0;redraw=true;
+    }
+#endif
     if(page==PAGE_HOME)menuActivityAt=now;
-    else if(page!=PAGE_SERVICE&&!manualWifiPage(page)&&idleSeconds&&!uiStressActive&&uint32_t(now-menuActivityAt)>=uint32_t(idleSeconds)*1000u){
+    else if(page!=PAGE_SERVICE&&(!IBT_NO_PSRAM||page!=76)&&!manualWifiPage(page)&&idleSeconds&&!uiStressActive&&uint32_t(now-menuActivityAt)>=btnavigation::menuTimeoutMs(idleSeconds,page==PAGE_BT_SCAN)){
         backupArmedAt=0;restartArmedAt=0;
         r10DiagRecoverHome();idlePage=PAGE_HOME;menuActivityAt=now;
     }
     serviceRouteTick();
     static uint32_t renderAt=0;
-    const auto renderSettings=snapshot().settings;
-    const bool sdBtClassic=ibtsdui::classic(btaudio::transmitting(),config.getMode()==PM_SDCARD,renderSettings.playerEnabled);
+#if IBT_NO_PSRAM
+    const bool renderPlayerEnabled=uiPlayerEnabled();
+#else
+    const bool renderPlayerEnabled=snapshot().settings.playerEnabled;
+#endif
+    const bool sdBtClassic=ibtsdui::classic(btaudio::transmitting(),config.getMode()==PM_SDCARD,renderPlayerEnabled);
     const bool conservativeBtHome=(page==PAGE_HOME||page==PAGE_STATIONS_LIST)&&btaudio::outputSelected()&&!sdBtClassic&&!uiStressFullScan;
     if(frontendOK&&conservativeBtHome){
         artab::tick(now);if(artab::consumeRepaint()){front::invalidate();redraw=true;}
@@ -3057,7 +3475,7 @@ void uiLoop() {
     if(btUiWasBlocked==btUiSafe&&uint32_t(now-btUiGateLoggedAt)>=1000){
         btUiGateLoggedAt=now;
         btUiWasBlocked=!btUiSafe;
-        Serial.printf("[UI-BT-GATE] blocked=%u reason=TX_PCM_HEADROOM required_ms=500 stress_bypass=0\n",unsigned(!btUiSafe));
+        Serial.printf("[UI-BT-GATE] blocked=%u reason=TX_PCM_HEADROOM required_ms=%u stress_bypass=0\n",unsigned(!btUiSafe),btaudio::uiHeadroomMs());
     }
     const bool menuPage=content::isMenuPage(page);
     const bool recoveryReady=menurender::recoveryReady(page==PAGE_SERVICE,player.isRunning(),
@@ -3072,10 +3490,13 @@ void uiLoop() {
     const bool cadenceReady=(page==PAGE_SERVICE||uiStressFullScan||ibtsdui::due(sdBtClassic,uint32_t(now-renderAt)))&&
         menurender::due(menuPage,redraw,menuContinuation,scanRequest,uiStressActive,
          uint32_t(now-renderAt),uiStressActive?uiStressDrawMs:(page==PAGE_SERVICE?100u:homeRenderMs));
+    btMenuHeadroomPending=frontendOK&&menuPage&&!btUiSafe&&
+        (redraw||menuContinuation||scanRequest)&&btaudio::transmitting();
     static menurender::Wait menuWait;
     menuWait.observe(now,page,selected,frontendOK&&menuPage&&(redraw||menuContinuation||
         (uiStressActive&&uiStressActions!=uiStressRenderedActions)),btUiSafe,recoveryReady,cadenceReady,audioGaps);
-    if(frontendOK&&btUiSafe&&recoveryReady&&cadenceReady&&uint32_t(now-renderAt)>=litememory::frameInterval) {
+    const unsigned renderInterval=IBT_NO_PSRAM&&page==76&&menuContinuation?20u:litememory::frameInterval;
+    if(frontendOK&&btUiSafe&&recoveryReady&&cadenceReady&&uint32_t(now-renderAt)>=renderInterval) {
         renderAt=now;Snapshot s=snapshot();prepareTrackText(s);
         const uint32_t drawStart=micros();
         {lightmem::Phase memoryPhase("UI_RENDER");front::render(s,page,selected,redraw);}redraw=false;
@@ -3157,7 +3578,7 @@ void uiLoop() {
     onlineart::serviceReader();
 #endif
 #if IBT_NO_PSRAM
-    if(frontendOK)front::liteMeterTick((page==PAGE_HOME||page==PAGE_BT_PLAYER)&&btUiSafe&&recoveryReady&&int32_t(now-quietUiUntil)>=0&&!uiGovernor.active(now));
+    if(frontendOK)front::liteMeterTick((page==PAGE_HOME||page==PAGE_BT_PLAYER)&&btUiSafe&&recoveryReady&&int32_t(now-quietUiUntil)>=0&&!uiGovernor.inputOverloadActive(now));
 #endif
 }
 void audioLoop() {
@@ -3175,7 +3596,10 @@ void audioLoop() {
     static uint32_t diagnosticAt=0;
     if(uint32_t(diagnosticNow-diagnosticAt)>=500){diagnosticAt=diagnosticNow;
       Snapshot s=snapshot();s.playing=diagnosticRunning;s.sd=false;s.volume=config.store.volume;
-      s.bitrate=config.station.bitrate;s.sampleRate=player.getSampleRate();s.elapsed=player.getAudioCurrentTime();
+      s.bitrate=config.station.bitrate;s.audioCodec=btaudio::inputSelected()?0:uint8_t(player.getCodec());
+        s.sourceBits=(s.audioCodec==5||s.audioCodec==7)?FLACGetBitsPerSample():player.getBitsPerSample();
+        s.formatKbps=uint16_t(std::min(uint32_t(65535),player.getBitRate()/1000));
+        s.sampleRate=player.getSampleRate();s.elapsed=player.getAudioCurrentTime();
       s.buffer=diagnosticBuffer;s.bufferCapacity=diagnosticBuffer+player.inBufferFree();
       s.freeHeap=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);s.largestHeap=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
       s.connected=WiFi.status()==WL_CONNECTED;s.rssi=s.connected?WiFi.RSSI():0;textCopy(s.station,sizeof(s.station),config.station.name);
@@ -3198,7 +3622,7 @@ void audioLoop() {
         case Action::VolDown:player.stepVol(false);break;
         case Action::VolUp:player.stepVol(true);break;
         case Action::Source:
-            page=75;selected=0;redraw=true;break;
+            sourceRouteFailure=sdroute::Error::None;page=75;selected=0;redraw=true;break;
         case Action::SourceWeb:
         case Action::SourceSd:
 #if FEATURE_SD
@@ -3242,6 +3666,9 @@ void audioLoop() {
         s.playing=running;s.sd=config.getMode()==PM_SDCARD;
         s.bitrate=config.station.bitrate;s.volume=config.store.volume;
         s.bass=config.store.bass;s.middle=config.store.middle;s.treble=config.store.trebble;s.balance=config.store.balance;
+        s.audioCodec=btaudio::inputSelected()?0:uint8_t(player.getCodec());
+        s.sourceBits=(s.audioCodec==5||s.audioCodec==7)?FLACGetBitsPerSample():player.getBitsPerSample();
+        s.formatKbps=uint16_t(std::min(uint32_t(65535),player.getBitRate()/1000));
         s.sampleRate=player.getSampleRate();s.elapsed=player.getAudioCurrentTime();s.duration=player.getAudioFileDuration();
         s.buffer=buffered;s.bufferCapacity=buffered+player.inBufferFree();s.freeHeap=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
         s.largestHeap=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
@@ -3274,7 +3701,7 @@ void audioLoop() {
         int vuC0=-1,vuC1=-1;const bool vuKnown=loadprobe::cached(vuC0,vuC1);
         const bool btVu=!lightCover&&btinputvu::budget((surfacepolicy::current()==surfacepolicy::Surface::BtInput||(s.settings.playerEnabled&&!s.settings.mediaPlayerSkin&&s.settings.vintageSkin!=6))&&!s.settings.alarm.clockHome,
             btaudio::inputSelected(),btaudio::inputPlaying(),vuKnown,vuC0,vuC1,
-            btaudio::inputArtworkSafe()&&s.freeHeap>=ibtlimit::Policy::badInternal&&s.largestHeap>=8192);
+            btaudio::inputVuSafe()&&s.freeHeap>=ibtlimit::Policy::badInternal&&s.largestHeap>=8192);
         btinputvu::enabled.store(btVu&&(!IBT_NO_PSRAM||lightui::style.load()!=0),std::memory_order_relaxed);
         const bool lightVu=IBT_NO_PSRAM&&!lightCover&&lightui::style.load()!=0&&vuKnown&&vuC0>=0&&vuC0<800&&vuC1>=0&&vuC1<800&&
             heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)>=ibtlimit::Policy::badInternal&&s.largestHeap>=8192;
@@ -3300,7 +3727,7 @@ void audioLoop() {
             else {p.putString(key,"");ok=p.isKey(key)&&p.getString(key,"x").isEmpty();}
           }
 #if IBT_NO_PSRAM
-          ok=ok&&p.putUChar("yovu",lightui::style.load())==1&&p.putBool("yovuv1",true)==1;
+          ok=ok&&p.putUChar("yovu",lightui::style.load())==1&&p.putBool("yovuv1",true)==1&&p.putUChar("yclock",lightui::clockStyle.load())==1;
 #endif
           ok=ok&&p.putUChar("lang",unsigned(s.language))==1 && p.putUChar("theme",unsigned(s.theme))==1
           &&p.putBool("dnsmanual",s.dnsManual)==1
@@ -3328,7 +3755,9 @@ void audioLoop() {
           &&p.putBool("alm_blink",s.alarm.blinkColon)==1
           &&p.putUChar("alm_src",s.alarm.source)==1
           &&p.putUChar("alm_sdplay",s.alarm.sdPlayMode)==1
+#if !IBT_NO_PSRAM
           &&p.putBytes("eq10",&s.graphicEq,sizeof(s.graphicEq))==sizeof(s.graphicEq)
+#endif
           &&p.putUShort("rate",s.maxKbps)==2
           &&p.putUChar("rotmode",s.rotaryMode)==1&&p.putUChar("volstep",s.volumeStep)==1
           &&p.putUChar("debug",s.debug?1:0)==1&&p.putUChar("artwork",s.artworkEnabled?1:0)==1
@@ -3338,7 +3767,11 @@ void audioLoop() {
           &&p.putUChar("wifibar",s.wifiIndicator?1:0)==1
           &&p.putUChar("btquick",s.btQuickScan?1:0)==1
           &&p.putUChar("hls",s.hlsEnabled?1:0)==1
-          &&p.putUChar(playerSettingKey,s.playerEnabled?1:0)==1&&p.putUChar("mediaskin",s.mediaPlayerSkin?1:0)==1&&p.putUChar("kajonskin",s.kajonSkin?1:0)==1&&p.putUChar("vinskin",s.vintageSkin)==1&&p.putUChar("bootart",s.bootScreen)==1&&p.putUChar("bootsound",s.bootSound)==1&&p.putUChar("netmode",s.networkMode)==1&&p.putUChar("retrocol",s.retroColor)==1&&p.putUChar("swipeskin",s.swipeSkins?1:0)==1&&p.putUChar("swipev2",1)==1&&p.putUShort("menuidle",s.menuIdleSeconds)==2&&p.putUShort("vutimer",vuprobe::refreshMs.load(std::memory_order_relaxed))==2&&p.putBool("light100v1",true)==1;p.end();}
+          &&p.putUChar(playerSettingKey,s.playerEnabled?1:0)==1&&p.putUChar("mediaskin",s.mediaPlayerSkin?1:0)==1&&p.putUChar("kajonskin",s.kajonSkin?1:0)==1&&p.putUChar("vinskin",s.vintageSkin)==1&&p.putUChar("bootart",s.bootScreen)==1&&p.putUChar("bootsound",s.bootSound)==1&&p.putUChar("netmode",s.networkMode)==1&&p.putUChar("retrocol",s.retroColor)==1&&p.putUChar("swipeskin",s.swipeSkins?1:0)==1&&p.putUChar("swipev2",1)==1
+#if IBT_NO_PSRAM
+          &&p.putBool("modeswipe1",true)==1&&p.putBool("tapselect",s.tapSelected)==1
+#endif
+          &&p.putUShort("menuidle",s.menuIdleSeconds)==2&&p.putUShort("vutimer",vuprobe::refreshMs.load(std::memory_order_relaxed))==2&&p.putBool("light100v1",true)==1;p.end();}
         if(ok){portENTER_CRITICAL(&mux);savedVersion=version;clockStore->saved=clockVersion;state.pendingSave=settingsVersion!=savedVersion||favoriteVersion!=favoriteSaved||clockStore->version!=clockStore->saved;portEXIT_CRITICAL(&mux);}
         else nextSettingsCommit=now+5000;
     }

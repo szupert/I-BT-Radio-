@@ -1,4 +1,12 @@
 #include "../core/options.h"
+#if IBT_NO_PSRAM
+#include "artwork_ab.h"
+#include <Arduino.h>
+namespace artab {bool prepare(){return false;}bool setRows(unsigned){return false;}bool set(bool){return false;}
+bool on(){return false;}void stop(){}void tick(uint32_t){}bool consumeRepaint(){return false;}
+void diagnostics(){Serial.println("[ART-AB] compiled=0 reason=LIGHT_DISABLED");}}
+#else
+#include "../core/options.h"
 #include "artwork_ab.h"
 #include "online_artwork.h"
 #include "bt_audio.h"
@@ -105,3 +113,5 @@ void tick(uint32_t now){
 bool consumeRepaint(){if(!state)return false;bool result=state->repaint;state->repaint=false;return result;}
 void diagnostics(){if(!state){Serial.println("[ART-AB] enabled=0 ready=0 source=NONE decodes=0 frames=0 failures=0 decode_wall_us=0 draw_wall_us=0 fetches=0");return;}Serial.printf("[ART-AB] enabled=%u ready=%u core=%d source=%s decodes=%u frames=%u failures=%u decode_wall_us=%llu decode_max_us=%u draw_wall_us=%llu draw_max_us=%u pending_rows=%u fetches=0\n",unsigned(state->active),unsigned(state->ready),xPortGetCoreID(),state->source,state->decodes,state->renders,state->failures,(unsigned long long)state->decodeUs,state->decodeMax,(unsigned long long)state->drawUs,state->drawMax,240-state->row);}
 }
+
+#endif

@@ -25,6 +25,7 @@ void artworkTestRows(unsigned y,unsigned n,const uint16_t *pixels);
 void service();
 #if IBT_NO_PSRAM
 void liteMeterTick(bool allowed);
+void playerButtonPressed(unsigned index); // UI-owned latch, no immediate LCD write
 void transportAck(); // latch only; LCD feedback remains on the guarded UI owner
 #endif
 void setRotation(uint8_t rotation);

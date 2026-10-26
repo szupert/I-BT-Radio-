@@ -109,6 +109,12 @@ bool allowArtworkProgress(){return artworkReady(false);}
 bool allowArtworkIdleProgress(){const auto s=sample();return !s.audioActive&&s.audioFresh&&s.freeInternal>=Policy::reserve;}
 
 bool allowRedraw() { return allowAllocation(1024); }
+size_t compactTelemetry(char* out,size_t capacity) {
+    Policy p;portENTER_CRITICAL(&mux);p=policy;portEXIT_CRITICAL(&mux);
+    return snprintf(out,capacity,"[R10-LIMITER] version=2 pressure=%u heavy=%u http=%u ws=%u denied=%lu admitted=%lu reserve=%lu\n",
+      unsigned(p.pressured),unsigned(p.heavy),unsigned(p.http),unsigned(p.ws),
+      (unsigned long)p.denied,(unsigned long)p.admitted,(unsigned long)Policy::reserve);
+}
 void telemetry() {
 #if IBT_NO_PSRAM
     Serial.printf("[LIGHT-MEM-SAMPLED] free_min=%lu scope=admission_and_limiter_samples not_all_allocations=1\n",(unsigned long)sampledMinimum.load(std::memory_order_relaxed));

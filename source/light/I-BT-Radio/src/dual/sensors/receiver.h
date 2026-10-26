@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include "passive_policy.h"
 namespace sensors {
+bool roleSelected(unsigned);bool roleReading(unsigned,radiosensor::Reading&);
+bool roleSavePending();void enableRoles();
+void selectRole(unsigned index,unsigned role);void clearRole(unsigned role);
+bool bindRole(unsigned role,const char* address,const char* key);
+void roleBindingStatus(unsigned,char*,size_t,bool&);
 void stackStopped(); // SDK owner notification; callbacks are no longer live
 bool available();
 bool enabled();

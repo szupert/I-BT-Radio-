@@ -537,15 +537,15 @@ The connection tables are located here https://github.com/e2002/yoradio#connecti
   #if 1
 #if IBT_COMPACT_UI
 #if IBT_NO_PSRAM
-#define IBT_FW_VERSION "V166-R216"
+#define IBT_FW_VERSION "V166-R270"
 #else
-#define IBT_FW_VERSION "V166-R216"
+#define IBT_FW_VERSION "V166-R270"
 #endif
 #else
 #if IBT_NO_PSRAM
-#define IBT_FW_VERSION "V166-R216"
+#define IBT_FW_VERSION "V166-R270"
 #else
-#define IBT_FW_VERSION "V166-R216"
+#define IBT_FW_VERSION "V166-R270"
 #endif
 #endif
   #elif 0

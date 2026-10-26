@@ -1,3 +1,4 @@
+#include "../dual/bt_rx_probe.h"
 #include "../dual/memory_checkpoint.h"
 #include "../dual/resource_policy.h"
 #include "../dual/lite_memory.h"
@@ -29,6 +30,7 @@
 #endif
 #include "resume_seconds.h"
 #include "local_read_policy.h"
+#include "local_flac_plan.h"
 #include "wav_format_policy.h"
 #include "wav_pcm.h"
 #include "dac_submit.h"
@@ -113,10 +115,10 @@ size_t AudioBuffer::init() {
     }
     if(!m_buffer) {
 #if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO)
-        if(config.getMode()==PM_WEB){
+        if(!m_compactSdBt&&(config.getMode()==PM_WEB||!btaudio::outputSelected())){
             using P=ibtaudio::StreamBufferPolicy;
             constexpr unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT;
-            constexpr uint32_t window=CONFIG_LWIP_TCP_WND_DEFAULT;
+            const uint32_t window=config.getMode()==PM_WEB?CONFIG_LWIP_TCP_WND_DEFAULT:0;
             const uint32_t receiveBudget=P::receiveCost(window);
             lightmem::checkpoint("INPUT_ALLOC_BEFORE");
             uint8_t* pages[2]{};uint8_t* windowBytes=nullptr;
@@ -135,13 +137,13 @@ size_t AudioBuffer::init() {
                 }else {free(pages[0]);free(pages[1]);free(windowBytes);}
             }
             lightmem::checkpoint("INPUT_ALLOC_AFTER");
-            Serial.printf("[STREAM-BUFFER-LIGHT] capacity=%u requested=16384 policy=FIXED16 layout=PAGED_2X8192 page=8192 tail=%u receive_budget=%u reserve=%u largest_floor=%u\n",
-                unsigned(m_buffSize),unsigned(m_resBuffSizeRAM),unsigned(receiveBudget),unsigned(ibtlimit::Policy::reserve),unsigned(ibtlimit::Policy::reserve));
+            Serial.printf("[STREAM-BUFFER-LIGHT] capacity=%u requested=16384 policy=FIXED16 layout=PAGED_2X8192 page=8192 tail=%u receive_budget=%u reserve=%u largest_floor=%u source=%s\n",
+                unsigned(m_buffSize),unsigned(m_resBuffSizeRAM),unsigned(receiveBudget),unsigned(ibtlimit::Policy::reserve),unsigned(ibtlimit::Policy::reserve),config.getMode()==PM_WEB?"WIFI":"SD");
         }else
 #endif
         {
-        const size_t base=IBT_NO_PSRAM?ibtaudio::StreamBufferPolicy::LightBase:32u*1024u;
-        size_t capacity=base;
+        const size_t base=IBT_NO_PSRAM?(config.getMode()==PM_SDCARD&&btaudio::outputSelected()?2048u:ibtaudio::StreamBufferPolicy::LightBase):32u*1024u;
+        size_t capacity=m_compactCapacity?m_compactCapacity:base;
         if(IBT_NO_PSRAM&&config.getMode()==PM_WEB){
             const unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT;
             if(ibtaudio::StreamBufferPolicy::admitLight(heap_caps_get_free_size(caps),
@@ -149,9 +151,9 @@ size_t AudioBuffer::init() {
                 capacity=ibtaudio::StreamBufferPolicy::LightPreferred;
         }
         lightmem::checkpoint("INPUT_ALLOC_BEFORE");
-        m_buffer = (uint8_t*)(IBT_NO_PSRAM?lightpayload::zero(capacity+m_resBuffSizeRAM):calloc(capacity + m_resBuffSizeRAM,1));
+        m_buffer = (uint8_t*)(IBT_NO_PSRAM?lightpayload::zero(capacity+(m_compactSdBt?0:m_resBuffSizeRAM)):calloc(capacity + m_resBuffSizeRAM,1));
         // A racing allocation or fragmentation must not prevent the old16KiB path.
-        if(!m_buffer&&capacity!=base){capacity=base;m_buffer=(uint8_t*)(IBT_NO_PSRAM?lightpayload::zero(base+m_resBuffSizeRAM):calloc(base+m_resBuffSizeRAM,1));}
+        if(!m_buffer&&capacity!=base&&!m_compactCapacity){capacity=base;m_buffer=(uint8_t*)(IBT_NO_PSRAM?lightpayload::zero(base+m_resBuffSizeRAM):calloc(base+m_resBuffSizeRAM,1));}
         lightmem::checkpoint("INPUT_ALLOC_AFTER");
         if(m_buffer)m_buffSize=capacity;
         if(IBT_NO_PSRAM&&config.getMode()==PM_WEB)
@@ -167,6 +169,7 @@ size_t AudioBuffer::init() {
 }
 
 void AudioBuffer::changeMaxBlockSize(uint16_t mbs){
+    if(m_compactSdBt&&m_f_init){m_maxBlockSize=std::min<size_t>(mbs,m_buffSize-1);return;}
     // Reserve is allocated for the largest supported frame, not merely the last codec.
     size_t reserve=m_f_psram?m_resBuffSizePSRAM:m_resBuffSizeRAM;
     m_maxBlockSize = mbs<=reserve?mbs:reserve;
@@ -178,6 +181,7 @@ uint16_t AudioBuffer::getMaxBlockSize(){
 }
 
 size_t AudioBuffer::freeSpace() {
+    if(m_compactSdBt&&m_f_init){return m_buffSize-1-size_t(m_writePtr-m_readPtr);}
     if(m_lightRing.attached())return m_lightRing.free();
     if(!m_f_init)return 0;
     if(m_readPtr > m_writePtr) {
@@ -191,6 +195,11 @@ size_t AudioBuffer::freeSpace() {
 }
 
 size_t AudioBuffer::writeSpace() {
+    if(m_compactSdBt&&m_f_init){
+        const size_t used=size_t(m_writePtr-m_readPtr);
+        if(m_readPtr!=m_buffer){memmove(m_buffer,m_readPtr,used);m_readPtr=m_buffer;m_writePtr=m_buffer+used;}
+        return m_buffSize-1-used;
+    }
     if(m_lightRing.attached())return m_lightRing.writeSpace();
     if(!m_f_init)return 0;
     if(m_readPtr > m_writePtr) {
@@ -207,6 +216,7 @@ size_t AudioBuffer::writeSpace() {
 }
 
 size_t AudioBuffer::bufferFilled() {
+    if(m_compactSdBt&&m_f_init){return size_t(m_writePtr-m_readPtr);}
     if(m_lightRing.attached())return m_lightRing.filled();
     if(!m_f_init)return 0;
     if(m_writePtr >= m_readPtr) {
@@ -218,6 +228,7 @@ size_t AudioBuffer::bufferFilled() {
 }
 
 void AudioBuffer::bytesWritten(size_t bw) {
+    if(m_compactSdBt&&m_f_init){m_writePtr+=std::min(bw,size_t(m_endPtr-m_writePtr-1));return;}
     if(m_lightRing.attached()){m_lightRing.written(bw);return;}
     if(!m_f_init)return;
     m_writePtr += bw;
@@ -229,6 +240,7 @@ void AudioBuffer::bytesWritten(size_t bw) {
 }
 
 void AudioBuffer::bytesWasRead(size_t br) {
+    if(m_compactSdBt&&m_f_init){m_readPtr+=std::min(br,size_t(m_writePtr-m_readPtr));return;}
     if(m_lightRing.attached()){m_lightRing.consumed(br);return;}
     if(!m_f_init)return;
     m_readPtr += br;
@@ -244,6 +256,7 @@ uint8_t* AudioBuffer::getWritePtr() {
 }
 
 uint8_t* AudioBuffer::getReadPtr() {
+    if(m_compactSdBt&&m_f_init){return m_readPtr;}
     if(m_lightRing.attached())return m_lightRing.readPtr(m_maxBlockSize);
     if(!m_f_init)return NULL;
     size_t len = m_endPtr - m_readPtr;
@@ -363,13 +376,14 @@ void Audio::setBufsize(int rambuf_sz, int psrambuf_sz) {
 };
 
 // RADIO_FIRST_AUDIO_DIAG_V52_20260911
-void Audio::initInBuff() {
+void Audio::initInBuff(bool compactSdBt,size_t compactCapacity) {
     lightmem::checkpoint("PCM_ALLOC_BEFORE");
     const bool newOutput=!m_outBuff;
     if(!m_outBuff)m_outBuff=static_cast<int16_t*>(IBT_NO_PSRAM?lightpayload::zero(OutputBytes):heap_caps_calloc(OutputSamples,sizeof(int16_t),litememory::payloadCaps));
     lightmem::checkpoint("PCM_ALLOC_AFTER");
     if(!m_outBuff){Serial.println("[PCM-MEM] result=DENIED reason=STAGING_ALLOCATION");return;}
     if(!InBuff.isInitialized()) {
+        if(compactCapacity)InBuff.compactLocal(compactCapacity);else InBuff.compactSdBt(compactSdBt);
         const size_t beforeFree=heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
         const size_t beforeLargest=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
         size_t size = InBuff.init();
@@ -399,7 +413,8 @@ esp_err_t Audio::I2Sstop(uint8_t i2s_num) {
 }
 bool Audio::suspendDacForBtSearch(){
 #if IBT_NO_PSRAM
-    if(!player.onAudioTask()||m_f_running||m_f_internalDAC||!btaudio::idle()||btaudio::wanted())return false;
+    const bool localBt=btaudio::outputSelected()&&btaudio::producerReady()&&config.getMode()==PM_SDCARD;
+    if(!player.onAudioTask()||m_f_running||m_f_internalDAC||(!localBt&&(!btaudio::idle()||btaudio::wanted())))return false;
     if(m_dacDormant)return true;
     if(!m_i2sReady)return false;
     const unsigned before=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
@@ -411,9 +426,19 @@ bool Audio::suspendDacForBtSearch(){
 #endif
     return true;
 }
+bool Audio::outputReady() const {
+    if(m_i2sReady)return true;
+#if IBT_NO_PSRAM
+    return m_dacDormant&&!m_f_internalDAC&&config.getMode()==PM_SDCARD&&
+        btaudio::outputSelected()&&btaudio::producerReady();
+#else
+    return false;
+#endif
+}
 bool Audio::restoreDacAfterBtSearch(){
 #if IBT_NO_PSRAM
     if(!m_dacDormant)return m_i2sReady;
+    if(btaudio::outputSelected())return false; // SD->BT never leases the physical DAC.
     if(!player.onAudioTask()||m_f_running)return false;
     const unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT;
     const unsigned dmaBytes=unsigned(m_i2s_config.dma_buf_count)*unsigned(m_i2s_config.dma_buf_len)*4u;
@@ -476,7 +501,7 @@ Audio::~Audio() {
     setDefaults();
     if(m_outBuff){heap_caps_free(m_outBuff);m_outBuff=nullptr;}
     if(m_playlistBuff) {free(m_playlistBuff); m_playlistBuff = NULL;}
-    i2s_driver_uninstall((i2s_port_t)m_i2s_num); // #215 free I2S buffer
+    if(m_i2sReady)i2s_driver_uninstall((i2s_port_t)m_i2s_num); // #215 free I2S buffer
 }
 //---------------------------------------------------------------------------------------------------------------------
 bool Audio::setDefaults(bool prepareMp3, bool buffers) {
@@ -505,6 +530,7 @@ bool Audio::setDefaults(bool prepareMp3, bool buffers) {
     AUDIO_INFO("buffers freed, free Heap: %lu bytes", ESP.getFreeHeap());
 
     m_streamTransportClosed = false;
+    m_streamBuffering = false;
     m_headerWaiting = false;
     m_f_chunked = false;                                    // Assume not chunked
     m_f_firstmetabyte = false;
@@ -556,7 +582,7 @@ bool Audio::setDefaults(bool prepareMp3, bool buffers) {
     if(prepareMp3)Serial.println("[MP3-PREPARE] result=READY phase=BEFORE_IO reserve=10000");
 #endif
     if(buffers){initInBuff();InBuff.resetBuffer();}
-    const bool ok=!buffers || (InBuff.isInitialized()&&m_outBuff&&m_i2sReady);
+    const bool ok=!buffers || (InBuff.isInitialized()&&m_outBuff&&outputReady());
 #if IBT_NO_PSRAM
     if(!ok){MP3Decoder_FreeBuffers();InBuff.release();heap_caps_free(m_outBuff);m_outBuff=nullptr;}
 #endif
@@ -749,7 +775,7 @@ bool Audio::connecttohost(const char* host, const char* user, const char* pwd) {
             unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
         initInBuff();
         lightmem::checkpoint("AFTER_IO");
-        res=InBuff.isInitialized() && m_outBuff && m_i2sReady;
+        res=InBuff.isInitialized() && m_outBuff && outputReady();
         Serial.printf("[STREAM-MEM] phase=AFTER_IO ok=%u free=%u largest=%u\n",unsigned(res),
             unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
             unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
@@ -979,32 +1005,68 @@ bool Audio::connecttoFSImpl(fs::FS &fs, const char* path, uint32_t resumeFilePos
 
     if(!path||!path[0]||strlen(path)>=ibtsd::PathCapacity-1)return false;
     if(!netprefetch::end())return false;
+    const bool localFlac=IBT_NO_PSRAM&&dual::endsWithIgnoreCase(path,".flac");
+    const bool earlyFile=IBT_NO_PSRAM&&!reset;
     if(reset){
-        if(!setDefaults(IBT_NO_PSRAM && ibtaudio::prepareMp3First(path)))return false;
-    }else{
+        if(!setDefaults(!localFlac&&IBT_NO_PSRAM&&ibtaudio::prepareMp3First(path),!localFlac))return false;
+    }
+    struct FileGuard {fs::File& file;bool keep=false;~FileGuard(){if(!keep)file.close();}} guard{audiofile};
+    auto fail=[&](const char* phase){Serial.printf("[SD-PREPARE-FAIL] phase=%s free=%u largest=%u input=%u pcm=%u output=%u\n",phase,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(InBuff.isInitialized()),unsigned(m_outBuff!=nullptr),unsigned(outputReady()));return false;};
+    String relative;const char* audioName=path;
+    if(path[0]!='/'){if(!relative.concat("/")||!relative.concat(path))return fail("PATH");audioName=relative.c_str();}
+    uint32_t openDone=0,openDuration=0;
+    size_t flacInputCapacity=16384;
+    const char* filePhase="FILE_OPEN";
+    auto openFile=[&](){
+        const uint32_t fileStarted=micros();
+        if(audio_beginSDread)audio_beginSDread();
+        audiofile=fs.open(audioName);
+        if((earlyFile||localFlac)&&audiofile){
+            // Configure stdio before its first I/O; don't let a late 4KiB cache
+            // compete with the admitted codec. Warm file/cache resources now.
+            filePhase="FILE_CACHE";
+            if(!audiofile.setBufferSize(512))return false;
+            filePhase="FILE_PROBE";
+            uint8_t probe[42]{};
+            const size_t count=audiofile.read(probe,localFlac?sizeof(probe):1);
+            if(!audiofile.size()||!count)return false;
+            // STREAMINFO max frame size is an optional 24-bit byte count.
+            // Keep a bounded default when unknown; never truncate a known frame.
+            if(localFlac&&count==sizeof(probe)&&!memcmp(probe,"fLaC",4)&&
+               (probe[4]&0x7f)==0&&probe[5]==0&&probe[6]==0&&probe[7]==34){
+                const uint32_t frame=(uint32_t(probe[15])<<16)|(uint32_t(probe[16])<<8)|probe[17];
+                const auto plan=localflac::input(frame);
+                if(!plan.supported){filePhase="FLAC_FRAME_LIMIT";return false;}
+                flacInputCapacity=plan.capacity;
+            }
+            if(!audiofile.seek(0))return false;
+        }
+        openDone=micros();openDuration=openDone-fileStarted;
+        Serial.printf("[SD-FILE-ADMIT] ok=%u early=%u stdio_bytes=%u flac_input=%u free=%u largest=%u\n",unsigned(bool(audiofile)),unsigned(earlyFile||localFlac),(earlyFile||localFlac)?512u:0u,localFlac?unsigned(flacInputCapacity):0u,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+        return bool(audiofile);
+    };
+    if((earlyFile||localFlac)&&!openFile())return fail(filePhase);
+    if(!reset||localFlac){
 #if IBT_NO_PSRAM
-        if(ibtaudio::prepareMp3First(path)&&!MP3Decoder_AllocateBuffers())return false;
+        if(btaudio::outputSelected()&&ibtaudio::prepareMp3First(path)){
+            // Allocate byte-addressed output/input before integer codec workspaces.
+            // The unused final PCM granule is temporary reorder scratch, consumed
+            // before synthesis writes that granule; no PCM survives into next decode.
+            initInBuff(true);
+            if(!m_outBuff||!InBuff.isInitialized())return fail("PCM_INPUT");
+            static_assert(OutputBytes==4608,"Borrowed reorder layout requires full stereo PCM frame");
+            if(!MP3Decoder_BorrowReorder(m_outBuff+1152,OutputBytes-2304))return fail("REORDER_BIND");
+            if(!MP3Decoder_AllocateBuffers())return fail("MP3_WORKSPACE");
+            Serial.printf("[SD-BT-MEM] input_bytes=2048 wrap_tail=0 pcm_bytes=4608 borrowed_reorder=792 saving=2392 free=%u largest=%u\n",
+              unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+        }else if(ibtaudio::prepareMp3First(path)&&!MP3Decoder_AllocateBuffers())return fail("MP3_WORKSPACE");
 #endif
-        initInBuff();
+        initInBuff(false,localFlac?flacInputCapacity:0);
     }
     m_resumeFilePos=resumeFilePos;
     const uint32_t defaultsDone=micros();
-    if(!InBuff.isInitialized()||!m_i2sReady||!m_outBuff)return false;
-    // Preserve UTF-8 exactly. No lossy ASCII retry that could open another file.
-    String relative;
-    const char* audioName=path;
-    if(path[0]!='/'){
-      if(!relative.concat("/")||!relative.concat(path))return false;
-      audioName=relative.c_str();
-    }
-    AUDIO_INFO("Reading file: \"%s\"",audioName);vTaskDelay(2);
-    if(audio_beginSDread)audio_beginSDread();
-    audiofile=fs.open(audioName);
-    const uint32_t openDone=micros();
-    if(!audiofile) {
-        if(audio_info) {vTaskDelay(2); audio_info("Failed to open file for reading");}
-        return false;
-    }
+    if(!InBuff.isInitialized()||!outputReady()||!m_outBuff)return fail("IO_READY");
+    if(!earlyFile&&!localFlac&&!openFile())return fail(filePhase);
     setDatamode(AUDIO_LOCALFILE);
     m_file_size = audiofile.size();//TEST loop
     const char* afn=audiofile.name();
@@ -1022,14 +1084,19 @@ bool Audio::connecttoFSImpl(fs::FS &fs, const char* path, uint32_t resumeFilePos
     if(m_codec==CODEC_M4A&&!extraM4aFile()){audiofile.close();return false;}
     if(m_codec==CODEC_AMR){uint8_t h[9];const int n=audiofile.read(h,sizeof(h));audiofile.seek(0);if(n==9&&!memcmp(h,"#!AMR-WB\n",9))m_codec=CODEC_AMRWB;}
     if(m_codec==CODEC_NONE){audiofile.close();return false;}
+    const uint32_t decoderStarted=micros();
     bool ret = initializeDecoder();
+    // The compact local input has no wrap tail. Expose its actual bounded
+    // decoder window; the Wi-Fi/PSRAM FLAC maximum remains unchanged.
+    if(ret&&localFlac)InBuff.changeMaxBlockSize(uint16_t(flacInputCapacity-1));
     Serial.printf("[SD-OPEN] ok=%u defaults_us=%lu open_us=%lu probe_decoder_us=%lu total_us=%lu\n",ret?1:0,
-        (unsigned long)(defaultsDone-connectStarted),(unsigned long)(openDone-defaultsDone),
-        (unsigned long)(micros()-openDone),(unsigned long)(micros()-connectStarted));
+        (unsigned long)(defaultsDone-connectStarted),(unsigned long)openDuration,
+        (unsigned long)(micros()-decoderStarted),(unsigned long)(micros()-connectStarted));
     if(ret) m_f_running = true;
     else {
       audiofile.close();
     }
+    guard.keep=ret;
     return ret;
 }
 //---------------------------------------------------------------------------------------------------------------------
@@ -1037,7 +1104,7 @@ bool Audio::connecttospeech(const char* speech, const char* lang){
 
     if(!netprefetch::end())return false;
     setDefaults();
-    if(!InBuff.isInitialized() || !m_i2sReady || !m_outBuff)return false;
+    if(!InBuff.isInitialized() || !outputReady() || !m_outBuff)return false;
     char host[] = "translate.google.com.vn";
     char path[] = "/translate_tts";
 
@@ -1125,7 +1192,7 @@ bool Audio::connecttomarytts(const char* speech, const char* lang, const char* v
 
     if(!netprefetch::end())return false;
     setDefaults();
-    if(!InBuff.isInitialized() || !m_i2sReady || !m_outBuff)return false;
+    if(!InBuff.isInitialized() || !outputReady() || !m_outBuff)return false;
     char host[] = "mary.dfki.de";
     char path[] = "/process";
     int port = 59125;
@@ -1293,7 +1360,7 @@ void Audio::showID3Tag(const char* tag, const char* value){
     if(!strcmp(tag, "TEXT")) sprintf(chbuf, "Lyricist: %s", value);
     if(!strcmp(tag, "TIME")) sprintf(chbuf, "Time: %s", value);
     if(!strcmp(tag, "TIT1")) sprintf(chbuf, "Grouping: %s", value);
-    if(!strcmp(tag, "TIT2")) { sprintf(chbuf, "Title: %s", value); if(audio_id3album) audio_id3album(value); }
+    if(!strcmp(tag, "TIT2")) { sprintf(chbuf, "Title: %s", value); if(audio_id3title) audio_id3title(value); }
     if(!strcmp(tag, "TIT3")) sprintf(chbuf, "Subtitle: %s", value);
     if(!strcmp(tag, "TLAN")) sprintf(chbuf, "Language: %s", value);
     if(!strcmp(tag, "TLEN")) sprintf(chbuf, "Length (ms): %s", value);
@@ -1734,8 +1801,8 @@ int Audio::read_FLAC_Header(uint8_t *data, size_t len) {
         uint8_t bps = (nextval & 0x01) << 4;
         bps += (*(data +16) >> 4) + 1;
         m_flacBitsPerSample = bps;
-        if((bps != 8) && (bps != 16)){
-            log_e("bits per sample must be 8 or 16, is %i", bps);
+        if(bps<8 || bps>16){
+            log_e("bits per sample must be8..16, is %i", bps);
             stopSong();
             return -1;
         }
@@ -2586,6 +2653,7 @@ size_t Audio::process_m3u8_ID3_Header(uint8_t* packet){
 }
 //---------------------------------------------------------------------------------------------------------------------
 uint32_t Audio::stopSong() {
+    m_streamBuffering=false;
     if(cooperativeWebDac()){m_validSamples=0;m_curSample=0;} // Discard the cancelled frame on its owner.
 #if IBT_NO_PSRAM
     lightnet::gate().cancel();
@@ -2616,7 +2684,7 @@ uint32_t Audio::stopSong() {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void Audio::playI2Sremains() { // returns true if all dma_buffs flushed
-    if(!m_i2sReady||!m_outBuff){m_validSamples=0;return;}
+    if(!outputReady()||!m_outBuff){m_validSamples=0;return;}
     if(!getSampleRate()) setSampleRate(96000);
     if(!getChannels()) setChannels(2);
     if(getBitsPerSample() > 8) memset(m_outBuff,   0, OutputBytes);     //Clear OutputBuffer (signed)
@@ -2637,7 +2705,7 @@ bool Audio::pauseResume() {
         if(!m_f_running) {
             if(cooperativeWebDac()){m_validSamples=0;m_curSample=0;}
             memset(m_outBuff, 0, OutputBytes);               //Clear OutputBuffer
-            i2s_zero_dma_buffer((i2s_port_t) m_i2s_num);
+            if(m_i2sReady)i2s_zero_dma_buffer((i2s_port_t) m_i2s_num);
         }
     }
     return retVal;
@@ -2914,7 +2982,7 @@ uint16_t Audio::get_VUlevel(uint16_t dimension){
 void Audio::loop() {
     if(m_playlistFormat==FORMAT_M3U8&&!ibtdirect::hlsEnabled()){stopSong();AUDIO_ERROR("HLS disabled in settings");return;}
 
-    if(!InBuff.isInitialized() || !m_i2sReady || !m_outBuff){m_f_running=false;return;}
+    if(!InBuff.isInitialized() || !outputReady() || !m_outBuff){m_f_running=false;return;}
     if(!m_f_running) {
       vuLeft=0; vuRight=0;
       vTaskDelay(2);
@@ -3466,6 +3534,9 @@ void Audio::processLocalFile() {
                 InBuff.bytesWasRead(bytesDecoded);
                 return;
             }
+            // FLAC emits one frame in several PCM chunks without consuming
+            // further compressed bytes. EOF must wait for its final chunk.
+            if(m_f_running&&(m_codec==CODEC_FLAC||m_codec==CODEC_OGG_FLAC)&&FLACOutputPending())return;
         }
         InBuff.resetBuffer();
         playI2Sremains();
@@ -3504,6 +3575,14 @@ void Audio::processLocalFile() {
 //----------------------------------------------------------------------------------------------------------------------
 void Audio::processWebStream() {
 
+    // TLS available()/read() can decrypt/receive a record. Never put that work
+    // between already decoded PCM slices: service pending output on this owner
+    // first, without advancing the compressed ring or decoding another frame.
+    if(!m_f_firstCall && getDatamode()==AUDIO_DATA && cooperativeWebDac() && m_validSamples){
+        drainDecoded();
+        return;
+    }
+
     const uint16_t  maxFrameSize = InBuff.getMaxBlockSize();    // every mp3/aac frame is not bigger
     static ibtaudio::StartupBuffer startup;
     static netpoll::Gate pollGate;
@@ -3524,9 +3603,11 @@ void Audio::processWebStream() {
         f_tmr_1s = false;
         directrx::reset();
         pollGate.reset();netpoll::applied().store(0,std::memory_order_relaxed);
-        startup.begin(millis(),uint32_t(InBuff.bufferFilled()+InBuff.freeSpace()));
-        if(!m_f_tts)Serial.printf("[PREBUFFER] WAIT policy=CAPPED_25 target=%lu capacity=%lu\n",(unsigned long)startup.threshold(),(unsigned long)(InBuff.bufferFilled()+InBuff.freeSpace()));
-        if(cooperativeWebDac())Serial.println("[WEB-DAC-SERVICE] slice_frames=512 pending_pcm=RETAIN refill=BETWEEN_SLICES heap_added=0");
+        const bool refillFirst=cooperativeWebDac();
+        m_streamBuffering=refillFirst;
+        startup.begin(millis(),uint32_t(InBuff.bufferFilled()+InBuff.freeSpace()),refillFirst);
+        if(!m_f_tts)Serial.printf("[PREBUFFER] WAIT policy=%s target=%lu capacity=%lu\n",refillFirst?"LIGHT_TLS_75":"CAPPED_25",(unsigned long)startup.threshold(),(unsigned long)(InBuff.bufferFilled()+InBuff.freeSpace()));
+        if(refillFirst)Serial.println("[WEB-DAC-SERVICE] slice_frames=512 pending_pcm=DRAIN_BEFORE_RX refill=BETWEEN_FRAMES low_input=CONTINUOUS_NO_REBUFFER_GATE heap_added=0");
         cnt_slow = 0;
         chunks.reset();
         loopCnt = 0;
@@ -3544,10 +3625,14 @@ void Audio::processWebStream() {
     }
 
     if(getDatamode() != AUDIO_DATA) return;              // guard
+    // The75% gate belongs to startup only. During playback, the complete-frame
+    // check in playAudioData() waits only for the missing frame bytes; never
+    // turn an ordinary partial TCP/TLS arrival into a new startup pause.
     if(!f_stream && !m_f_tts){
         const auto ready=startup.poll(millis(),uint32_t(InBuff.bufferFilled()));
         if(ready==ibtaudio::StartupBuffer::Ready){
             f_stream=true;
+            m_streamBuffering=false;
             Serial.printf("[PREBUFFER] READY fill=%lu target=%lu\n",(unsigned long)InBuff.bufferFilled(),(unsigned long)startup.threshold());
             AUDIO_INFO("stream ready");
         }else if(ready!=ibtaudio::StartupBuffer::Waiting){
@@ -4571,9 +4656,12 @@ int Audio::sendBytes(uint8_t* data, size_t len) {
     if(ret==ERR_AAC_OUTPUT_TOO_SMALL&&(m_codec==CODEC_AAC||m_codec==CODEC_M4A)){
         AUDIO_ERROR("A hangformátumhoz nagyobb PCM-puffer kell");stopSong();return 0;
     }
+    if((m_codec==CODEC_FLAC||m_codec==CODEC_OGG_FLAC)&&ret==ERR_FLAC_MEMORY){
+        AUDIO_ERROR("Nincs eleg RAM a FLAC hangblokkhoz");stopSong();return 0;
+    }
     if(ret < 0) { // Error, skip the frame...
         if(m_f_Log) if(m_codec == CODEC_M4A){log_i("begin not found"); return 1;}
-        i2s_zero_dma_buffer((i2s_port_t)m_i2s_num);
+        if(m_i2sReady)i2s_zero_dma_buffer((i2s_port_t)m_i2s_num);
         if(!getChannels() && (ret == -2)) {
              ; // suppress errorcode MAINDATA_UNDERFLOW
         }
@@ -4603,9 +4691,14 @@ int Audio::sendBytes(uint8_t* data, size_t len) {
             }
             if(m_codec == CODEC_FLAC || m_codec == CODEC_OGG_FLAC){
                 setChannels(FLACGetChannels());
-                setSampleRate(FLACGetSampRate());
-                setBitsPerSample(FLACGetBitsPerSample());
+                if(!setSampleRate(FLACGetSampRate())){AUDIO_ERROR("FLAC: I2S clock rejected");stopSong();return 0;}
+                setBitsPerSample(16); // Decoder normalizes8..16-bit samples to PCM16.
                 setBitrate(FLACGetBitRate());
+                m_extraDacSourceRate=0;m_extraDacResampler.reset();
+                if(IBT_NO_PSRAM&&!btaudio::outputSelected()){
+                    directrx::pcmBegin(getSampleRate(),getChannels());
+                    Serial.printf("[FLAC-DAC] rate=%lu source_bits=%u output_bits=16 channels=%u writer=NATIVE64 probe=ADPCM_PCM_SHARED\n",(unsigned long)getSampleRate(),unsigned(FLACGetBitsPerSample()),unsigned(getChannels()));
+                }
             }
             showCodecParams();
         }
@@ -4620,6 +4713,8 @@ int Audio::sendBytes(uint8_t* data, size_t len) {
         }
     }
     pathprobe::frames(m_validSamples);
+    const bool nativeFlac=IBT_NO_PSRAM&&(m_codec==CODEC_FLAC||m_codec==CODEC_OGG_FLAC)&&!btaudio::outputSelected();
+    if(nativeFlac)directrx::pcmRaw(m_outBuff,m_validSamples,getChannels());
     if(m_streamType==ST_WEBSTREAM)directrx::decoded(m_validSamples,m_codec==CODEC_MP3?MP3GetBitrate():getBitRate(),getSampleRate(),getChannels(),getBitsPerSample());
     compute_audioCurrentTime(bytesDecoded);
     pathprobe::Scope outputProbe(pathprobe::Output);outputProbe.units(m_validSamples);
@@ -4632,6 +4727,13 @@ int Audio::sendBytes(uint8_t* data, size_t len) {
             if(cooperativeWebDac()){m_validSamples=0;m_curSample=0;}
             return bytesDecoded;
         }
+    }
+    if(nativeFlac&&m_validSamples){
+        m_curSample=0;
+        // Same native PCM16 handoff used by verified WAV/ADPCM playback;
+        // includes gain/fade, bounded writes and packed/accepted PCM probes.
+        if(!playExtraDacBlock()){if(m_f_running)stopSong();}
+        return bytesDecoded;
     }
     drainDecoded();
     return bytesDecoded;
@@ -4745,6 +4847,8 @@ void Audio::printDecodeError(int r) {
         switch(r){
             case ERR_FLAC_NONE:                             e = "NONE";                             break;
             case ERR_FLAC_BLOCKSIZE_TOO_BIG:                e = "BLOCKSIZE TOO BIG";                break;
+            case ERR_FLAC_SAMPLE_RANGE: e = "FLAC reconstructed sample out of range"; break;
+            case ERR_FLAC_MEMORY: e = "FLAC sample workspace allocation failed"; break;
             case ERR_FLAC_RESERVED_BLOCKSIZE_UNSUPPORTED:   e = "Reserved Blocksize unsupported";   break;
             case ERR_FLAC_SYNC_CODE_NOT_FOUND:              e = "SYNC CODE NOT FOUND";              break;
             case ERR_FLAC_UNKNOWN_CHANNEL_ASSIGNMENT:       e = "UNKNOWN CHANNEL ASSIGNMENT";       break;
@@ -4872,6 +4976,7 @@ bool Audio::audioFileSeek(const float speed) {
     // 1.5 is one and half speed
     if((speed > 1.5f) || (speed < 0.25f)) return false;
 
+    if(!m_i2sReady)return false; // This legacy control changes the physical DAC clock only.
     uint32_t srate = getSampleRate() * speed;
     i2s_set_sample_rates((i2s_port_t)m_i2s_num, srate);
     return true;
@@ -4879,6 +4984,10 @@ bool Audio::audioFileSeek(const float speed) {
 //---------------------------------------------------------------------------------------------------------------------
 bool Audio::setSampleRate(uint32_t sampRate) {
     if(!sampRate) sampRate = 16000; // fuse, if there is no value -> set default #209
+    if(!m_i2sReady){
+        if(!outputReady())return false;
+        m_sampleRate=sampRate;return true; // BT resampler consumes the source clock.
+    }
     const esp_err_t result=i2s_set_sample_rates((i2s_port_t)m_i2s_num, sampRate);
     if(result!=ESP_OK){log_e("I2S rate change failed: rate=%lu error=%d",(unsigned long)sampRate,int(result));return false;}
     m_sampleRate = sampRate;
@@ -4946,6 +5055,7 @@ void Audio::setI2SCommFMT_LSB(bool commFMT) {
 
     }
     AUDIO_INFO("commFMT = %i", m_i2s_config.communication_format);
+    if(!m_i2sReady)return; // Save format for the next real DAC lease, no SDK call while dormant.
     i2s_driver_uninstall((i2s_port_t)m_i2s_num);
     i2s_driver_install  ((i2s_port_t)m_i2s_num, &m_i2s_config, 0, NULL);
 }
@@ -4973,8 +5083,10 @@ serviceui::Transfer Audio::writeServicePcm(const int16_t* samples,uint16_t frame
 }
 bool Audio::writePcm16(const uint8_t* data,size_t bytes,uint32_t rate){
     if(!m_i2sReady || bytes%4)return false;
+    const uint32_t started=micros();unsigned submissions=0;
+    const auto finish=[&](bool ok){btrxprobe::stats().write(submissions,uint32_t(micros()-started),ok);return ok;};
     setBitsPerSample(16);setChannels(2);
-    if(getSampleRate()!=rate && !setSampleRate(rate))return false;
+    if(getSampleRate()!=rate && !setSampleRate(rate))return finish(false);
     static uint32_t lastReportedRate=0;
     if(rate!=lastReportedRate){
         lastReportedRate=rate;
@@ -4982,8 +5094,14 @@ bool Audio::writePcm16(const uint8_t* data,size_t bytes,uint32_t rate){
             (unsigned long)rate,double(i2s_get_clk((i2s_port_t)m_i2s_num)));
     }
     monodsp::block(rate);
-    for(size_t i=0;i<bytes;i+=4){int16_t frame[2];memcpy(frame,data+i,4);if(!playSample(frame))return false;}
-    return true;
+    uint32_t frames[64];unsigned ready=0;
+    for(size_t i=0;i<bytes;i+=4){
+        int16_t frame[2];memcpy(frame,data+i,4);
+        if(!playSample(frame,&frames[ready]))return finish(false);
+        ++ready;
+        if(ready==64||i+4==bytes){++submissions;if(!submitDacFrames(frames,ready))return finish(false);ready=0;}
+    }
+    return finish(true);
 }
 bool Audio::playBtBlock() {
     if(!btaudio::outputSelected() || getBitsPerSample()!=16)return false;

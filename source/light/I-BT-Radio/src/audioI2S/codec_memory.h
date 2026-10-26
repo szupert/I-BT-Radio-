@@ -7,6 +7,10 @@
 // Retain fast internal allocation when there is ample room; otherwise use PSRAM.
 static inline void* ibtCodecAlloc(size_t bytes) {
     constexpr size_t reserve = ibtram::reserve;
+    if constexpr (reserve == 0) {
+        if (void* p=heap_caps_malloc(bytes,MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)) return p;
+        return heap_caps_malloc(bytes,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
+    }
     constexpr size_t overhead = 64;
     if (bytes <= SIZE_MAX-reserve-overhead &&
         heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT) >= bytes+reserve+overhead &&

@@ -37,6 +37,7 @@ idf_component_register(SRCS
     "dual/dns_auto.cpp"
     "dual/ir_receiver.cpp"
     "dual/weather.cpp"
+    "dual/weather_light_decode.cpp"
     "dual/sensors/receiver.cpp"
     "dual/sensors/direct_reader.cpp"
     "dual/r10_diag.cpp"
@@ -57,6 +58,7 @@ idf_component_register(SRCS
     "dual/station_save_control.cpp"
     "dual/logic.cpp"
     "ui/small/frontend_small.cpp"
+    "ui/boot_custom.cpp"
     "pluginsManager/pluginsManager.cpp"
     "dual/v026_probe.cpp"
     "dual/v027_himem.cpp"
@@ -78,4 +80,4 @@ set_source_files_properties("audioI2S/mp3_decoder/mp3_decoder.cpp"
     PROPERTIES COMPILE_OPTIONS "-O2")
 
 
-set_source_files_properties("dual/core.cpp" "dual/ir_receiver.cpp" "ui/small/frontend_small.cpp" "dual/online_artwork.cpp" "dual/dns_auto.cpp" PROPERTIES COMPILE_OPTIONS "-fstack-usage")
+set_source_files_properties("dual/core.cpp" "dual/ir_receiver.cpp" "ui/small/frontend_small.cpp" "ui/boot_custom.cpp" "dual/online_artwork.cpp" "dual/dns_auto.cpp" "dual/weather.cpp" "dual/weather_light_decode.cpp" PROPERTIES COMPILE_OPTIONS "-fstack-usage")

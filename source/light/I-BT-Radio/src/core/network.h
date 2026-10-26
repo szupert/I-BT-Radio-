@@ -14,10 +14,12 @@ class MyNetwork {
     void begin();
     void service();
     void startSetup();
+    void requestSetup(); // owner-queued AP onboarding; preserves saved credentials
     void enterOfflinePlayer(unsigned target=1, bool temporaryBluetooth=false);
     bool prepareLocalBluetooth(); // network owner acknowledges WiFi OFF before SDK allocation
     void enterOnlinePlayer();
     bool offlineReady() const;
+    bool connectionBusy() const; // Read-only ownership state, no driver calls
     bool offlinePlayer() const;
     bool applySetupCredentials(const char* ssid, const char* pass);
     bool connectScannedNetwork(const char* ssid, const char* pass);

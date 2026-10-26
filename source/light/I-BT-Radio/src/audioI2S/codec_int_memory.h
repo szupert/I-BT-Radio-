@@ -1,11 +1,17 @@
 #pragma once
 #include "codec_memory.h"
-// Only the explicitly audited integer-only MP3 workspaces may use this pool.
+// Only the explicitly audited integer-only MP3/FLAC workspaces use this pool.
 // No byte/halfword/float access, libc memset or DMA is permitted on these blocks.
 // Byte-oriented reservoirs, headers and PCM remain in normal DRAM/PSRAM.
 static inline void* ibtCodecIntAlloc(size_t bytes) {
 #if IBT_NO_PSRAM && defined(CONFIG_IDF_TARGET_ESP32)
     constexpr unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_EXEC|MALLOC_CAP_32BIT;
+    if constexpr (ibtram::reserve == 0) {
+        if (bytes%4==0) {
+            if(void* p=heap_caps_malloc(bytes,caps)) return p;
+        }
+        return ibtCodecAlloc(bytes);
+    }
     constexpr size_t reserve=ibtram::reserve==0?0:4096;
     // EXEC/32BIT can come from shared D/IRAM, reducing byte-accessible DRAM.
     // A post-allocation rejection alone can already destroy its low-water mark.

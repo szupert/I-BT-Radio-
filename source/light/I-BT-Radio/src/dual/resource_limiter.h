@@ -31,4 +31,5 @@ bool allowArtworkStart();
 bool allowArtworkProgress();
 bool allowArtworkIdleProgress(); // Light preparation cancels if playback starts.
 void telemetry();
+size_t compactTelemetry(char* out,size_t capacity);
 }

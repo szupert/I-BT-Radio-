@@ -43,15 +43,19 @@ void Telnet::start() {
 #if defined(YO_DUAL)
   return; // No NetworkClient access; USB framing is owned by R10.
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   server.begin();
   server.setNoDelay(true);
+#endif
 }
 
 void Telnet::stop() {
 #if defined(YO_DUAL)
   return; // No NetworkClient access; USB framing is owned by R10.
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   server.stop();
+#endif
 }
 
 void Telnet::toggle() {
@@ -74,6 +78,7 @@ void Telnet::cleanupClients() {
 #if defined(YO_DUAL)
   return; // No NetworkClient access; USB framing is owned by R10.
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   for (int i = 0; i < MAX_TLN_CLIENTS; i++) {
     if (!clients[i].connected()) {
       if (clients[i]) {
@@ -82,6 +87,7 @@ void Telnet::cleanupClients() {
       }
     }
   }
+#endif
 }
 
 void Telnet::handleSerial(){
@@ -101,6 +107,7 @@ void Telnet::loop() {
 #if defined(YO_DUAL)
   return; // No NetworkClient access; USB framing is owned by R10.
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   if(network.status==SDREADY || network.status!=CONNECTED) {
     handleSerial();
     return;
@@ -151,6 +158,7 @@ void Telnet::loop() {
     }
   }
   handleSerial();
+#endif
 }
 
 void Telnet::print(const char *buf) {
@@ -158,12 +166,14 @@ void Telnet::print(const char *buf) {
   if(buf)Serial.print(buf);
   return;
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   for (int id = 0; id < MAX_TLN_CLIENTS; id++) {
     if (clients[id] && clients[id].connected()) {
       print(id, buf);
     }
   }
   Serial.print(buf);
+#endif
 }
 
 void Telnet::print(uint8_t id, const char *buf) {
@@ -171,10 +181,12 @@ void Telnet::print(uint8_t id, const char *buf) {
   if(buf)Serial.print(buf);
   return;
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   if(id>=MAX_TLN_CLIENTS)return;
   if (clients[id] && clients[id].connected()) {
     clients[id].print(buf);
   }
+#endif
 }
 
 void Telnet::printf(const char *format, ...) {
@@ -191,6 +203,7 @@ void Telnet::printf(const char *format, ...) {
   }
   return;
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   va_list args;
   va_start (args, format );
   vsnprintf(cmBuf, sizeof(cmBuf), format, args);
@@ -205,6 +218,7 @@ void Telnet::printf(const char *format, ...) {
   char *nl = strstr(cmBuf, "\n> ");
   if (nl != NULL) { cmBuf[nl-cmBuf+1] = '\0'; }
   Serial.print(cmBuf);
+#endif
 }
 
 void Telnet::printf(uint8_t id, const char *format, ...) {
@@ -221,6 +235,7 @@ void Telnet::printf(uint8_t id, const char *format, ...) {
   }
   return;
 #endif
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
   va_list argptr;
   va_start(argptr, format);
   vsnprintf(cmBuf, sizeof(cmBuf), format, argptr);
@@ -232,6 +247,7 @@ void Telnet::printf(uint8_t id, const char *format, ...) {
   if (clients[id] && clients[id].connected()) {
     clients[id].print(cmBuf);
   }
+#endif
 }
 
 void Telnet::on_connect(const char* str, uint8_t clientId) {

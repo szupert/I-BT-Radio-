@@ -73,6 +73,10 @@ static void loopDspTask(void * pvParameters){
     #endif
   #endif
     const bool btOut=ibtsched::active(btaudio::outputSelected(),btaudio::transmitting());
+#if IBT_NO_PSRAM && defined(DUMMYDISPLAY)
+    if(btOut&&dual::menuAwaitingBtHeadroom())btaudio::waitUiHeadroom(ibtsched::displayDelayMs(true,0));
+    else
+#endif
     vTaskDelay(btOut?pdMS_TO_TICKS(ibtsched::displayDelayMs(true,0)):DSP_TASK_DELAY);
   }
   vTaskDelete( NULL );

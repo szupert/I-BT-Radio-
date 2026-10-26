@@ -27,6 +27,8 @@ static DeferredFlags deferredAudioNotifications;
 #include "../dual/core.h"
 #include "../dual/sensors/receiver.h"
 #include "../ui/content.h"
+#include "../ui/boot_custom.h"
+#include "../ui/boot_image_format.h"
 #include "../displays/dspcore.h"
 #include "../displays/widgets/widgetsconfig.h" //BitrateFormat
 
@@ -228,6 +230,7 @@ bool NetServer::begin(bool quiet) {
     });
   }
 
+#if !IBT_NO_PSRAM
   webserver.on("/api/videoton.ttf", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(404,"text/plain","Not available in Light");});
   webserver.on("/api/skin.png", HTTP_GET, [](AsyncWebServerRequest *request) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
@@ -237,13 +240,48 @@ bool NetServer::begin(bool quiet) {
     auto* response=request->beginResponse_P(200,"image/png",webSkin_winamp,webSkin_winamp_len);
     response->addHeader("Cache-Control","public, max-age=86400, immutable");request->send(response);
   });
+#endif
   webserver.on("/api/version", HTTP_GET, [](AsyncWebServerRequest *request) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
 #endif
-    auto* response=request->beginResponse(200,"application/json","{\"major\":\"166\",\"release\":\"216\",\"webui\":\"IBT_R216_1\",\"save\":\"lease3\"}");
+    auto* response=request->beginResponse(200,"application/json","{\"major\":\"166\",\"release\":\"270\",\"webui\":\"IBT_R270_1\",\"save\":\"lease3\"}");
     response->addHeader("Cache-Control","no-store");request->send(response);
   });
+#if IBT_NO_PSRAM
+  webserver.on("/api/boot",HTTP_GET,[](AsyncWebServerRequest* request){
+    if(!stationSaveAuthorized(request))return;
+    char body[192];snprintf(body,sizeof(body),"{\"seconds\":%u,\"custom\":%s,\"crc\":%lu,\"bytes\":%lu,\"max_seconds\":120,\"factory_minimum\":true}",bootcustom::seconds(),bootcustom::available()?"true":"false",(unsigned long)bootcustom::checksum(),(unsigned long)bootimage::Total);
+    auto* response=request->beginResponse(200,"application/json",body);response->addHeader("Cache-Control","no-store");request->send(response);
+  });
+  webserver.on("/api/boot/time",HTTP_POST,[](AsyncWebServerRequest* request){
+    if(!stationSaveAuthorized(request))return;
+    const String value=request->arg("seconds");unsigned seconds=0;bool valid=value.length()>0&&value.length()<=3;
+    for(unsigned i=0;valid&&i<value.length();++i){const char c=value[i];if(c<'0'||c>'9')valid=false;else seconds=seconds*10+unsigned(c-'0');}
+    if(!valid||seconds>bootimage::MaxSeconds){request->send(400,"text/plain","Az ido0..120masodperc lehet");return;}
+    if(config.getMode()!=PM_WEB||player.isRunning()||player.status()!=STOPPED||btaudio::wanted()||!btaudio::idle()||weather::busy()||dataUploadOwner||webboardUploadOwner||dataImportBusy||stationsave::holdsAudio()||!bootcustom::saveSeconds(seconds)){request->send(409,"text/plain","Elobb szuneteltesd a lejatszast, es kapcsold ki a Bluetooth hangutat.");return;}
+    char body[80];snprintf(body,sizeof(body),"{\"saved\":true,\"seconds\":%u,\"factory_minimum\":true}",bootcustom::seconds());request->send(200,"application/json",body);
+  });
+  webserver.on("/api/boot/image",HTTP_POST,[](AsyncWebServerRequest* request){
+    if(!stationSaveAuthorized(request))return;
+    const bool owned=dataUploadOwner==request;
+    const bool quiet=network.status==CONNECTED&&config.getMode()==PM_WEB&&!player.isRunning()&&player.status()==STOPPED&&!btaudio::wanted()&&btaudio::idle()&&!weather::busy()&&!stationsave::holdsAudio();
+    uint32_t crc=0;const bool ok=owned&&quiet&&bootcustom::uploadFinish(crc);
+    if(owned){bootcustom::uploadAbort();dataUploadOwner=nullptr;}
+    if(!ok){request->send(409,"text/plain","A kep nem mentheto: szunet/Wi-Fi mod vagy teljes, ervenyes kep szukseges. A regi kep megmaradt.");return;}
+    char body[112];snprintf(body,sizeof(body),"{\"saved\":true,\"crc\":%lu,\"bytes\":%lu,\"next_boot\":true}",(unsigned long)crc,(unsigned long)bootimage::Total);request->send(200,"application/json",body);
+  },nullptr,[](AsyncWebServerRequest* request,uint8_t* data,size_t len,size_t index,size_t total){
+    if(!index){
+#if defined(HTTP_USER) && defined(HTTP_PASS)
+      if(!request->authenticate(HTTP_USER,HTTP_PASS))return;
+#endif
+      if(request->header("Origin")!=String("http://")+request->header("Host")||network.status!=CONNECTED||config.getMode()!=PM_WEB||player.isRunning()||player.status()!=STOPPED||btaudio::wanted()||!btaudio::idle()||dataUploadOwner||webboardUploadOwner||dataImportBusy||userResetQueued.load()||stationsave::holdsAudio()||weather::busy()||!bootcustom::uploadBegin(total))return;
+      dataUploadOwner=request;request->onDisconnect([request](){if(dataUploadOwner==request){bootcustom::uploadAbort();dataUploadOwner=nullptr;}});
+    }
+    if(dataUploadOwner!=request)return;
+    if(network.status!=CONNECTED||config.getMode()!=PM_WEB||player.isRunning()||player.status()!=STOPPED||btaudio::wanted()||!btaudio::idle()||weather::busy()||stationsave::holdsAudio()||total!=bootimage::Total||!bootcustom::uploadWrite(index,data,len)){bootcustom::uploadAbort();dataUploadOwner=nullptr;}
+  });
+#endif
   webserver.on("/api/player", HTTP_GET, [](AsyncWebServerRequest *request) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
@@ -251,7 +289,8 @@ bool NetServer::begin(bool quiet) {
     if(network.status!=CONNECTED){request->send(503,"text/plain","Radio offline");return;}
     dual::Snapshot s=dual::snapshot();dual::prepareTrackText(s);
     AsyncResponseStream* response=request->beginResponseStream("application/json; charset=utf-8");
-    response->print("{\"skin\":");response->print(webSkinIndex(s.settings));
+    response->print("{\"skin\":");response->print(IBT_NO_PSRAM?0:webSkinIndex(s.settings));
+    response->print(",\"light\":");response->print(IBT_NO_PSRAM?"true":"false");
     // Bind persisted browser save requests to this unit, not merely its IP.
     const uint64_t chip=ESP.getEfuseMac();uint32_t device=2166136261u;
     for(unsigned i=0;i<8;++i){device^=uint8_t(chip>>(i*8));device*=16777619u;}
@@ -427,6 +466,7 @@ bool NetServer::begin(bool quiet) {
     }
     response->print("]}");response->addHeader("Cache-Control","no-store");request->send(response);
   });
+#if !IBT_NO_PSRAM
   webserver.on("/api/mono", HTTP_POST, [](AsyncWebServerRequest *request) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
@@ -439,6 +479,7 @@ bool NetServer::begin(bool quiet) {
     const long number=strtol(value.c_str(),&end,10);const bool ok=goodKey&&value.length()&&!*end&&number>=-32768&&number<=32767&&monodsp::set(unsigned(key),int(number));
     request->send(ok?202:400,"application/json",ok?"{\"accepted\":true,\"save\":\"when_stopped\"}":"{\"error\":\"Invalid MONO DSP value\"}");
   });
+#endif
   webserver.on("/api/weather", HTTP_GET, [](AsyncWebServerRequest *request) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
@@ -446,6 +487,7 @@ bool NetServer::begin(bool quiet) {
     const auto c=weather::configuration();const auto w=weather::reading();
     auto response=request->beginResponseStream("application/json; charset=utf-8");
     response->print("{\"enabled\":");response->print(c.enabled?"true":"false");
+    response->printf(",\"light\":%s",IBT_NO_PSRAM?"true":"false");
     response->print(",\"provider\":");response->print(unsigned(c.provider));
     response->print(",\"latitude\":");response->print(c.latitude,5);response->print(",\"longitude\":");response->print(c.longitude,5);
     response->print(",\"location\":");webJsonString(response,c.location);
@@ -486,7 +528,9 @@ bool NetServer::begin(bool quiet) {
 #if defined(HTTP_USER) && defined(HTTP_PASS)
     if(!request->authenticate(HTTP_USER,HTTP_PASS))return request->requestAuthentication();
 #endif
-    char address[18],body[320];bool hasKey=false,pending=false;sensors::bindingStatus(address,sizeof(address),hasKey,pending);radiosensor::Reading value;const bool ready=sensors::reading(value);
+    char address[18],body[320];bool hasKey=false,pending=false;radiosensor::Reading value;bool ready=false;
+    if(request->hasParam("role")){const String r=request->getParam("role")->value();if(r!="0"&&r!="1"){request->send(400,"text/plain","Invalid role");return;}sensors::roleBindingStatus(r=="0"?0:1,address,sizeof(address),hasKey);ready=sensors::roleReading(r=="0"?0:1,value);pending=sensors::roleSavePending();}
+    else{sensors::bindingStatus(address,sizeof(address),hasKey,pending);ready=sensors::reading(value);}
     snprintf(body,sizeof(body),"{\"mac\":\"%s\",\"key_set\":%s,\"pending\":%s,\"fresh\":%s,\"temperature_centi\":%d,\"humidity_centi\":%u}",address,hasKey?"true":"false",pending?"true":"false",ready&&radiosensor::hasFreshPair(value,millis())?"true":"false",int(value.temperatureCenti),unsigned(value.humidityCenti));
     auto response=request->beginResponse(200,"application/json",body);response->addHeader("Cache-Control","no-store");request->send(response);
   });
@@ -499,7 +543,8 @@ bool NetServer::begin(bool quiet) {
     if(!request->hasParam("mac",true)||!request->hasParam("key",true)){request->send(400,"text/plain","MAC and bindkey required in POST body");return;}
     String mac=request->getParam("mac",true)->value();String key=request->getParam("key",true)->value();
     mac.trim();mac.replace('-',':');key.trim();
-    bool ok=mac.length()==17&&key.length()==32&&sensors::bindAddress(mac.c_str(),key.c_str());
+    const String role=request->hasParam("role",true)?request->getParam("role",true)->value():String("legacy");
+    bool ok=mac.length()==17&&((role=="0"||role=="1")?sensors::bindRole(role=="0"?0:1,mac.c_str(),key.c_str()):(role=="legacy"&&key.length()==32&&sensors::bindAddress(mac.c_str(),key.c_str())));
     for(unsigned i=0;i<key.length();++i)key.setCharAt(i,'0');
     auto response=request->beginResponse(ok?202:400,"application/json",ok?"{\"queued\":true}":"{\"error\":\"Invalid MAC/key or pending request\"}");response->addHeader("Cache-Control","no-store");request->send(response);
   });
@@ -565,8 +610,10 @@ bool NetServer::begin(bool quiet) {
   webReady=true;
   //if(strlen(config.store.mdnsname)>0)
   //  MDNS.begin(config.store.mdnsname);
+#if !IBT_NO_PSRAM
   websocket.onEvent(onWsEvent);
   webserver.addHandler(&websocket);
+#endif
   if(network.status==SOFT_AP){
     Serial.printf("[WIFI-PORTAL] listener=%u bt_blocked=%u free=%u largest=%u\n",unsigned(!webBtSuspended),unsigned(webBtSuspended),
       unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));

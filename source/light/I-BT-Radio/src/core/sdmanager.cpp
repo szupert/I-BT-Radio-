@@ -143,16 +143,22 @@ void SDManager::listSD(File &plSDfile,File &plSDindex,const char* dirname,uint8_
     if(result!=FR_OK){indexCancel.store(true);Serial.printf("[SD-INDEX] FAIL readdir=%u\n",unsigned(result));break;}
     if(!info->fname[0])break;
     if(!strcmp(info->fname,".")||!strcmp(info->fname,".."))continue;
+    ++scanStats.entries;
+    if(scanStats.logged++<24)Serial.printf("[SD-ENTRY] dir=%s name=%s kind=%s bytes=%llu\n",dirname,info->fname,(info->fattrib&AM_DIR)?"DIR":"FILE",(unsigned long long)info->fsize);
     String fileName;
     if(!fileName.concat(dirname)||(!fileName.endsWith("/")&&!fileName.concat("/"))||!fileName.concat(info->fname)){
       indexCancel.store(true);Serial.println("[SD-INDEX] FAIL file path memory");break;
     }
     if(fileName.length()+1>=ibtsd::PathCapacity||strpbrk(info->fname,"\t\r\n")){
-      indexCancel.store(true);Serial.println("[SD-INDEX] FAIL unrepresentable path");break;
+      ++scanStats.invalid;Serial.println("[SD-INDEX] SKIP unrepresentable path");continue;
     }
     const char* filePath=fileName.c_str();
-    if(info->fattrib&AM_DIR){if(levels&&!_checkNoMedia(filePath))listSD(plSDfile,plSDindex,filePath,levels-1);}
-    else if(dual::supportedAudioName(info->fname)){
+    if(info->fattrib&AM_DIR){
+      if(!levels){++scanStats.depth;Serial.printf("[SD-INDEX] SKIP depth path=%s\n",filePath);}
+      else if(_checkNoMedia(filePath)){++scanStats.nomedia;Serial.printf("[SD-INDEX] SKIP nomedia path=%s\n",filePath);}
+      else listSD(plSDfile,plSDindex,filePath,levels-1);
+    }
+    else if((++scanStats.files,dual::supportedAudioName(info->fname))){
       // Existing audio counters/seek APIs are 32-bit; fail closed above that range.
       if(info->fsize>UINT32_MAX){Serial.println("[SD-INDEX] SKIP file over 4GB");continue;}
       uint32_t pos=plSDfile.position();
@@ -164,13 +170,14 @@ void SDManager::listSD(File &plSDfile,File &plSDindex,const char* dirname,uint8_
       indexedTracks.store(++_sdFCount);
       if(_sdFCount%64==0)Serial.printf("[SD-AUDIO] indexed=%lu\n",(unsigned long)_sdFCount);
       if(_sdFCount>=65535){indexCancel.store(true);break;}
-    }
+    }else ++scanStats.unsupported;
   }
   if(f_closedir(root.get())!=FR_OK)indexCancel.store(true);
 }
 
 bool SDManager::indexSDPlaylist() {
   Serial.printf("[SD-INDEX] START playlist=%s index=%s\n",PLAYLIST_SD_PATH,INDEX_SD_PATH);
+  indexError.store(sdroute::Error::ReadIndex);
   catalogReady.store(false);
   // An incremental reader must finish its current small read before index
   // replacement starts. It sees catalogReady=false on its next step.
@@ -180,6 +187,7 @@ bool SDManager::indexSDPlaylist() {
     xSemaphoreGive(scanIoLock);
   }
   _sdFCount = 0;
+  scanStats={};
   indexedTracks.store(0);
   indexStarted=millis();
   // A blank FAT card does not contain yoRadio's private index directory.
@@ -197,13 +205,16 @@ bool SDManager::indexSDPlaylist() {
   File index = open(INDEX_SD_PATH, "w", true);
   if(!index){playlist.close();remove(PLAYLIST_SD_PATH);Serial.println("[SD-AUDIO] FAIL open index");return false;}
   listSD(playlist, index, "/", SD_MAX_LEVELS);
+  Serial.printf("[SD-CATALOG] entries=%lu files=%lu accepted=%lu unsupported=%lu nomedia=%lu depth=%lu invalid=%lu cancelled=%u\n",(unsigned long)scanStats.entries,(unsigned long)scanStats.files,(unsigned long)_sdFCount,(unsigned long)scanStats.unsupported,(unsigned long)scanStats.nomedia,(unsigned long)scanStats.depth,(unsigned long)scanStats.invalid,indexCancel.load()?1:0);
   index.flush();
   playlist.flush();
   const bool valid=!indexExpired()&&_sdFCount>0&&index.size()==_sdFCount*4&&playlist.size()>0;
+  const auto failure=sdroute::catalogFailure(!indexExpired(),_sdFCount,index.size()==0&&playlist.size()==0);
   index.close();
   playlist.flush();
   playlist.close();
-  if(!valid){remove(INDEX_SD_PATH);Serial.printf("[SD-AUDIO] FAIL tracks=%lu cancelled=%u elapsed_ms=%lu\n",(unsigned long)_sdFCount,indexCancel.load()?1:0,(unsigned long)(millis()-indexStarted));return false;}
+  if(!valid){indexError.store(failure);remove(INDEX_SD_PATH);Serial.printf("[SD-AUDIO] FAIL tracks=%lu cancelled=%u elapsed_ms=%lu\n",(unsigned long)_sdFCount,indexCancel.load()?1:0,(unsigned long)(millis()-indexStarted));return false;}
+  indexError.store(sdroute::Error::None);
   catalogReady.store(true);
   Serial.printf("[SD-AUDIO] READY tracks=%lu codecs=MP3,AAC-SBR,M4A-AAC-ALAC,WAV-PCM-ADPCM-G711,FLAC,OGG-VORBIS-OPUS,AMR,AWB,TS,MPEG\n",(unsigned long)_sdFCount);
   Serial.println();

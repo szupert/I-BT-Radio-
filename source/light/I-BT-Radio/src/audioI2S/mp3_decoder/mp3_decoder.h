@@ -173,13 +173,41 @@ typedef struct ScaleFactorJS { /* used in MPEG 2, 2.5 intensity (joint) stereo o
  *   last 15 blocks to shift them down one, a hardware style FIFO)
  */
 typedef struct SubbandInfo {
-    int vbuf[m_MAX_NCHAN * m_VBUF_LENGTH];      /* vbuf for fast DCT-based synthesis PQMF - double size for speed (no modulo indexing) */
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+#define IBT_MP3_PAGED_SYNTHESIS 1
+    // Exact full synthesis history, in independently admitted integer pages.
+    struct History {
+        static constexpr unsigned Words=m_MAX_NCHAN*m_VBUF_LENGTH/2, PageWords=64;
+        static constexpr unsigned Pages=(Words+PageWords-1)/PageWords;
+        int* page[Pages];
+        static int** second; // singleton decoder: allocated only after a preferred 256-byte page is denied
+        static uint32_t splitMask;
+        volatile int& operator[](size_t i){
+            const unsigned p=i/PageWords, off=i%PageWords;
+            return (splitMask&(uint32_t(1)<<p)) && off>=PageWords/2
+                ? second[p][off-PageWords/2] : page[p][off];
+        }
+    } vbuf;
+#else
+#define IBT_MP3_PAGED_SYNTHESIS 0
+    int vbuf[m_MAX_NCHAN * m_VBUF_LENGTH
+#if IBT_NO_PSRAM
+        / 2
+#endif
+    ];      /* vbuf for fast DCT-based synthesis PQMF - double size for speed (no modulo indexing) */
+#endif
     int vindex;                             /* internal index for tracking position in vbuf */
 } SubbandInfo_t;
 
 typedef struct MP3DecInfo {
     /* buffer which must be large enough to hold largest possible main_data section */
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+#define IBT_MP3_SPLIT_BYTE_RESERVOIR 1
+    unsigned char* mainBuf; // Full-size byte reservoir owned by decoder workspace.
+#else
+#define IBT_MP3_SPLIT_BYTE_RESERVOIR 0
     unsigned char mainBuf[m_MAINBUF_SIZE];
+#endif
     /* special info for "free" bitrate files */
     int freeBitrateFlag;
     int freeBitrateSlots;
@@ -456,6 +484,7 @@ const uint32_t csa[8][2] PROGMEM = {
 
 // prototypes
 bool MP3Decoder_AllocateBuffers(void);
+bool MP3Decoder_BorrowReorder(void* scratch,unsigned bytes);
 void MP3Decoder_MemoryDiagnostics(void);
 void MP3Decoder_FreeBuffers();
 int  MP3Decode( unsigned char *inbuf, int *bytesLeft, short *outbuf, int useSize);
@@ -470,8 +499,13 @@ int  MP3GetOutputSamps();
 
 //internally used
 void MP3Decoder_ClearBuffer(void);
-void PolyphaseMono(short *pcm, int *vbuf, const uint32_t *coefBase);
-void PolyphaseStereo(short *pcm, int *vbuf, const uint32_t *coefBase);
+#if IBT_MP3_PAGED_SYNTHESIS
+using Mp3VPosition=size_t; // Logical cursor; never a fabricated cross-page pointer.
+#else
+using Mp3VPosition=int*;
+#endif
+void PolyphaseMono(short *pcm, Mp3VPosition vbuf, const uint32_t *coefBase);
+void PolyphaseStereo(short *pcm, Mp3VPosition vbuf, const uint32_t *coefBase);
 void SetBitstreamPointer(BitStreamInfo_t *bsi, int nBytes, unsigned char *buf);
 unsigned int GetBits(BitStreamInfo_t *bsi, int nBits);
 int CalcBitsUsed(BitStreamInfo_t *bsi, unsigned char *startBuf, int startOffset);
@@ -479,7 +513,7 @@ int DequantChannel(int *sampleBuf, int *workBuf, int *nonZeroBound, SideInfoSub_
 void MidSideProc(int x[m_MAX_NCHAN][m_MAX_NSAMP], int nSamps, int mOut[2]);
 void IntensityProcMPEG1(int x[m_MAX_NCHAN][m_MAX_NSAMP], int nSamps, ScaleFactorInfoSub_t *sfis,	CriticalBandInfo_t *cbi, int midSideFlag, int mixFlag, int mOut[2]);
 void IntensityProcMPEG2(int x[m_MAX_NCHAN][m_MAX_NSAMP], int nSamps, ScaleFactorInfoSub_t *sfis, CriticalBandInfo_t *cbi, ScaleFactorJS_t *sfjs, int midSideFlag, int mixFlag, int mOut[2]);
-void FDCT32(int *x, int *d, int offset, int oddBlock, int gb);// __attribute__ ((section (".data")));
+void FDCT32(int *x, Mp3VPosition d, int offset, int oddBlock, int gb);// __attribute__ ((section (".data")));
 void FreeBuffers();
 int CheckPadBit();
 int UnpackFrameHeader(unsigned char *buf);

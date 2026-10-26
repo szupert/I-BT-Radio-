@@ -12,8 +12,10 @@
  */
 #include "flac_decoder.h"
 #include "../codec_memory.h"
+#include "../codec_int_memory.h"
 #include "../pcm_bounds.h"
 #include "vector"
+#include <algorithm>
 using namespace std;
 
 
@@ -21,6 +23,54 @@ FLACFrameHeader_t   *FLACFrameHeader;
 FLACMetadataBlock_t *FLACMetadataBlock;
 FLACsubFramesBuff_t *FLACsubFramesBuff;
 
+#if IBT_FLAC_DYNAMIC_SAMPLES
+static uint16_t sampleCapacity[MAX_CHANNELS]{},reportedFrames=0;
+using SamplePage=FLACsubframesBuffer_t::ChannelSamples;
+static void zeroSamples(unsigned ch){
+    for(unsigned at=0;at<sampleCapacity[ch];at+=SamplePage::PageSamples)
+        ibtCodecZeroWords(FLACsubFramesBuff->samplesBuffer[ch].page[at/SamplePage::PageSamples],SamplePage::storageBytes(std::min<unsigned>(SamplePage::PageSamples,sampleCapacity[ch]-at)));
+}
+static void releaseChannel(unsigned ch){
+    auto& channel=FLACsubFramesBuff->samplesBuffer[ch];
+    for(unsigned i=0;i<SamplePage::Pages;++i){if(channel.owners&(uint32_t(1)<<i))free(channel.page[i]);channel.page[i]=nullptr;}
+    channel.owners=0;
+    sampleCapacity[ch]=0;
+}
+static void releaseSamples(){
+    if(!FLACsubFramesBuff)return;
+    for(unsigned ch=0;ch<MAX_CHANNELS;++ch)releaseChannel(ch);
+}
+static bool ensureSamples(unsigned frames,unsigned channels){
+    if(!frames||frames>MAX_BLOCKSIZE||channels<1||channels>MAX_CHANNELS)return false;
+    for(unsigned ch=0;ch<channels;++ch){
+        if(sampleCapacity[ch]>=frames)continue;
+        releaseChannel(ch);
+        auto& channel=FLACsubFramesBuff->samplesBuffer[ch];
+        static_assert(SamplePage::Pages<=32,"Bounded sample page ownership");
+        for(unsigned at=0;at<frames;at+=1024){
+            const unsigned count=std::min<unsigned>(1024,frames-at),first=at/SamplePage::PageSamples;
+            if(auto* block=static_cast<int32_t*>(ibtCodecIntAlloc(SamplePage::storageBytes(count)))){
+                channel.owners|=uint32_t(1)<<first;
+                for(unsigned n=0;n<count;n+=SamplePage::PageSamples)channel.page[first+n/SamplePage::PageSamples]=block+(n*3/4);
+            }else{
+                for(unsigned n=0;n<count;n+=SamplePage::PageSamples){
+                    const unsigned page=first+n/SamplePage::PageSamples,bytes=SamplePage::storageBytes(std::min<unsigned>(SamplePage::PageSamples,count-n));
+                    channel.page[page]=static_cast<int32_t*>(ibtCodecIntAlloc(bytes));
+                    if(!channel.page[page]){
+#if defined(ESP_PLATFORM)
+                        Serial.printf("[FLAC-MEM] result=PAGE_DENIED channel=%u page_index=%u page_bytes=%u free=%u largest=%u\n",ch,page,bytes,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+#endif
+                        releaseSamples();return false;
+                    }
+                    channel.owners|=uint32_t(1)<<page;
+                }
+            }
+        }
+        sampleCapacity[ch]=frames;zeroSamples(ch);
+    }
+    return true;
+}
+#endif
 vector<int32_t>coefs;
 const uint16_t outBuffSize = 2048;
 uint16_t m_blockSize=0;
@@ -42,6 +92,9 @@ bool     m_f_OggS_found = false;
 //          FLAC INI SECTION
 //----------------------------------------------------------------------------------------------------------------------
 bool FLACDecoder_AllocateBuffers(void){
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    const bool freshSamples=FLACsubFramesBuff==nullptr;
+#endif
     if(psramFound()) {
         // PSRAM found, Buffer will be allocated in PSRAM
         if(!FLACFrameHeader)    {FLACFrameHeader   = (FLACFrameHeader_t*)    ps_malloc(sizeof(FLACFrameHeader_t));}
@@ -53,6 +106,9 @@ bool FLACDecoder_AllocateBuffers(void){
         if(!FLACMetadataBlock)  {FLACMetadataBlock = (FLACMetadataBlock_t*)  ibtCodecAlloc(sizeof(FLACMetadataBlock_t));}
         if(!FLACsubFramesBuff)  {FLACsubFramesBuff = (FLACsubFramesBuff_t*)  ibtCodecAlloc(sizeof(FLACsubFramesBuff_t));}
     }
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    if(freshSamples&&FLACsubFramesBuff)memset(FLACsubFramesBuff,0,sizeof(FLACsubFramesBuff_t));
+#endif
     if(!FLACFrameHeader || !FLACMetadataBlock || !FLACsubFramesBuff ){
         log_e("not enough memory to allocate flacdecoder buffers");
         FLACDecoder_FreeBuffers();
@@ -63,15 +119,26 @@ bool FLACDecoder_AllocateBuffers(void){
 }
 //----------------------------------------------------------------------------------------------------------------------
 void FLACDecoder_ClearBuffer(){
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    reportedFrames=0;
+#endif
     memset(FLACFrameHeader,   0, sizeof(FLACFrameHeader_t));
     memset(FLACMetadataBlock, 0, sizeof(FLACMetadataBlock_t));
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    for(unsigned ch=0;ch<MAX_CHANNELS;++ch)if(sampleCapacity[ch])
+        zeroSamples(ch);
+#else
     memset(FLACsubFramesBuff, 0, sizeof(FLACsubFramesBuff_t));
+#endif
     m_status = DECODE_FRAME;
     m_outputOffset=0;m_validSamples=0;m_inputUnderflow=false;
     return;
 }
 //----------------------------------------------------------------------------------------------------------------------
 void FLACDecoder_FreeBuffers(){
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    releaseSamples();
+#endif
     if(FLACFrameHeader)    {free(FLACFrameHeader);   FLACFrameHeader   = NULL;}
     if(FLACMetadataBlock)  {free(FLACMetadataBlock); FLACMetadataBlock = NULL;}
     if(FLACsubFramesBuff)  {free(FLACsubFramesBuff); FLACsubFramesBuff = NULL;}
@@ -100,7 +167,8 @@ uint32_t readUint(uint8_t nBits){
 }
 
 int32_t readSignedInt(int nBits){
-    if(nBits<1||nBits>32){m_inputUnderflow=true;return 0;}
+    if(nBits==0)return 0; // A Rice escape partition may encode all-zero residuals.
+    if(nBits<0||nBits>32){m_inputUnderflow=true;return 0;}
     int32_t temp = readUint(nBits) << (32 - nBits);
     temp = temp >> (32 - nBits); // The C++ compiler uses the sign bit to fill vacated bit positions
     return temp;
@@ -333,6 +401,17 @@ int8_t FLACDecodeBounded(uint8_t *inbuf,int *bytesLeft,short *outbuf,size_t outp
         }
         readUint(8);
         if(m_inputUnderflow)return ERR_FLAC_INPUT_UNDERFLOW;
+#if IBT_FLAC_DYNAMIC_SAMPLES
+        if(!ensureSamples(m_blockSize,FLACMetadataBlock->numChannels)){
+#if defined(ESP_PLATFORM)
+            Serial.printf("[FLAC-MEM] result=DENIED frames=%u channels=%u bytes=%u free=%u largest=%u\n",unsigned(m_blockSize),unsigned(FLACMetadataBlock->numChannels),unsigned(SamplePage::storageBytes(m_blockSize)*FLACMetadataBlock->numChannels),unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+#endif
+            return ERR_FLAC_MEMORY;
+        }
+#if defined(ESP_PLATFORM)
+        if(m_blockSize>reportedFrames){reportedFrames=m_blockSize;Serial.printf("[FLAC-MEM] result=READY frames=%u channels=%u bytes=%u layout=PACKED24_WORD_PAGES256_RESIDUAL_FUSED\n",unsigned(m_blockSize),unsigned(FLACMetadataBlock->numChannels),unsigned(SamplePage::storageBytes(m_blockSize)*FLACMetadataBlock->numChannels));}
+#endif
+#endif
         m_status = DECODE_SUBFRAMES;
         *bytesLeft = m_bytesAvail;
         m_blockSizeLeft = m_blockSize;
@@ -362,7 +441,9 @@ int8_t FLACDecodeBounded(uint8_t *inbuf,int *bytesLeft,short *outbuf,size_t outp
         for (int i = 0; i < blockSize; i++) {
             for (int j = 0; j < FLACMetadataBlock->numChannels; j++) {
                 int val = FLACsubFramesBuff->samplesBuffer[j][i + offset];
-                if (FLACMetadataBlock->bitsPerSample == 8) val += 128;
+                // All PCM handoffs are signed16, including low-depth FLAC.
+                if(FLACMetadataBlock->bitsPerSample<16)
+                    val*=int(1u<<(16-FLACMetadataBlock->bitsPerSample));
                 outbuf[FLACMetadataBlock->numChannels*i+j] = val;
             }
         }
@@ -392,13 +473,14 @@ uint16_t FLACGetOutputSamps(){
     m_validSamples=0;
     return vs;
 }
+bool FLACOutputPending(){return m_status==OUT_SAMPLES;}
 //----------------------------------------------------------------------------------------------------------------------
 uint64_t FLACGetTotoalSamplesInStream(){
     return FLACMetadataBlock->totalSamples;
 }
 //----------------------------------------------------------------------------------------------------------------------
 uint8_t FLACGetBitsPerSample(){
-    return FLACMetadataBlock->bitsPerSample;
+    return FLACMetadataBlock?FLACMetadataBlock->bitsPerSample:0; // display snapshot may follow decoder release
 }
 //----------------------------------------------------------------------------------------------------------------------
 uint8_t FLACGetChannels(){
@@ -427,12 +509,16 @@ uint32_t FLACGetAudioFileDuration() {
 //----------------------------------------------------------------------------------------------------------------------
 int8_t decodeSubframes(){
     if(FLACFrameHeader->chanAsgn <= 7) {
-        for (int ch = 0; ch < FLACMetadataBlock->numChannels; ch++)
-            decodeSubframe(FLACMetadataBlock->bitsPerSample, ch);
+        for (int ch = 0; ch < FLACMetadataBlock->numChannels; ch++){
+            const int ret=decodeSubframe(FLACMetadataBlock->bitsPerSample, ch);
+            if(ret)return ret;
+        }
     }
     else if (8 <= FLACFrameHeader->chanAsgn && FLACFrameHeader->chanAsgn <= 10) {
-        decodeSubframe(FLACMetadataBlock->bitsPerSample + (FLACFrameHeader->chanAsgn == 9 ? 1 : 0), 0);
-        decodeSubframe(FLACMetadataBlock->bitsPerSample + (FLACFrameHeader->chanAsgn == 9 ? 0 : 1), 1);
+        int ret=decodeSubframe(FLACMetadataBlock->bitsPerSample + (FLACFrameHeader->chanAsgn == 9 ? 1 : 0), 0);
+        if(ret)return ret;
+        ret=decodeSubframe(FLACMetadataBlock->bitsPerSample + (FLACFrameHeader->chanAsgn == 9 ? 0 : 1), 1);
+        if(ret)return ret;
         if(FLACFrameHeader->chanAsgn == 8) {
             for (int i = 0; i < m_blockSize; i++)
                 FLACsubFramesBuff->samplesBuffer[1][i] = (
@@ -469,13 +555,14 @@ int8_t decodeSubframe(uint8_t sampleDepth, uint8_t ch) {
     uint8_t type = readUint(6);
     int shift = readUint(1);
     if (shift == 1) {
-        while (!m_inputUnderflow&&readUint(1) == 0)
+        while (!m_inputUnderflow&&shift<sampleDepth&&readUint(1) == 0)
             shift++;
     }
+    if(m_inputUnderflow||shift>=sampleDepth)return ERR_FLAC_INPUT_UNDERFLOW;
     sampleDepth -= shift;
 
     if(type == 0){  // Constant coding
-        int16_t s= readSignedInt(sampleDepth);
+        int32_t s= readSignedInt(sampleDepth); // Stereo side channels can be17-bit.
         for(int i=0; i < m_blockSize; i++){
             FLACsubFramesBuff->samplesBuffer[ch][i] = s;
         }
@@ -503,12 +590,12 @@ int8_t decodeSubframe(uint8_t sampleDepth, uint8_t ch) {
     return ERR_FLAC_NONE;
 }
 //----------------------------------------------------------------------------------------------------------------------
+static int8_t decodeResidualsImpl(uint8_t warmup,uint8_t ch,int shift,bool predict);
 int8_t decodeFixedPredictionSubframe(uint8_t predOrder, uint8_t sampleDepth, uint8_t ch) {
     uint8_t ret = 0;
+    if(predOrder>4||predOrder>m_blockSize)return ERR_FLAC_PREORDER_TOO_BIG;
     for(uint8_t i = 0; i < predOrder; i++)
         FLACsubFramesBuff->samplesBuffer[ch][i] = readSignedInt(sampleDepth);
-    ret = decodeResiduals(predOrder, ch);
-    if(ret) return ret;
     coefs.clear();
     if(predOrder == 0) coefs.resize(0);
     if(predOrder == 1) coefs.push_back(1);  // FIXED_PREDICTION_COEFFICIENTS
@@ -516,12 +603,18 @@ int8_t decodeFixedPredictionSubframe(uint8_t predOrder, uint8_t sampleDepth, uin
     if(predOrder == 3){coefs.push_back(3); coefs.push_back(-3); coefs.push_back(1);}
     if(predOrder == 4){coefs.push_back(4); coefs.push_back(-6); coefs.push_back(4); coefs.push_back(-1);}
     if(predOrder > 4) return ERR_FLAC_PREORDER_TOO_BIG; // Error: preorder > 4"
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    return decodeResidualsImpl(predOrder,ch,0,true);
+#else
+    ret=decodeResiduals(predOrder,ch);if(ret)return ret;
     restoreLinearPrediction(ch, 0);
     return ERR_FLAC_NONE;
+#endif
 }
 //----------------------------------------------------------------------------------------------------------------------
 int8_t decodeLinearPredictiveCodingSubframe(int lpcOrder, int sampleDepth, uint8_t ch){
     int8_t ret = 0;
+    if(lpcOrder<1||lpcOrder>32||lpcOrder>m_blockSize)return ERR_FLAC_PREORDER_TOO_BIG;
     for (int i = 0; i < lpcOrder; i++)
         FLACsubFramesBuff->samplesBuffer[ch][i] = readSignedInt(sampleDepth);
     int precision = readUint(4) + 1;
@@ -529,13 +622,30 @@ int8_t decodeLinearPredictiveCodingSubframe(int lpcOrder, int sampleDepth, uint8
     coefs.resize(0);
     for (uint8_t i = 0; i < lpcOrder; i++)
         coefs.push_back(readSignedInt(precision));
+#if IBT_FLAC_DYNAMIC_SAMPLES
+    return decodeResidualsImpl(uint8_t(lpcOrder),ch,shift,true);
+#else
     ret = decodeResiduals(lpcOrder, ch);
     if(ret) return ret;
     restoreLinearPrediction(ch, shift);
     return ERR_FLAC_NONE;
+#endif
 }
 //----------------------------------------------------------------------------------------------------------------------
-int8_t decodeResiduals(uint8_t warmup, uint8_t ch) {
+int8_t decodeResiduals(uint8_t warmup,uint8_t ch){return decodeResidualsImpl(warmup,ch,0,false);}
+static int8_t decodeResidualsImpl(uint8_t warmup,uint8_t ch,int shift,bool predict) {
+    auto store=[&](unsigned index,int32_t residual){
+        int64_t value=residual;
+        if(predict){
+            int64_t sum=0;
+            for(unsigned j=0;j<coefs.size();++j)sum+=int64_t(int32_t(FLACsubFramesBuff->samplesBuffer[ch][index-1-j]))*coefs[j];
+            value+=shift>=0?(sum>>shift):sum*(int64_t(1)<<-shift);
+        }
+#if IBT_FLAC_DYNAMIC_SAMPLES
+        if(value< -8388608ll||value>8388607ll)return false;
+#endif
+        FLACsubFramesBuff->samplesBuffer[ch][index]=int32_t(value);return true;
+    };
 
     int method = readUint(2);
     if (method >= 2)
@@ -548,6 +658,7 @@ int8_t decodeResiduals(uint8_t warmup, uint8_t ch) {
     if (m_blockSize % numPartitions != 0)
         return ERR_FLAC_WRONG_RICE_PARTITION_NR; //Error: Block size not divisible by number of Rice partitions
     int partitionSize = m_blockSize/ numPartitions;
+    if(partitionSize<warmup)return ERR_FLAC_WRONG_RICE_PARTITION_NR;
 
     for (int i = 0; i < numPartitions; i++) {
         int start = i * partitionSize + (i == 0 ? warmup : 0);
@@ -556,26 +667,27 @@ int8_t decodeResiduals(uint8_t warmup, uint8_t ch) {
         int param = readUint(paramBits);
         if (param < escapeParam) {
             for (int j = start; j < end; j++){
-                FLACsubFramesBuff->samplesBuffer[ch][j] = readRiceSignedInt(param);
+                if(!store(j,readRiceSignedInt(param)))return ERR_FLAC_SAMPLE_RANGE;
             }
         } else {
             int numBits = readUint(5);
             for (int j = start; j < end; j++){
-                FLACsubFramesBuff->samplesBuffer[ch][j] = readSignedInt(numBits);
+                if(!store(j,readSignedInt(numBits)))return ERR_FLAC_SAMPLE_RANGE;
             }
         }
     }
     return ERR_FLAC_NONE;
 }
 //----------------------------------------------------------------------------------------------------------------------
-void restoreLinearPrediction(uint8_t ch, uint8_t shift) {
+void restoreLinearPrediction(uint8_t ch, int shift) {
 
     for (int i = coefs.size(); i < m_blockSize; i++) {
-        int32_t sum = 0;
+        int64_t sum = 0;
         for (int j = 0; j < coefs.size(); j++){
-            sum += FLACsubFramesBuff->samplesBuffer[ch][i - 1 - j] * coefs[j];
+            sum += int64_t(FLACsubFramesBuff->samplesBuffer[ch][i - 1 - j]) * coefs[j];
         }
-        FLACsubFramesBuff->samplesBuffer[ch][i] += (sum >> shift);
+        const int64_t prediction=shift>=0?(sum>>shift):sum*(int64_t(1)<<(-shift));
+        FLACsubFramesBuff->samplesBuffer[ch][i]=int32_t(int64_t(FLACsubFramesBuff->samplesBuffer[ch][i])+prediction);
     }
 }
 //----------------------------------------------------------------------------------------------------------------------

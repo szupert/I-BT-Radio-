@@ -23,10 +23,14 @@
 #include "core/timekeeper.h"
 #include "dual/core.h"
 #include "dual/boot_progress.h"
+#if IBT_NO_PSRAM
+#include "ui/light_boot_policy.h"
+#endif
 #include "dual/connectivity_policy.h"
 #include "dual/r10_diag.h"
 #include "dual/bt_audio.h"
 #include "dual/sensors/receiver.h"
+#include "dual/weather.h"
 #if defined(BOARD_CYD28)
 namespace front { bool earlyBoot(); void rgbBootTestTick(); }
 #endif
@@ -95,7 +99,13 @@ void setup() {
   front::earlyBoot();
 #endif
   // UART interrupt drains diagnostic bursts without stalling the audio loop.
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+  // R247: retain buffered UART diagnostics, not a second 4KiB burst cache.
+  // Driver keeps blocking/ordered writes; RX, baud and the control parser stay intact.
+  Serial.setTxBufferSize(512);
+#else
   Serial.setTxBufferSize(4096);
+#endif
   Serial.begin(115200);
 #ifdef NETSERVER_LOOP1
   netserver.bindServiceTask();
@@ -122,6 +132,12 @@ void setup() {
   config.store.play_mode=PM_WEB;config.store.smartstart=1;
   config.store.showweather=false;config.store.vumeter=false;
   Serial.printf("[DIAG-SERVICES] mode=STREAM_ART_ONLY reserve=%u AUDIO_GUARD_MS=500 EQ=OFF MONO=OFF BT=OFF BLE=OFF SD=OFF WEBUI=OFF NTP=OFF WEATHER=OFF VU=OFF CONTROLS=PLAY_PAUSE_VOLUME_PREV_NEXT SETTINGS_SAVE=OFF\n",unsigned(ibtlimit::Policy::reserve));
+#endif
+#if IBT_NO_PSRAM && defined(USE_SD)
+  // Before display/audio owners: bounded existing mount check, no catalog scan.
+  // Wi-Fi boots release a probe-only mount rather than retaining its heap.
+  const bool bootSdReady=lightboot::probeSd(sdman,config.getMode()==PM_SDCARD);
+  Serial.printf("[LIGHT-BOOT] sd_checked=1 sd_ready=%u mount_retained=%u\n",unsigned(bootSdReady),unsigned(sdman.ready));
 #endif
   lightmem::checkpoint("CONFIG");
   bootprogress::reached(bootprogress::Stage::Config);
@@ -187,7 +203,11 @@ player.init();
   pm.on_end_setup();
   bootprogress::reached(bootprogress::Stage::Controls);
   const auto bootSettings=dual::snapshot().settings;
-  const bool autoplay=connectivity::bootAutoplay(bootSettings.networkMode,bootSettings.alarm.clockHome,config.store.smartstart==1)&&config.lastStation()>0;
+  const bool autoplay=
+#if IBT_NO_PSRAM
+    !lightboot::session().wifiMenuPending.load()&&
+#endif
+    connectivity::bootAutoplay(bootSettings.networkMode,bootSettings.alarm.clockHome,config.store.smartstart==1)&&config.lastStation()>0;
   bool soundArmed=false;
   if(!IBT_STREAM_ART_DIAG&&bootSettings.bootSound&&bootSettings.networkMode==0&&!bootSettings.alarm.clockHome&&network.status==CONNECTED&&WiFi.status()==WL_CONNECTED){
     if(bootSettings.bootSound==2&&!sdman.ready)sdman.start(); // Before the audio owner exists; no index worker.
@@ -225,6 +245,7 @@ void loop() {
   vTaskDelay(pdMS_TO_TICKS(2));return;
 #endif
   netprefetch::service();
+  weather::service();
   sensors::service();
   if(sensors::quiescent())btaudio::service();
   audiod::service();

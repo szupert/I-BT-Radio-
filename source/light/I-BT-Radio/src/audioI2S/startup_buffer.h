@@ -7,8 +7,8 @@ namespace ibtaudio {
 class StartupBuffer {
 public:
     enum Result { Waiting, Ready, Stalled, Expired };
-    constexpr void begin(uint32_t now,uint32_t capacity){
-        target=StreamBufferPolicy::startupTarget(capacity);
+    constexpr void begin(uint32_t now,uint32_t capacity,bool refillFirst=false){
+        target=refillFirst?uint32_t(uint64_t(capacity)*3u/4u):StreamBufferPolicy::startupTarget(capacity);
         started=progressAt=now;lastFill=0;result=Waiting;
     }
     constexpr Result poll(uint32_t now,uint32_t filled){

@@ -3,6 +3,7 @@
 #include <esp_heap_caps.h>
 static std::atomic<bool> localPlayerOnly{false},localPlayerRequest{false},localPlayerReady{false};
 static std::atomic<bool> wifiAttemptOwned{false},savedSearchRunning{false},onlineRequest{false};
+static std::atomic<bool> setupModeRequest{false};
 static void launchSavedSearch();
 #if IBT_NO_PSRAM
 static std::atomic<bool> btNetworkRequested{false},btNetworkLease{false},btNetworkRestore{false};
@@ -336,6 +337,7 @@ static void serviceScan(){
 // Captive DNS + HTTP stay alive while credentials are entered and while STA connects.
 // AP is stopped only after STA has been continuously connected for 3 seconds.
 static clocksync::Retry clockRetry;
+bool MyNetwork::connectionBusy() const {return wifiAttemptOwned.load()||savedSearchRunning.load()||onlineRequest.load()||setupModeRequest.load();}
 bool MyNetwork::offlinePlayer() const {return localPlayerOnly.load();}
 bool MyNetwork::offlineReady() const{return localPlayerOnly.load()&&localPlayerReady.load();}
 bool MyNetwork::prepareLocalBluetooth(){
@@ -346,7 +348,13 @@ bool MyNetwork::prepareLocalBluetooth(){
   return true;
 #endif
 }
+void MyNetwork::requestSetup(){
+  // Cancel the association cooperatively; the network owner starts the AP.
+  onlineRequest.store(false);localPlayerRequest.store(false);
+  localPlayerOnly.store(true);localPlayerReady.store(false);setupModeRequest.store(true);
+}
 void MyNetwork::enterOnlinePlayer(){
+  setupModeRequest.store(false);
 #if IBT_NO_PSRAM
   if(btNetworkLease.load())btNetworkRestore.store(true);
 #endif
@@ -354,6 +362,7 @@ void MyNetwork::enterOnlinePlayer(){
   localPlayerRequest.store(false);onlineRequest.store(true);
 }
 void MyNetwork::enterOfflinePlayer(unsigned target,bool temporaryBluetooth){
+  setupModeRequest.store(false);
 #if IBT_NO_PSRAM
   if(!temporaryBluetooth)btNetworkRestore.store(false); // Explicit Offline always wins.
 #else
@@ -369,6 +378,17 @@ void MyNetwork::service(){
   // Association owns the driver until cancellation/success is acknowledged.
   // Recovery and setup scans must not race the background saved-network search.
   if(wifiAttemptOwned.load()||savedSearchRunning.load())return;
+  if(setupModeRequest.load()){
+    if(btRadioReserved())return; // Wait for the existing audio-owner teardown ACK.
+    setupModeRequest.store(false);
+#if IBT_NO_PSRAM
+    btNetworkRequested.store(false);btNetworkLease.store(false);btNetworkRestore.store(false);
+#endif
+    cancelScan();serviceScan();
+    config.initNetwork();startSetup();netserver.begin(true);
+    Serial.println("[WIFI-SETUP] request=STARTED owner=NETWORK credentials=RETAINED");
+    return;
+  }
 #if IBT_NO_PSRAM
   if(btNetworkRequested.load()&&btRadioReserved()){
     btNetworkRequested.store(false);

@@ -116,6 +116,7 @@ li a{display:block}li a::after{content:' ↘';color:#f3d47b}
 #player-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:10px 0 4px}
 #player-controls button{min-width:42px;text-align:center}
 #next-skin{flex-basis:100%}
+#next-skin[hidden],#weather-setup[hidden]{display:none!important}
 #player-state{min-height:20px;margin:8px 0;text-align:center;font-size:.86rem;color:#c2d3d5}
 #player-progress{height:4px;background:#2c363a;border-radius:3px;overflow:hidden}
 #player-progress span{display:block;height:100%;width:0;background:#63ced5}
@@ -195,7 +196,7 @@ dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
   <button data-action="next" type="button" aria-label="Következő">⏭</button>
   <button data-action="volm" type="button" aria-label="Halkítás">−</button>
   <button data-action="volp" type="button" aria-label="Hangosítás">+</button>
-  <button id="next-skin" type="button">Következő skin</button></div>
+  <button id="next-skin" hidden type="button">Következő skin</button></div>
  <div id="player-progress" aria-label="Hangpuffer"><span></span></div>
  <p id="player-state" role="status">Lejátszó betöltése...</p>
 </div>
@@ -224,8 +225,8 @@ dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
 <nav id="sections" aria-label="Menücsoportok"></nav>
 <p id="status" role="status">Menü betöltése...</p></header>
 <button id="refresh" type="button">Frissítés</button><div id="menu"></div>
-<section id="weather-setup"><h2>Időjárás · Fotó skin</h2>
-<p>Open-Meteo: kulcs nélkül. OpenWeather: saját API-kulcs szükséges. Az adatok leállított hang mellett frissülnek; lejátszáskor a tárolt adat látszik.</p>
+<section id="weather-setup" hidden><h2>Időjárás · hely és API</h2>
+<p>Light: külön, lejátszás nélküli időjárásmód, Open-Meteo API-val és öt nappal. Menü → Időjárás. A városkeresés a böngészőben fut. A hőmérőket lent Kint/Bent szerephez rendelheted.</p>
 <form id="weather-form" autocomplete="off">
 <label><input id="weather-on" type="checkbox"> Időjárás engedélyezése (alapból ki)</label>
 <label>Szolgáltató <select id="weather-provider"><option value="0">Open-Meteo · kulcs nélkül</option><option value="1">OpenWeather · saját kulcs</option></select></label>
@@ -240,10 +241,11 @@ dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
 <p id="weather-state" role="status">Nincs automatikus háttér-lekérdezés a böngészőben. Betöltés vagy mentés kézzel.</p>
 <p><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo</a> / <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeather</a></p></section>
 <section id="sensor-setup"><h2>BLE hőmérő</h2>
-<p>LYWSD03MMC: a MAC-címet BluetoothLEView, a kulcsot a Telink Mi Bind Key mezője adja.</p>
+<p>Xiaomi MiBeacon: MAC-cím és saját 32 karakteres bindkey szükséges. A nyílt BTHome v2 és ATC/PVVX formátum Kint/Bent mezőjéhez a kulcs üresen maradhat. Egy érzékelő egy helyhez rendelhető; egyetlen hőmérő középen látszik. A BLE-vétel és az API-letöltés felváltva fut.</p>
 <form id="sensor-form" autocomplete="off">
+<label>Hőmérő helye <select id="sensor-role"><option value="legacy">Óralap (korábbi)</option><option value="0">Kint</option><option value="1">Bent</option></select></label>
 <label for="sensor-mac">Érzékelő MAC-címe</label><input id="sensor-mac" name="mac" maxlength="17" placeholder="AA:BB:CC:DD:EE:FF" required>
-<label for="sensor-key">Mi Bind Key (32 hexadecimális karakter)</label><input id="sensor-key" name="key" type="password" minlength="32" maxlength="32" pattern="[0-9a-fA-F]{32}" autocomplete="new-password" required>
+<label for="sensor-key">Mi Bind Key (32 hexadecimális karakter)</label><input id="sensor-key" name="key" type="password" maxlength="32" pattern="([0-9a-fA-F]{32})?" autocomplete="new-password">
 <button type="submit">Érzékelő mentése</button><button id="sensor-refresh" type="button">Állapot frissítése</button>
 </form><p id="sensor-state" role="status">Az állapot külön kérhető le. A vétel leállított lejátszás mellett, nyugalmi óralapon működik.</p></section>
 
@@ -254,7 +256,7 @@ dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
 </main><script>
 (() => {
  'use strict';
- const client={major:'166',release:'216',webui:'IBT_R216_1'};
+ const client={major:'166',release:'270',webui:'IBT_R270_1'};
  const key='ibt-webui-version:'+location.host;
  const token=v=>[v.major,v.release,v.webui].join('|');
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
@@ -329,13 +331,14 @@ dialog::backdrop{background:#0009}body:has(dialog[open]){overflow:hidden}
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 (function(){'use strict';
-var pages=[73,1,8,6,14,15,16,3,43,7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46];
+var pages=[77,79,80,73,1,8,6,14,15,16,3,43,7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46];
 var groups=[{root:8,pages:[8]},{root:6,pages:[73,6,14,15,16]},
- {root:3,pages:[3,43]},{root:7,pages:[7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46]}];
+ {root:3,pages:[3,43]},{root:7,pages:[77,79,80,7,9,53,54,10,47,72,56,52,49,50,59,60,61,62,63,64,68,70,71,11,12,19,13,37,45,46]}];
 var $=function(id){return document.getElementById(id);};
 function weatherState(){return fetch('/api/weather',{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
  $('weather-on').checked=!!d.enabled;$('weather-provider').value=String(d.provider);$('weather-lat').value=d.latitude;$('weather-lon').value=d.longitude;$('weather-location').value=d.location;$('weather-interval').value=String(d.interval);
- $('weather-state').textContent=d.status+' · '+(d.key_set?'API-kulcs mentve':'Nincs API-kulcs')+(d.fresh?' · '+(d.temperature_tenths/10).toFixed(1)+' °C':'');
+ if(d.light){$('weather-provider').value='0';$('weather-provider').disabled=true;$('weather-key').disabled=true;$('weather-clear').disabled=true;}
+ $('weather-state').textContent=d.status+' · '+(d.light?'Open-Meteo · kulcs nélkül':d.key_set?'API-kulcs mentve':'Nincs API-kulcs')+(d.fresh?' · '+(d.temperature_tenths/10).toFixed(1)+' °C':'');
  }).catch(function(e){$('weather-state').textContent='Állapotlekérés sikertelen: '+e.message;});}
 $('weather-refresh').addEventListener('click',weatherState);
 var cities=[];
@@ -353,14 +356,15 @@ $('weather-form').addEventListener('submit',function(e){e.preventDefault();var b
  var body=new URLSearchParams({enabled:$('weather-on').checked?'1':'0',provider:$('weather-provider').value,latitude:$('weather-lat').value,longitude:$('weather-lon').value,location:$('weather-location').value,interval:$('weather-interval').value,key:$('weather-key').value.trim(),clear_key:$('weather-clear').checked?'1':'0'});
  fetch('/api/weather',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);$('weather-key').value='';$('weather-clear').checked=false;$('weather-state').textContent='Elfogadva. A tartós mentéshez állítsd le a hangot, térj a főképernyőre és várj 15 másodpercet. Utána kérj állapotot.';}).catch(function(e){$('weather-state').textContent='Mentési hiba: '+e.message;}).finally(function(){button.disabled=false;});body.delete('key');
 });
-function sensorState(){return fetch('/api/sensor',{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
+function sensorState(){var role=$('sensor-role').value;return fetch('/api/sensor'+(role==='legacy'?'':'?role='+role),{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(function(d){
  if(!$('sensor-mac').value)$('sensor-mac').value=d.mac||'';
- $('sensor-state').textContent=d.pending?'Mentésre vár: állítsd le a lejátszást és térj a nyugalmi óralapra.':d.fresh?'Hőmérséklet: '+(d.temperature_centi/100).toFixed(1)+' °C · Pára: '+(d.humidity_centi/100).toFixed(1)+'%':d.key_set?'Cím és kulcs beállítva, friss mérésre vár.':'Nincs ehhez a címhez mentett kulcs.';
+ $('sensor-state').textContent=d.pending?'Mentésre vár: állítsd le a lejátszást és térj a nyugalmi óralapra.':d.fresh?'Hőmérséklet: '+(d.temperature_centi/100).toFixed(1)+' °C · Pára: '+(d.humidity_centi/100).toFixed(1)+'%':d.key_set?'Cím és kulcs beállítva, friss mérésre vár.':($('sensor-role').value!=='legacy'&&d.mac?'Hozzárendelve, friss BLE-mérésre vár.':'Nincs ehhez a címhez mentett kulcs.');
  }).catch(function(e){$('sensor-state').textContent='Állapotlekérés sikertelen: '+e.message;});}
 $('sensor-refresh').addEventListener('click',sensorState);
+$('sensor-role').addEventListener('change',function(){$('sensor-mac').value='';$('sensor-key').value='';sensorState();});
 $('sensor-form').addEventListener('submit',function(e){e.preventDefault();var form=this,button=form.querySelector('button[type="submit"]'),mac=$('sensor-mac').value.trim().replace(/-/g,':'),key=$('sensor-key').value.trim();
- if(!/^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)||!/^[0-9a-fA-F]{32}$/.test(key)){$('sensor-state').textContent='Ellenőrizd a MAC-címet és a 32 karakteres kulcsot.';return;}
- button.disabled=true;fetch('/api/sensor',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({mac:mac,key:key}).toString()}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);$('sensor-key').value='';$('sensor-state').textContent='Beállítás elfogadva. Lejátszás STOP, nyugalmi óralap után kérj állapotot.';}).catch(function(e){$('sensor-state').textContent='Mentés sikertelen: '+e.message;}).finally(function(){button.disabled=false;});key='';
+ if(!/^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)||!(/^[0-9a-fA-F]{32}$/.test(key)||($('sensor-role').value!=='legacy'&&key===''))){$('sensor-state').textContent='Ellenőrizd a MAC-címet és a 32 karakteres kulcsot.';return;}
+ button.disabled=true;fetch('/api/sensor',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({mac:mac,key:key,role:$('sensor-role').value}).toString()}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);$('sensor-key').value='';$('sensor-state').textContent='Beállítás elfogadva. Lejátszás STOP, nyugalmi óralap után kérj állapotot.';}).catch(function(e){$('sensor-state').textContent='Mentés sikertelen: '+e.message;}).finally(function(){button.disabled=false;});key='';
 });
 var key=function(page){return 'ibt-menu-v150:'+location.host+':'+page;};
 var activeSkin=0,stationNames=null,stationLoading=null;
@@ -368,6 +372,7 @@ function playerResize(){var frame=$('player-frame'),screen=$('player-screen');
  if(frame&&screen)screen.style.transform='scale('+Math.min(1,frame.clientWidth/320)+')';}
 function playerTime(seconds){seconds=Math.max(0,Number(seconds)||0);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
 function playerRender(data){
+ if(data&&typeof data.light==='boolean'){document.getElementById('next-skin').hidden=data.light;document.getElementById('weather-setup').hidden=false;if(data.light){$('weather-provider').value='0';$('weather-provider').disabled=true;$('weather-key').disabled=true;$('weather-clear').disabled=true;}}
  if(data.device)saveKnownDevice=data.device;
  if(!data||typeof data.skin!=='number'||data.skin<0||(data.skin>12&&data.skin!==15))return;
  var screen=$('player-screen'),picture=$('skin-image'),skin=data.skin===5?0:data.skin;

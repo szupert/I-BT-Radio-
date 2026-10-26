@@ -2,6 +2,7 @@
 #ifndef player_h
 #define player_h
 #include "../dual/stream_recovery.h"
+#include "../dual/sd_route_error.h"
 
 #if I2S_DOUT!=255 || I2S_INTERNAL
   #include "../audioI2S/AudioEx.h"
@@ -23,9 +24,15 @@ struct playerRequestParams_t
   playerRequestType_e type;
   int payload;
   uint32_t alarmToken=0; // zero means an ordinary/manual command
+  uint32_t commandSequence=0; // monotonic ordering, independent of micros wrap
   uint32_t queuedAtUs=0; // diagnostic wall time, copied with the command
   bool naturalSd=false; // explicit EOF intent; negative payloads also serve diagnostics/alarms
+  bool sourceAutoplay=false; // Explicit source chooser intent; fits existing request padding.
 };
+
+#if IBT_NO_PSRAM
+static_assert(sizeof(playerRequestParams_t)==24,"Source intent must reuse request padding");
+#endif
 
 enum plStatus_e : uint8_t{ PLAYING = 1, STOPPED = 2 };
 enum class SdPrepareState : uint8_t { Idle, Indexing, Ready, Failed, Cancelled };
@@ -101,6 +108,7 @@ class Player: public Audio {
     unsigned queueDepth() const;
     uint32_t commandDrops() const;
     SdPrepareState sdPrepareState() const;
+    sdroute::Error sdPrepareError() const;
     void resetQueue();
     #ifdef MQTT_ROOT_TOPIC
     void browseUrl();

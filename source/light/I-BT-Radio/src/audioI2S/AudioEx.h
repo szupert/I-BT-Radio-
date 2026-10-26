@@ -139,6 +139,8 @@ public:
     ~AudioBuffer();                             // frees the buffer
     void     release(); // audio owner only, no producer may retain pointers
     size_t   init();                            // set default values
+    void compactSdBt(bool enabled){if(!m_f_init){m_compactSdBt=enabled;m_compactCapacity=0;}}
+    void compactLocal(size_t bytes){if(!m_f_init){m_compactSdBt=true;m_compactCapacity=bytes;}}
     bool     isInitialized() { return m_f_init; };
     void     setBufsize(int ram, int psram);
     void     changeMaxBlockSize(uint16_t mbs);  // is default 1600 for mp3 and aac, set 16384 for FLAC
@@ -175,6 +177,8 @@ protected:
     uint8_t* m_endPtr           = NULL;
     bool     m_f_start          = true;
     bool     m_f_init           = false;
+    size_t   m_compactCapacity = 0;
+    bool     m_compactSdBt      = false; // Single audio-owner local MP3 input; no wrap copy tail.
     bool     m_f_psram          = false;    // PSRAM is available (and used...)
 };
 //----------------------------------------------------------------------------------------------------------------------
@@ -210,6 +214,7 @@ public:
     bool isRunning() {return m_f_running;}
     bool streamTransportClosed() const {return m_streamTransportClosed;}
     bool streamHeaderPending() const {return m_datamode==HTTP_RESPONSE_HEADER;}
+    bool streamBuffering() const {return m_streamBuffering;}
     void loop();
     uint32_t stopSong();
     void forceMono(bool m);
@@ -233,6 +238,7 @@ public:
     bool setDefaults(bool prepareMp3=false, bool buffers=true);
     bool suspendDacForBtSearch(); // stopped audio owner only; never from BT callbacks
     bool restoreDacAfterBtSearch();
+    bool outputReady() const; // Physical DAC or a ready SD->BT producer, never a fake I2S driver.
     /* VU METER */
     void     setVUmeter() {};
     void     getVUlevel() {};
@@ -262,7 +268,7 @@ private:
     void UTF8toASCII(char* str);
     bool latinToUTF8(char* buff, size_t bufflen);
     //void setDefaults(); // free buffers and set defaults
-    void initInBuff();
+    void initInBuff(bool compactSdBt=false,size_t compactCapacity=0);
     bool httpPrint(const char* host);
     void processLocalFile();
     void processWebStream();
@@ -602,6 +608,7 @@ private:
     bool            m_f_ssl = false;
     bool            m_f_running = false;
     bool            m_streamTransportClosed = false;
+    bool            m_streamBuffering = false; // owner-published startup/rebuffer wait; no extra buffer
     uint32_t        m_headerWaitAt = 0;
     bool            m_headerWaiting = false;
     bool            m_i2sReady = false;
