@@ -4,12 +4,12 @@
 
 | Könyvtár | Alapállapot | Státusz |
 |---|---|---|
-| [Light](light/) | R211, helyi baseline d8bcbfc, firmwareforrás a13c7b4 | Lezárt diagnosztikai változat; nem stabil kiadás |
+| [Light](light/) | R270, commit 96c5287521ca29dcb5c7925cae1558aecf141e47 | Aktuális Light pillanatkép; készülékes R270 próba még szükséges |
 | [Pro](pro/) | A meglévő R176 fejlesztési fa ellenőrzőösszeggel rögzített másolata | Korábbi forrásbaseline; új készülékteszt nem történt |
 
-Az R211 célzott stream/artwork diagnosztika: WebUI, BT/BLE, SD-lejátszás, teljes menü, VU, EQ és időjárás kikapcsolva; alap Play/Szünet és hangerő kezelhető. A BT/BLE-visszaállítás külön következő munkablokk, még nincs kész kiadása. Az R211 közölt 5000 bájtos határ diagnosztikai kivétel; a normál forrás alapértéke10000 bájt, a500ms hangvédelem változatlan.
+A jelenlegi Lightban Wi-Fi/SD→DAC, SD→BT, telefon→DAC, óra, API-időjárás/BLE és egyszerű WebUI van. A felhasználó által kért reserve0 mérési politika érvényes; a BT250ms és általános500/2000ms védelem megmarad. A részletes változásokat és nyitott hibákat a [R270 tesztútmutató](../docs/LIGHT_R270_TEST_GUIDE.md) tartalmazza.
 
-A `SOURCE_MANIFEST.json` az átadott fájlok SHA-256 listája. A folyamatban lévő helyi BT/BLE-módosításokat nem kevertem a baseline-ba. Nincsenek Wi-Fi-jelszavak, eszközmentések, NVS-tartalmak vagy személyes naplók. A myoptions.h általános panel- és bekötési konfigurációt tartalmaz.
+A LIGHT_R270_MANIFEST.json és a frissített SOURCE_MANIFEST.json pontos SHA256 fájllistát ad. A korábbi manifesztek történeti pillanatképek. Nem tartalmazunk NVS-t, Wi-Fi-jelszavakat vagy személyes naplókat. A Pro R176 és8048 forrása változatlan.
 
 ## Fordítás és függőségek
 

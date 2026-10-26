@@ -1,3 +1,13 @@
+## Aktuális Light4MB: R270 · tesztelhető béta
+
+[**Egykattintásos Windows telepítő**](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/4MB_PSRAM_NELKUL/R270/I-BT-Radio-Auto4-Install.exe) · [Teljes Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light) · [Előképek](https://github.com/szupert/I-BT-Radio-/tree/main/skins/light-320x240) · [Menü](https://github.com/szupert/I-BT-Radio-/tree/main/docs/menu) · [Próba és ismert hibák](https://github.com/szupert/I-BT-Radio-/blob/main/docs/LIGHT_R270_TEST_GUIDE.md)
+
+Választható koppintási mód, egységes állomáslista, villogásmentes boot-részletfrissítés, nagyobb fejléc, MP3-cím és BT-listagörgetés javítása. A jelenlegi béta gépen ellenőrzött, R270 készülékes PASS még nincs. Light16/Pro/8048 telepítők változatlanul elérhetők a profiljuk alatt. A korábbi R211/R216 szövegek és galériák alább **történeti kiadások**, nem a jelenlegi Light képességlistája.
+
+![Light lejátszó](https://raw.githubusercontent.com/szupert/I-BT-Radio-/main/skins/light-320x240/player.png)
+
+---
+
 # Source / Installer · 2026-10-22
 
 Full Light/Pro application sources and four hardware profiles are public. One-click Windows installers remain available. R2114MB/noPSRAM is diagnostic-only (BT/BLE/SD/WebUI OFF); Bluetooth restoration is a separate pending block. This is a development beta, not a stability claim.

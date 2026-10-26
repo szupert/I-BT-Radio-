@@ -1,0 +1,11 @@
+{
+  "version": "R270",
+  "profile": "Light4MB/noPSRAM",
+  "firmware_sha256": "0810c981aee333cf4b34ef64b563b8a093f99e43051f701481e6f3b754e29c0c",
+  "installer_sha256": "ab6d4b30e0f03694f568adc9e291d556d46eda8470d44cb5a4283ccf305fb7f4",
+  "installer_bytes": 28274332,
+  "source_commit": "96c5287521ca29dcb5c7925cae1558aecf141e47",
+  "physical_R270": "NOT_RUN",
+  "host_result": "PASS_PUBLIC_AUTO4_FROZEN_HOST_ONLY",
+  "other_profiles": "Light16 R189, Pro R176 unchanged"
+}

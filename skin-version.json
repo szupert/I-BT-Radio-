@@ -99,5 +99,11 @@
       "source_publication_allowed": true,
       "sha256": "365ff1a310a2f3cfb83ba6971b9d3e75be50dc27a3600155f42f35afa3a8c150"
     }
-  ]
+  ],
+  "light_latest": {
+    "version": "R270",
+    "profile": "4MB noPSRAM",
+    "gallery": "skins/light-320x240",
+    "physical": "NOT_RUN"
+  }
 }
