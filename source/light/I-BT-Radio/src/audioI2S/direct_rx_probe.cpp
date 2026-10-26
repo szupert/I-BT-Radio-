@@ -1,6 +1,7 @@
 #include "pcm_handoff_probe.h"
 #include "../dual/memory_checkpoint.h"
 #include "direct_rx_probe.h"
+#include "refill_budget.h"
 #include "supply_counters.h"
 #include "dac_continuity.h"
 #include "../dual/audio_path_probe.h"
@@ -154,7 +155,7 @@ void refillSample(uint32_t rounds,uint32_t bytes,uint32_t elapsed){
 }
 void dacDiagnostics(){
 #if IBT_NO_PSRAM
- Serial.printf("[STREAM-REFILL] calls=%lu rounds=%lu bytes=%lu max_us=%lu max_rounds=%lu limits=4096B,16rounds,3000us scope=OWNER_WALL_NOT_CPU_OR_HARD_DEADLINE\n",(unsigned long)refillCalls.load(),(unsigned long)refillRounds.load(),(unsigned long)refillBytes.load(),(unsigned long)refillMaxUs.load(),(unsigned long)refillMaxRounds.load());
+ Serial.printf("[STREAM-REFILL] calls=%lu rounds=%lu bytes=%lu max_us=%lu max_rounds=%lu limits=%luB,%lurounds,normal%luus,low%luus low_below_pct=25 scope=OWNER_WALL_NOT_CPU_OR_HARD_DEADLINE\n",(unsigned long)refillCalls.load(),(unsigned long)refillRounds.load(),(unsigned long)refillBytes.load(),(unsigned long)refillMaxUs.load(),(unsigned long)refillMaxRounds.load(),(unsigned long)ibtaudio::RefillBudget::maxBytes,(unsigned long)ibtaudio::RefillBudget::maxRounds,(unsigned long)ibtaudio::RefillBudget::maxUs,(unsigned long)ibtaudio::RefillBudget::lowUs);
  const auto& d=lightDac;
  Serial.printf("[DAC-I2S] enabled=1 scope=LIGHT_LIFETIME calls=%lu accepted_bytes=%lu short_writes=%lu zero_writes=%lu errors=%lu call_max_us=%lu gap_max_us=%lu over_capacity_gaps=%lu rate=%lu method=DRIVER_ACCEPTED_NOT_DMA_IRQ\n",
  (unsigned long)d.calls.load(),(unsigned long)d.accepted.load(),(unsigned long)d.shortWrites.load(),(unsigned long)d.zeroWrites.load(),(unsigned long)d.errors.load(),(unsigned long)d.callMaxUs.load(),(unsigned long)d.gapMaxUs.load(),(unsigned long)d.overCapacityGaps.load(),(unsigned long)d.rate.load());

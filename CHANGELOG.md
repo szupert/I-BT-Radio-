@@ -1,3 +1,7 @@
+## R270 Light4MB ·2026.10.26.
+
+Gépen ellenőrzött boot-, fejléc-, koppintás- és listajavítás; R269 MP3-cím/BT-görgetés benne van. Teljes aktuális Light-forrás, előképek, menüútmutató és négyprofilos beágyazott futtatókörnyezetű EXE. R270 készülékes próba még szükséges; korábbi nyitott hibák megmaradnak. [Részletek](docs/LIGHT_R270_TEST_GUIDE.md).
+
 ## 2026-10-16 — skinláthatóság pontosítása
  
 ## V166-R163 BETA · 2026-10-19

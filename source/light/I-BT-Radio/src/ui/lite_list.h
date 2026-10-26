@@ -2,7 +2,12 @@
 // Native Light list geometry is shared by painting and hit testing.
 namespace litelist {
 constexpr unsigned rows=7;
-constexpr int top=56,step=23;
+constexpr int top=32,step=29;
+constexpr unsigned searchRows=6;
+constexpr unsigned searchFirst(unsigned selected,unsigned total){
+ if(!total)return 0;unsigned n=selected>=2?selected-2:0;
+ return total>searchRows&&n>total-searchRows?total-searchRows:n;
+}
 constexpr unsigned first(unsigned selected,unsigned total){
  if(!total)return 0;
  unsigned n=selected>3?selected-3:1;

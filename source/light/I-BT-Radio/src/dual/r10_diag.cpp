@@ -1,5 +1,6 @@
 #include "r10_diag.h"
 #include "sbc_probe.h"
+#include "bt_transport_probe.h"
 #include "load_probe.h"
 #include "audio_path_probe.h"
 #include "../audioI2S/direct_rx_probe.h"
@@ -26,6 +27,7 @@
 #include "../core/telnet.h"
 #include "v026_probe.h"
 #include "../ui/frontend.h"
+#include "../ui/light_ui_policy.h"
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_heap_caps.h>
@@ -65,13 +67,78 @@ static int argInt(const char* s,const char* key,int fallback){
 static void printCaps(){
   Serial.printf("[R10-CAPS] version=1 firmware=%s limiter=1 events=fw_rot_cw,fw_rot_ccw,fw_short,fw_long,fw_double,fw_menu,fw_eq_jitter,fw_memory_churn,fw_net_probe,fw_volume_jitter,fw_station_next,fw_station_prev,fw_audio_toggle,fw_stream_reconnect\n",IBT_FW_VERSION);
 }
+#if IBT_NO_PSRAM
+// Bounded owner-tick output. No UART-sized heap buffer, task, or audio callback IO.
+extern "C" unsigned ibt_sbc_wire_byte(unsigned index);
+static uint8_t wireOffset=0;
+static bool wirePending=false;
+static uint8_t transportPending=0;
+static uint8_t compactStage=0;
+static const char* compactTag="tick";
+static const char* pendingTag=nullptr;
+static uint32_t compactAt=0;
+static void compactTick(){
+  if(transportPending&&uint32_t(millis()-compactAt)>=20&&Serial.availableForWrite()>=192){
+    char out[192];int n;
+    if(transportPending==1)n=snprintf(out,sizeof(out),"[BT-TRANSPORT] l2_ok=%lu l2_congested=%lu l2_failed=%lu acl_calls=%lu media_calls=%lu\n",
+      (unsigned long)ibt_tx_get(IBT_L2_OK),(unsigned long)ibt_tx_get(IBT_L2_CONGESTED),(unsigned long)ibt_tx_get(IBT_L2_FAILED),
+      (unsigned long)ibt_tx_get(IBT_ACL_TX),(unsigned long)ibt_tx_get(IBT_MEDIA_TX));
+    else if(transportPending==2)n=snprintf(out,sizeof(out),"[BT-HCI-TX] submitted=%lu short=%lu bad=%lu fragmented=%lu acl_completed=%lu handle=%lu cid=%lu\n",
+      (unsigned long)ibt_tx_get(IBT_MEDIA_SUBMITTED),(unsigned long)ibt_tx_get(IBT_MEDIA_SHORT),(unsigned long)ibt_tx_get(IBT_BAD_FRAME),
+      (unsigned long)ibt_tx_get(IBT_MEDIA_FRAGMENT),(unsigned long)ibt_tx_get(IBT_ACL_COMPLETED),
+      (unsigned long)ibt_tx_get(IBT_MEDIA_HANDLE),(unsigned long)ibt_tx_get(IBT_MEDIA_CID));
+    else n=snprintf(out,sizeof(out),"[BT-HCI-FIRST] bytes=%lu fnv=%08lx rtp_time=%lu scope=CONTROLLER_API_NOT_PEER_ACK\n",
+      (unsigned long)ibt_tx_get(IBT_FIRST_BYTES),(unsigned long)ibt_tx_get(IBT_FIRST_HASH),(unsigned long)ibt_tx_get(IBT_FIRST_TIME));
+    if(n<=0||size_t(n)>=sizeof(out)){Serial.println("[R10-DIAG] transport=OVERFLOW");transportPending=0;return;}
+    Serial.write(reinterpret_cast<const uint8_t*>(out),size_t(n));compactAt=millis();transportPending=transportPending==3?0:transportPending+1;return;
+  }
+  if(wirePending&&uint32_t(millis()-compactAt)>=20&&Serial.availableForWrite()>=192){
+    char out[100];const unsigned length=ibt_sbc_wire_byte(128);
+    int n=snprintf(out,sizeof(out),"[BT-SBC-FRAME] len=%u offset=%u hex=",length,unsigned(wireOffset));
+    unsigned end=std::min<unsigned>(length,unsigned(wireOffset)+16);
+    for(unsigned i=wireOffset;i<end;++i)n+=snprintf(out+n,sizeof(out)-n,"%02x",ibt_sbc_wire_byte(i));
+    out[n++]='\n';Serial.write(reinterpret_cast<const uint8_t*>(out),n);
+    wireOffset=uint8_t(end);wirePending=length&&end<length;compactAt=millis();return;
+  }
+  if(!compactStage||uint32_t(millis()-compactAt)<20||Serial.availableForWrite()<192)return;
+  char out[192];int n=0;
+  if(compactStage==1){
+    const unsigned caps=MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT;
+    n=snprintf(out,sizeof(out),"[R10-TELEM] tag=%s heap_internal=%lu heap_largest=%lu heap_min=%lu psram_free=%u unit=bytes snapshot=PER_LINE\n",compactTag,
+      (unsigned long)heap_caps_get_free_size(caps),(unsigned long)heap_caps_get_largest_free_block(caps),
+      (unsigned long)heap_caps_get_minimum_free_size(caps),unsigned(ESP.getFreePsram()));
+  }else if(compactStage==2){
+    n=snprintf(out,sizeof(out),"[R10-STACK] stack_free=%lu dsp_stack_hwm=%lu mem_checks=%lu mem_errors=%lu unit=bytes\n",
+      (unsigned long)uxTaskGetStackHighWaterMark(nullptr),(unsigned long)dspTaskStackHighWater(),
+      (unsigned long)memChecks,(unsigned long)memErrors);
+  }else if(compactStage==3){
+    const auto task=static_cast<TaskHandle_t>(player.audioTaskHandle());
+    n=snprintf(out,sizeof(out),"[AUDIO-TASK] ready=%u stack_min=%lu stack_alloc=12288 unit=bytes core=1\n",task?1:0,
+      task?(unsigned long)uxTaskGetStackHighWaterMark(task):0ul);
+  }else if(compactStage==4){
+    int c0=-1,c1=-1;const bool known=loadprobe::cached(c0,c1);
+    n=snprintf(out,sizeof(out),"[VU-STATE] style=%u dac=%u local_bt=%u left=%u right=%u cpu_valid=%u core0_pm=%d core1_pm=%d\n",unsigned(lightui::style.load()),unsigned(vuprobe::dacEnabled.load()),unsigned(vuprobe::localBtEnabled.load()),unsigned(vuprobe::dacLeft.load()),unsigned(vuprobe::dacRight.load()),unsigned(known),c0,c1);
+  }else n=int(ibtlimit::compactTelemetry(out,sizeof(out)));
+  if(n<=0||size_t(n)>=sizeof(out)){Serial.println("[R10-DIAG] format=OVERFLOW");compactStage=0;return;}
+  if(Serial.availableForWrite()<n)return;
+  Serial.write(reinterpret_cast<const uint8_t*>(out),size_t(n));compactAt=millis();
+  if(compactStage==5){compactStage=pendingTag?1:0;if(pendingTag){compactTag=pendingTag;pendingTag=nullptr;}}
+  else ++compactStage;
+}
+#endif
 static void telemetry(const char* tag){
+#if IBT_NO_PSRAM
+  // Coalesce periodic requests, but retain an explicit request until emitted.
+  if(!compactStage){compactTag=tag?tag:"tick";compactStage=1;}
+  else if(tag&&strcmp(tag,"tick"))pendingTag=tag;
+  return;
+#else
   // Full status + limiter output is under 1200 bytes. Defer if UART is busy.
   if(Serial.availableForWrite()<1200)return;
   const uint32_t freeInt=heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
   const uint32_t largestInt=heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
   const uint32_t minInt=heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
-  const uint32_t stackBytes=(uint32_t)uxTaskGetStackHighWaterMark(nullptr)*(uint32_t)sizeof(StackType_t);
+  const uint32_t stackBytes=(uint32_t)uxTaskGetStackHighWaterMark(nullptr);
   const auto s=dual::snapshot(); IPAddress ip=WiFi.status()==WL_CONNECTED?WiFi.localIP():WiFi.softAPIP();
   Serial.printf("[R10-TELEM] tag=%s active=%u events=%lu rejected=%lu heap_internal=%lu heap_largest=%lu heap_min=%lu psram_free=%u stack_free=%lu dsp_stack_hwm=%lu queue_drops=%lu input_drops=%lu audio_command_drops=%lu ui_overload=%u input_buffer=%lu low_buffer=%lu ip=%u.%u.%u.%u mem_checks=%lu mem_errors=%lu page=%u selected=%u audio_playing=%u\n",
     tag?tag:"tick",engaged?1:0,(unsigned long)eventCount,(unsigned long)rejected,
@@ -83,6 +150,7 @@ static void telemetry(const char* tag){
   ibtlimit::telemetry();
   inputlow::telemetry();
   player.audioDiagnostics();
+#endif
 }
 static bool memoryChurn(const char* args){
   size_t bytes=(size_t)argInt(args,"bytes",4096); int cycles=argInt(args,"cycles",1);
@@ -158,7 +226,11 @@ static void restoreTick(){
     Serial.println("[R10] RESTORE=PASS persistent_writes=0");telemetry("restored");
   }
 }
-static void status(){if(Serial.availableForWrite()<1280)return;Serial.printf("[R10-STATUS] active=%u events=%lu rejected=%lu persistent_writes=0\n",engaged?1:0,(unsigned long)eventCount,(unsigned long)rejected);telemetry("status");}
+static void status(){
+#if !IBT_NO_PSRAM
+if(Serial.availableForWrite()<1280)return;
+#endif
+Serial.printf("[R10-STATUS] active=%u events=%lu rejected=%lu persistent_writes=0\n",engaged?1:0,(unsigned long)eventCount,(unsigned long)rejected);telemetry("status");}
 #include "path_session.inc"
 static void handle(char* s){
   if(!strcmp(s,"r10 surface status")){dual::surfaceDiagnostics();return;}
@@ -185,6 +257,10 @@ static void handle(char* s){
   if(!strcmp(s,"r10 bt out")){dual::bluetoothMode(0);return;}
   if(!strcmp(s,"r10 bt on")){dual::bluetoothMode(0);return;}
   if(!strcmp(s,"r10 bt off")){dual::bluetoothMode(-1);return;}
+#if IBT_NO_PSRAM
+  if(!strcmp(s,"r10 bt transport")){transportPending=1;return;}
+  if(!strcmp(s,"r10 bt frame")){wireOffset=0;wirePending=true;return;}
+#endif
   if(!strcmp(s,"r10 bt status")){btaudio::diagnostics();return;}
   if(!strcmp(s,"r10 ui selfcheck")){dual::r10UiSelfcheck();return;}
   if(!strncmp(s,"r10 ui stress start",19)){
@@ -265,6 +341,9 @@ void serialPoll(){
     else if(lineLen+1<sizeof(line))line[lineLen++]=(char)c;else{lineLen=0;rejected++;Serial.println("[R10] line_too_long");}}
 }
 void tick(){
+#if IBT_NO_PSRAM
+  compactTick();
+#endif
   pathTick();
   restoreTick();
 #ifdef USE_SD

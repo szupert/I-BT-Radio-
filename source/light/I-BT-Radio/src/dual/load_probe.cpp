@@ -68,13 +68,19 @@ struct LightStore {
  Epoch epoch;
 };
 static LightStore light;
+static void reportLight(bool cached,int64_t now){
+ Serial.printf("[LOAD] result=OK window_us=%llu core0_permille=%d core1_permille=%d tasks=2 probe_internal=%u window_id=%lu generation=%lu route_state=%u cached=%u age_us=%llu end_us=%llu method=IDLE_ONLY_NO_STACK_SCAN\n",(unsigned long long)light.window,light.busy[0],light.busy[1],unsigned(sizeof(light)),(unsigned long)light.sequence,(unsigned long)light.epoch.generation,light.epoch.state,unsigned(cached),(unsigned long long)(now-light.endedAt),(unsigned long long)light.endedAt);
+}
 static void collectLight(bool verbose,int64_t start){
  const auto generation=player.playbackGeneration();
  const unsigned state=unsigned(btaudio::mode())|(btaudio::transmitting()?0x100u:0u);
  if(light.epoch.update(generation,state)||(light.previousTime&&start-light.previousTime>30000000)){
   light.previousTime=0;light.window=0;light.cachedAt=0;
  }
- if(light.previousTime&&start-light.previousTime<9000000)return;
+ if(light.previousTime&&start-light.previousTime<9000000){
+  if(verbose){if(light.window)reportLight(true,start);else Serial.println("[LOAD] result=TOO_SOON method=IDLE_ONLY_NO_STACK_SCAN");}
+  return;
+ }
  configRUN_TIME_COUNTER_TYPE idle[2];TaskStatus_t task{};
  for(unsigned core=0;core<2;++core){
   auto handle=xTaskGetIdleTaskHandleForCPU(core);
@@ -92,7 +98,7 @@ static void collectLight(bool verbose,int64_t start){
  light.previousTime=stamp;light.endedAt=stamp;light.cachedAt=millis();if(light.window)++light.sequence;
  if(!same){light.previousTime=0;light.window=0;}
  if(verbose){
-  if(light.window)Serial.printf("[LOAD] result=OK window_us=%llu core0_permille=%d core1_permille=%d tasks=2 probe_internal=%u window_id=%lu generation=%lu route_state=%u method=IDLE_ONLY_NO_STACK_SCAN\n",(unsigned long long)light.window,light.busy[0],light.busy[1],unsigned(sizeof(light)),(unsigned long)light.sequence,(unsigned long)generation,state);
+  if(light.window)reportLight(false,stamp);
   else Serial.println("[LOAD] result=BASELINE method=IDLE_ONLY_NO_STACK_SCAN");
   reportMemory(start);
  }

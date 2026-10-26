@@ -3,6 +3,7 @@
 #include "direct_reader.h"
 #include "acquisition_policy.h"
 #include "../surface_policy.h"
+#include "../weather.h"
 #include <Arduino.h>
 #if CONFIG_BT_BLE_ENABLED && defined(IBT_SENSOR_EXPERIMENTAL)
 #include "passive_queue.h"
@@ -35,10 +36,12 @@ static portMUX_TYPE lock=portMUX_INITIALIZER_UNLOCKED;
 struct Device {uint8_t address[6];uint8_t type;int8_t rssi;uint16_t uuid;uint16_t model;bool seen;};
 static Device devices[8]{};static unsigned count=0;
 static Reading value{};
+struct Role {Config config{};Reading value{};};
+static Role roles[2]{};static Config rolePending{};static int roleRequest=-1;static std::atomic<bool> rolesDirty{false};static unsigned currentRole=0;static uint32_t roleAt=0;
 static uint32_t nativeProcessed=0,presencePackets=0,authFailures=0,invalidPackets=0,nativeSeenAt=0,nativeMaxUs=0;
 static uint8_t boundAddress[6]={},boundKey[16]={};static bool keyValid=false;
 static Config bindPending{};static bool bindRequested=false;
-static bool loaded=false,attached=false,attempted=false;
+static bool loaded=false,attached=false,attempted=false,roleProfileLoaded=false;
 // SDK owns this pointer until the asynchronous parameter-complete callback.
 static esp_ble_scan_params_t scanParameters{};
 static bool configuredActive=false;
@@ -63,7 +66,21 @@ static uint32_t last=0,phaseAt=0;static unsigned bursts=0;
 static uint32_t initAt=0,saveAt=0;static bool initTried=false,saveTried=false;
 static uint32_t packLow(const uint8_t*a){return uint32_t(a[0])|(uint32_t(a[1])<<8)|(uint32_t(a[2])<<16)|(uint32_t(a[3])<<24);}
 static uint32_t packHigh(const uint8_t*a){return uint32_t(a[4])|(uint32_t(a[5])<<8);}
-static Config configuration(){Config c;c.enabled=on.load();c.selected=chosen.load();uint32_t a=low.load(),b=high.load();for(unsigned i=0;i<4;i++)c.address[i]=a>>(i*8);c.address[4]=b;c.address[5]=b>>8;portENTER_CRITICAL(&lock);c.keyValid=keyValid&&!memcmp(c.address,boundAddress,6);if(c.keyValid)memcpy(c.bindkey,boundKey,16);portEXIT_CRITICAL(&lock);return c;}
+static Config legacyConfiguration(){Config c;c.enabled=on.load();c.selected=chosen.load();uint32_t a=low.load(),b=high.load();for(unsigned i=0;i<4;i++)c.address[i]=a>>(i*8);c.address[4]=b;c.address[5]=b>>8;portENTER_CRITICAL(&lock);c.keyValid=keyValid&&!memcmp(c.address,boundAddress,6);if(c.keyValid)memcpy(c.bindkey,boundKey,16);portEXIT_CRITICAL(&lock);return c;}
+static Config configuration(){
+ Config c=legacyConfiguration();if(!weather::active())return c;c=Config{};
+ portENTER_CRITICAL(&lock);if(roles[currentRole].config.selected)c=roles[currentRole].config;else if(roles[1-currentRole].config.selected)c=roles[1-currentRole].config;portEXIT_CRITICAL(&lock);c.enabled=on.load();return c;
+}
+bool roleSelected(unsigned r){if(r>1)return false;portENTER_CRITICAL(&lock);bool yes=roles[r].config.selected;portEXIT_CRITICAL(&lock);return yes;}
+bool roleSavePending(){portENTER_CRITICAL(&lock);bool pending=roleRequest>=0||rolesDirty.load();portEXIT_CRITICAL(&lock);return pending;}
+void enableRoles(){if((roleSelected(0)||roleSelected(1))&&!on.exchange(true)){dirty=true;resetRequest=true;}}
+bool roleReading(unsigned r,Reading& out){if(r>1)return false;portENTER_CRITICAL(&lock);out=roles[r].value;bool yes=roles[r].config.selected;portEXIT_CRITICAL(&lock);return yes&&enabled()&&hasFreshPair(out,millis());}
+static bool queueRole(unsigned r,const Config& c){if(r>1)return false;portENTER_CRITICAL(&lock);bool ok=roleRequest<0;if(ok){rolePending=c;roleRequest=int(r);}portEXIT_CRITICAL(&lock);return ok;}
+void selectRole(unsigned i,unsigned r){Config c{};portENTER_CRITICAL(&lock);bool ok=i<count;if(ok){c.selected=true;c.enabled=true;memcpy(c.address,devices[i].address,6);for(unsigned j=0;j<2;++j)if(roles[j].config.keyValid&&!memcmp(c.address,roles[j].config.address,6)){c.keyValid=true;memcpy(c.bindkey,roles[j].config.bindkey,16);}if(keyValid&&!memcmp(c.address,boundAddress,6)){c.keyValid=true;memcpy(c.bindkey,boundKey,16);}}portEXIT_CRITICAL(&lock);if(ok)queueRole(r,c);}
+void clearRole(unsigned r){queueRole(r,Config{});}
+void roleBindingStatus(unsigned r,char* out,size_t n,bool& key){Config c{};portENTER_CRITICAL(&lock);if(r<2)c=roles[r].config;portEXIT_CRITICAL(&lock);key=c.keyValid;if(c.selected)snprintf(out,n,"%02X:%02X:%02X:%02X:%02X:%02X",c.address[0],c.address[1],c.address[2],c.address[3],c.address[4],c.address[5]);else if(n)out[0]=0;}
+static bool acceptRole(const uint8_t* address){bool yes=false;portENTER_CRITICAL(&lock);for(unsigned r=0;r<2;++r)yes|=roles[r].config.selected&&!memcmp(address,roles[r].config.address,6);portEXIT_CRITICAL(&lock);return yes;}
+static void publishRole(const Config& c,const Reading& v){portENTER_CRITICAL(&lock);for(unsigned r=0;r<2;++r)if(roles[r].config.selected&&!memcmp(c.address,roles[r].config.address,6))roles[r].value=v;portEXIT_CRITICAL(&lock);}
 static void gap(esp_gap_ble_cb_event_t event,esp_ble_gap_cb_param_t*p){
  ++gapEvents;lastGap=unsigned(event);if(integrityFailed.load())return;
  if(event==ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT){if(p->scan_param_cmpl.status==ESP_BT_STATUS_SUCCESS){paramsReady=true;phase=Phase::Off;}else phase=Phase::Fault;return;}
@@ -73,7 +90,7 @@ static void gap(esp_gap_ble_cb_event_t event,esp_ble_gap_cb_param_t*p){
  if(p->scan_rst.search_evt==ESP_GAP_SEARCH_INQ_CMPL_EVT){phase=Phase::Off;return;}
  if(p->scan_rst.search_evt!=ESP_GAP_SEARCH_INQ_RES_EVT||!permit.load(std::memory_order_acquire))return;
  Packet packet;packet.epoch=epoch.load();packet.discovery=searching.load();
- if(!searching.load()&&(!chosen.load()||packLow(p->scan_rst.bda)!=low.load()||packHigh(p->scan_rst.bda)!=high.load()))return;
+ if(!searching.load()&&(weather::active()?!acceptRole(p->scan_rst.bda):(!chosen.load()||packLow(p->scan_rst.bda)!=low.load()||packHigh(p->scan_rst.bda)!=high.load())))return;
  memcpy(packet.address,p->scan_rst.bda,6);packet.addressType=p->scan_rst.ble_addr_type;packet.rssi=p->scan_rst.rssi;packet.capturedAt=millis();
  const auto extracted=extract(p->scan_rst.ble_adv,p->scan_rst.adv_data_len,packet);
  if(extracted!=Extract::Found){
@@ -97,13 +114,14 @@ static void retainBoundDevice(){
 // Runs only in the existing idle owner with a stack guard, at most one/100ms.
 static void nativePacket(const Packet& packet){
  if(packet.epoch!=epoch.load()||(ibtram::reserve!=0&&uxTaskGetStackHighWaterMark(nullptr)<3072))return;
- Config c=configuration();if(!c.keyValid)return;Reading candidate;portENTER_CRITICAL(&lock);candidate=value;portEXIT_CRITICAL(&lock);
+ Config c=configuration();Reading candidate;portENTER_CRITICAL(&lock);candidate=value;if(weather::active())for(unsigned r=0;r<2;++r)if(roles[r].config.selected&&!memcmp(packet.address,roles[r].config.address,6)){c=roles[r].config;c.enabled=on.load();candidate=roles[r].value;}portEXIT_CRITICAL(&lock);
  Frame f;memcpy(f.address,packet.address,6);f.service=packet.data;f.length=packet.length;f.uuid=packet.uuid;f.rssi=packet.rssi;
- const uint32_t started=micros();const auto decoded=decodeMiBeacon(c,f,packet.capturedAt,candidate);
+ const uint32_t started=micros();const auto decoded=decode(c,f,packet.capturedAt,candidate);
  ++nativeProcessed;nativeSeenAt=millis();const uint32_t elapsed=micros()-started;if(elapsed>nativeMaxUs)nativeMaxUs=elapsed;
  if(packet.epoch!=epoch.load())return;
- if(decoded==Result::Decoded){portENTER_CRITICAL(&lock);value=candidate;portEXIT_CRITICAL(&lock);result=1;++decodedCount;Serial.printf("[BLE-NATIVE] result=DECODED elapsed_us=%lu stack_hwm=%lu\n",(unsigned long)(micros()-started),(unsigned long)uxTaskGetStackHighWaterMark(nullptr));}
+ if(decoded==Result::Decoded){portENTER_CRITICAL(&lock);value=candidate;portEXIT_CRITICAL(&lock);publishRole(c,candidate);result=1;++decodedCount;Serial.printf("[BLE-NATIVE] result=DECODED elapsed_us=%lu stack_hwm=%lu\n",(unsigned long)(micros()-started),(unsigned long)uxTaskGetStackHighWaterMark(nullptr));}
  else if(decoded==Result::AdvertisementOnly){++presencePackets;if(result!=1&&result!=6&&result!=2)result=7;}
+ else if(decoded==Result::NeedsDecryption)result=2;
  else if(decoded==Result::AuthenticationFailed){++authFailures;result=6;}
  else if(decoded!=Result::WrongDevice){++invalidPackets;result=3;static uint32_t loggedAt=0;if(invalidPackets<=3||uint32_t(millis()-loggedAt)>=10000){loggedAt=millis();Serial.printf("[BLE-NATIVE] result=REJECT code=%u length=%u fc=%02x%02x model=%02x%02x\n",unsigned(decoded),unsigned(packet.length),packet.data[0],packet.data[1],packet.data[2],packet.data[3]);}}
 }
@@ -153,6 +171,12 @@ bool bindAddress(const char* text,const char* key){
  for(unsigned i=0;i<6;++i){int a=hexDigit(text[3*i]),b=hexDigit(text[3*i+1]);if(a<0||b<0||(i<5&&text[3*i+2]!=':'))return false;address[i]=uint8_t(a*16+b);}
  return queueBinding(address,key);
 }
+bool bindRole(unsigned r,const char* address,const char* key){
+ if(r>1||!address||strlen(address)!=17||!key||(strlen(key)!=0&&strlen(key)!=32))return false;Config c{};c.selected=c.enabled=true;c.keyValid=strlen(key)==32;
+ for(unsigned i=0;i<6;++i){int a=hexDigit(address[3*i]),b=hexDigit(address[3*i+1]);if(a<0||b<0||(i<5&&address[3*i+2]!=':'))return false;c.address[i]=uint8_t(a*16+b);}
+ if(c.keyValid)for(unsigned i=0;i<16;++i){int a=hexDigit(key[2*i]),b=hexDigit(key[2*i+1]);if(a<0||b<0)return false;c.bindkey[i]=uint8_t(a*16+b);}
+ return queueRole(r,c);
+}
 void bindingStatus(char* address,size_t size,bool& hasKey,bool& pending){Config c=configuration();hasKey=c.keyValid;portENTER_CRITICAL(&lock);pending=bindRequested||dirty.load();portEXIT_CRITICAL(&lock);if(c.selected)snprintf(address,size,"%02X:%02X:%02X:%02X:%02X:%02X",c.address[0],c.address[1],c.address[2],c.address[3],c.address[4],c.address[5]);else if(size)address[0]=0;}
 void listDevices(){for(unsigned i=0;i<8;++i){Device d;portENTER_CRITICAL(&lock);bool ok=i<count;if(ok)d=devices[i];portEXIT_CRITICAL(&lock);if(!ok)break;Serial.printf("[BLE-DEVICE] index=%u mac=%02X:%02X:%02X:%02X:%02X:%02X uuid=%04x model=%04x rssi=%d\n",i,d.address[0],d.address[1],d.address[2],d.address[3],d.address[4],d.address[5],d.uuid,d.model,int(d.rssi));}}
 
@@ -177,12 +201,14 @@ const char*status(){if(!enabled())return "KI";if(integrityFailed.load())return "
 void service(){
  const uint32_t now=millis();
  if(integrityFailed.load()){direct::service(configuration(),false,false,false,now);return;}
- if(!loaded){Preferences p;if(p.begin("ibt_sensor",true)){on=enabledAfterLoad(p.getBool("on",false),searchRequest.load());uint8_t a[6];if(p.getBytesLength("address")==6&&p.getBytes("address",a,6)==6){low=packLow(a);high=packHigh(a);chosen=true;}uint8_t binding[22];if(p.getBytesLength("binding")==22&&p.getBytes("binding",binding,22)==22){portENTER_CRITICAL(&lock);memcpy(boundAddress,binding,6);memcpy(boundKey,binding+6,16);keyValid=true;portEXIT_CRITICAL(&lock);}p.end();}loaded=true;retainBoundDevice();Serial.printf("[BLE-BIND] result=LOADED selected=%u key_set=%u\n",unsigned(chosen.load()),unsigned(configuration().keyValid));}
+ if(!loaded){Preferences p;if(p.begin("ibt_sensor",true)){on=enabledAfterLoad(p.getBool("on",false),searchRequest.load());uint8_t a[6];if(p.getBytesLength("address")==6&&p.getBytes("address",a,6)==6){low=packLow(a);high=packHigh(a);chosen=true;}uint8_t binding[22];if(p.getBytesLength("binding")==22&&p.getBytes("binding",binding,22)==22){portENTER_CRITICAL(&lock);memcpy(boundAddress,binding,6);memcpy(boundKey,binding+6,16);keyValid=true;portEXIT_CRITICAL(&lock);}bool found=p.getBytesLength("roles")==sizeof(roles[0].config)*2;Config restored[2];if(found&&p.getBytes("roles",restored,sizeof(restored))==sizeof(restored)){portENTER_CRITICAL(&lock);roles[0].config=restored[0];roles[1].config=restored[1];roleProfileLoaded=true;portEXIT_CRITICAL(&lock);}p.end();}loaded=true;if(!roleProfileLoaded&&chosen.load()){const auto migrated=legacyConfiguration();portENTER_CRITICAL(&lock);roles[1].config=migrated;portEXIT_CRITICAL(&lock);rolesDirty=true;}if(weather::active())enableRoles();retainBoundDevice();Serial.printf("[BLE-BIND] result=LOADED selected=%u key_set=%u\n",unsigned(chosen.load()),unsigned(configuration().keyValid));}
  const bool running=player.isRunning(),stopped=player.status()==STOPPED,diag=r10diag::active(),probe=pathprobe::enabled.load(),busy=ibtlimit::backgroundBusy(),btWanted=btaudio::wanted(),btIdle=btaudio::idle();
  const uint32_t gateMask=(!surfacepolicy::ble(surfacepolicy::current())?256u:0u)|(!budget.load()?1u:0u)|(running?2u:0u)|(!stopped?4u:0u)|(diag?8u:0u)|(probe?16u:0u)|(busy?32u:0u)|(btWanted?64u:0u)|(!btIdle?128u:0u);
  runtimeBlockers=gateMask;const bool idle=gateMask==0;
- direct::service(configuration(),idle&&!searching.load()&&!searchRequest.load(),attached&&phase!=Phase::Fault,phase==Phase::Off,now);
- Reading directValue;if(direct::take(directValue)&&idle&&chosen.load()){portENTER_CRITICAL(&lock);value=directValue;portEXIT_CRITICAL(&lock);result=1;++decodedCount;}
+ if(weather::active()&&direct::quiet()&&uint32_t(now-roleAt)>=60000){currentRole=1-currentRole;roleAt=now;}
+ const auto directConfig=configuration();
+ direct::service(directConfig,idle&&!searching.load()&&!searchRequest.load(),attached&&phase!=Phase::Fault,phase==Phase::Off,now);
+ Reading directValue;if(direct::take(directValue)&&idle&&directConfig.selected){portENTER_CRITICAL(&lock);value=directValue;portEXIT_CRITICAL(&lock);publishRole(directConfig,directValue);result=1;++decodedCount;}
 
  static uint32_t gateAt=0,lastGate=UINT32_MAX,lastUi=UINT32_MAX,lastRequest=0;
  const auto id=requestId.load(),ui=uiBlockers.load();
@@ -209,7 +235,14 @@ void service(){
   const int index=selection.exchange(-1);Device d;portENTER_CRITICAL(&lock);bool ok=unsigned(index)<count;if(ok)d=devices[index];portEXIT_CRITICAL(&lock);
   if(ok){permit=false;chosen=false;epoch.fetch_add(1);low=packLow(d.address);high=packHigh(d.address);chosen=true;searching=false;result=0;portENTER_CRITICAL(&lock);value=Reading{};portEXIT_CRITICAL(&lock);dirty=true;}
  }
+ if(quiescent()){Config next{};int r=-1;portENTER_CRITICAL(&lock);if(roleRequest>=0){r=roleRequest;next=rolePending;rolePending={};roleRequest=-1;roles[r]={next,Reading{}};if(next.selected&&roles[1-r].config.selected&&!memcmp(next.address,roles[1-r].config.address,6))roles[1-r]={};}portEXIT_CRITICAL(&lock);if(r>=0){rolesDirty=true;on=true;dirty=true;resetRequest=true;permit=false;++epoch;searching=false;searchRequest=false;}}
  if(!idle)return;
+ static uint32_t roleSaveAt=0;static bool roleSaveTried=false;
+ if(!rolesDirty.load())roleSaveTried=false;
+ if(rolesDirty.load()&&quiescent()&&(!roleSaveTried||uint32_t(now-roleSaveAt)>=30000)){
+  roleSaveTried=true;roleSaveAt=now;Config saved[2];portENTER_CRITICAL(&lock);for(unsigned r=0;r<2;++r)saved[r]=roles[r].config;portEXIT_CRITICAL(&lock);
+  Preferences p;if(p.begin("ibt_sensor",false)){Config check[2];const bool ok=p.putBytes("roles",saved,sizeof(saved))==sizeof(saved)&&p.getBytes("roles",check,sizeof(check))==sizeof(check)&&!memcmp(saved,check,sizeof(check));p.end();if(ok)rolesDirty=false;}
+ }
  // Discovery only stores bounded labels. Do not allocate a decoder task until a
  // device is selected. Callback still owns no UI/decoder work or allocations.
  static uint32_t discoveryAt=0;
@@ -217,9 +250,9 @@ void service(){
   discoveryAt=now;Packet packet;
   if(queue.pop(packet)&&packet.epoch==epoch.load()){if(packet.discovery){recordDevice(packet);++discoveryPackets;}else if(idle)nativePacket(packet);}
  }
- if((!saveTried||uint32_t(now-saveAt)>=1000)&&dirty.exchange(false)){saveTried=true;saveAt=now;Preferences p;if(p.begin("ibt_sensor",false)){Config c=configuration();bool saved=p.putBool("on",enabled())==1;if(c.selected)saved=saved&&p.putBytes("address",c.address,6)==6;uint8_t binding[22];bool hasKey;portENTER_CRITICAL(&lock);hasKey=keyValid;if(hasKey){memcpy(binding,boundAddress,6);memcpy(binding+6,boundKey,16);}portEXIT_CRITICAL(&lock);if(hasKey){saved=saved&&p.putBytes("binding",binding,22)==22;uint8_t verify[22];saved=saved&&p.getBytesLength("binding")==22&&p.getBytes("binding",verify,22)==22&&!memcmp(binding,verify,22);}p.end();if(!saved)dirty=true;else if(hasKey)Serial.println("[BLE-BIND] result=SAVED_READBACK_PASS key=<redacted>");}else dirty=true;}
+ if((!saveTried||uint32_t(now-saveAt)>=1000)&&dirty.exchange(false)){saveTried=true;saveAt=now;Preferences p;if(p.begin("ibt_sensor",false)){Config c=legacyConfiguration();bool saved=p.putBool("on",enabled())==1;if(c.selected)saved=saved&&p.putBytes("address",c.address,6)==6;uint8_t binding[22];bool hasKey;portENTER_CRITICAL(&lock);hasKey=keyValid;if(hasKey){memcpy(binding,boundAddress,6);memcpy(binding+6,boundKey,16);}portEXIT_CRITICAL(&lock);if(hasKey){saved=saved&&p.putBytes("binding",binding,22)==22;uint8_t verify[22];saved=saved&&p.getBytesLength("binding")==22&&p.getBytes("binding",verify,22)==22&&!memcmp(binding,verify,22);}p.end();if(!saved)dirty=true;else if(hasKey)Serial.println("[BLE-BIND] result=SAVED_READBACK_PASS key=<redacted>");}else dirty=true;}
  if(!enabled())return;
- if(!chosen.load()&&!searching.load()&&!searchRequest.load()){permit=false;return;}
+ if(!configuration().selected&&!searching.load()&&!searchRequest.load()){permit=false;return;}
  if(resetRequest.exchange(false)){if(result.load()==5)return;initTried=false;if(phase==Phase::Fault){phase=Phase::Off;paramsReady=false;}}
  if(phase==Phase::Fault)return;
  const bool needDecoder=needsDecoderTask(chosen.load(),searchRequest.load(),searching.load(),configuration().keyValid
@@ -243,7 +276,7 @@ void service(){
  }
  if(quiescent()&&searchRequest.exchange(false)){permit=false;epoch.fetch_add(1);portENTER_CRITICAL(&lock);count=0;portEXIT_CRITICAL(&lock);retainBoundDevice();searching=true;paramsReady=false;bursts=10;attempted=false;auditBursts=0;admissionAttempted=false;admissionBlocked=false;}
  if(phase==Phase::Off&&searching.load()&&bursts==0){searching=false;paramsReady=false;}
- if(!chosen.load()&&!searching.load())return;
+ if(!configuration().selected&&!searching.load())return;
  // A bound GATT sensor owns periodic acquisition. Passive scans must not
  // steal the shared60s slot while its fresh-reading timer is still closed.
  if(phase==Phase::Off&&directOwnsAcquisition(configuration(),searching.load(),searchRequest.load())){permit=false;return;}
@@ -289,6 +322,8 @@ void service(){
 }
 #else
 namespace sensors {
+bool roleSavePending(){return false;}void enableRoles(){}
+bool roleSelected(unsigned){return false;}bool roleReading(unsigned,radiosensor::Reading&){return false;}void selectRole(unsigned,unsigned){}void clearRole(unsigned){}bool bindRole(unsigned,const char*,const char*){return false;}void roleBindingStatus(unsigned,char*a,size_t n,bool&k){if(n)a[0]=0;k=false;}
 void stackStopped(){}bool available(){return false;}bool enabled(){return false;}void toggle(){}void discover(){}unsigned deviceCount(){return 0;}bool deviceLabel(unsigned,char*,size_t){return false;}void select(unsigned){}bool bindDevice(unsigned,const char*){return false;}bool bindAddress(const char*,const char*){return false;}
 void bindingStatus(char*a,size_t n,bool&k,bool&p){if(n)a[0]=0;k=p=false;}
 void audioRequested(){}void listDevices(){}void setBudget(bool,uint32_t){}void service(){}bool quiescent(){return true;}const char*status(){return "BLE firmware szukseges";}bool reading(radiosensor::Reading&){return false;}void diagnostics(){Serial.println("[BLE-SENSOR] available=0 enabled=0");}

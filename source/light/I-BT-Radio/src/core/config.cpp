@@ -864,6 +864,15 @@ void Config::initPlaylist() {
   }*/
 }
 uint16_t Config::playlistLength(){
+#if defined(USE_SD) && IBT_NO_PSRAM
+  // Published only after the owner validated and closed the complete SD index.
+  // No transient UI file-open allocation can turn a valid catalog into zero.
+  if(getMode()==PM_SDCARD){
+    if(!sdman.catalogReady.load())return 0;
+    const uint32_t count=sdman.indexedTracks.load();
+    return uint16_t(count>65535u?65535u:count);
+  }
+#endif
   uint16_t out = 0;
   if (SDPLFS()->exists(REAL_INDEX)) {
     File index = SDPLFS()->open(REAL_INDEX, "r");
@@ -885,17 +894,23 @@ bool Config::loadStation(uint16_t ls, bool persistSdSelection,bool persistLifecy
   if (ls > cs) {
     ls = 1;
   }
+  uint32_t pos;
+#if IBT_NO_PSRAM
+  if(!ibtsd::indexOffset(*SDPLFS(),REAL_INDEX,ls,pos))return false;
+  File playlist = SDPLFS()->open(REAL_PLAYL, "r");
+  if(!playlist||pos>=playlist.size()||!playlist.seek(pos,SeekSet)){playlist.close();return false;}
+#else
   File playlist = SDPLFS()->open(REAL_PLAYL, "r");
   File index = SDPLFS()->open(REAL_INDEX, "r");
   if(!playlist || !index || !index.seek((ls - 1) * 4, SeekSet)){
     playlist.close();index.close();return false;
   }
-  uint32_t pos;
   if(index.readBytes((char *) &pos, 4)!=4 || pos>=playlist.size()){
     index.close();playlist.close();return false;
   }
   index.close();
   playlist.seek(pos, SeekSet);
+#endif
   String ibtStationLine=playlist.readStringUntil('\n');
   artworkUrl[0]=0;
   if(getMode()==PM_SDCARD){
@@ -935,6 +950,17 @@ bool Config::loadStation(uint16_t ls, bool persistSdSelection,bool persistLifecy
 char * Config::stationByNum(uint16_t num){
   memset(_stationBuf,0,sizeof(_stationBuf));
   if(num<1 || num>playlistLength())return _stationBuf;
+#if IBT_NO_PSRAM
+  uint32_t pos=0;
+  const bool sd=getMode()==PM_SDCARD;
+  if(!ibtsd::indexOffset(*SDPLFS(),REAL_INDEX,num,pos)){
+    strlcpy(_stationBuf,sd?"SD: index olvasasi hiba":"Listaolvasasi hiba",sizeof(_stationBuf));return _stationBuf;
+  }
+  File playlist=SDPLFS()->open(REAL_PLAYL,"r");
+  const bool ok=playlist&&pos<playlist.size()&&playlist.seek(pos,SeekSet)&&ibtsd::readDisplayLabel(playlist,_stationBuf);
+  playlist.close();
+  if(!ok||!_stationBuf[0])strlcpy(_stationBuf,sd?"SD: fajlnev olvasasi hiba":"Listaolvasasi hiba",sizeof(_stationBuf));
+#else
   File playlist = SDPLFS()->open(REAL_PLAYL, "r");
   File index = SDPLFS()->open(REAL_INDEX, "r");
   if(!playlist || !index || !index.seek((num - 1) * 4, SeekSet)){
@@ -949,6 +975,7 @@ char * Config::stationByNum(uint16_t num){
   String label=playlist.readStringUntil('\t');
   ibtsd::displayCopy(_stationBuf,sizeof(_stationBuf),label.c_str(),label.length());
   playlist.close();
+#endif
   return _stationBuf;
 }
 

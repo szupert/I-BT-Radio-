@@ -25,7 +25,42 @@
 
 
 typedef struct FLACsubFramesBuff_t{
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+#define IBT_FLAC_DYNAMIC_SAMPLES 1
+    struct ChannelSamples {
+        static constexpr unsigned PageSamples=256,Pages=(MAX_BLOCKSIZE+PageSamples-1)/PageSamples;
+        int32_t* page[Pages];
+        uint32_t owners; // allocation bases only; normal3KiB blocks cover four packed logical pages
+        // Four signed24 samples occupy three aligned32-bit words. Supported16-bit
+        // PCM and its17-bit stereo side are exact; residuals are restored before
+        // storage. All accesses remain word-only, including EXEC/IRAM pages.
+        static constexpr unsigned storageBytes(unsigned samples){return ((samples*3+3)/4)*4;}
+        struct Ref {
+            volatile uint32_t* words;unsigned shift;
+            operator int32_t()const{
+                uint32_t v=words[0]>>shift;
+                if(shift>8)v|=words[1]<<(32-shift);
+                v&=0xffffffu;
+                return v&0x800000u?int32_t(v)-0x1000000:int32_t(v);
+            }
+            Ref& operator=(int32_t value){
+                const uint32_t v=uint32_t(value)&0xffffffu;
+                words[0]=(words[0]&~(0xffffffu<<shift))|(v<<shift);
+                if(shift>8){const unsigned bits=shift-8;const uint32_t mask=(1u<<bits)-1;
+                    words[1]=(words[1]&~mask)|(v>>(32-shift));}
+                return *this;
+            }
+            Ref& operator=(const Ref& other){return *this=int32_t(other);}
+            Ref& operator+=(int32_t value){return *this=int32_t(*this)+value;}
+            Ref& operator<<=(int shift){return *this=int32_t(int64_t(int32_t(*this))*(int64_t(1)<<shift));}
+        };
+        Ref operator[](size_t i){const unsigned bit=unsigned(i%PageSamples)*24;return {reinterpret_cast<volatile uint32_t*>(page[i/PageSamples])+bit/32,bit%32};}
+        explicit operator bool()const{return page[0]!=nullptr;}
+    } samplesBuffer[MAX_CHANNELS];
+#else
+#define IBT_FLAC_DYNAMIC_SAMPLES 0
     int32_t samplesBuffer[MAX_CHANNELS][MAX_BLOCKSIZE];
+#endif
 }FLACsubframesBuffer_t;
 
 enum : uint8_t {FLACDECODER_INIT, FLACDECODER_READ_IN, FLACDECODER_WRITE_OUT};
@@ -43,6 +78,8 @@ enum : int8_t  {GIVE_NEXT_LOOP = +1,
                 ERR_FLAC_WRONG_RICE_PARTITION_NR = -9,
                 ERR_FLAC_OUTPUT_TOO_SMALL = -12,
                 ERR_FLAC_INPUT_UNDERFLOW = -13,
+                ERR_FLAC_MEMORY = -14,
+                ERR_FLAC_SAMPLE_RANGE = -15,
                 ERR_FLAC_BITS_PER_SAMPLE_TOO_BIG = -10,
                 ERR_FLAG_BITS_PER_SAMPLE_UNKNOWN = 11};
 
@@ -158,6 +195,7 @@ void     FLACDecoderReset();
 int8_t   FLACDecode(uint8_t *inbuf, int *bytesLeft, short *outbuf);
 int8_t   FLACDecodeBounded(uint8_t *inbuf, int *bytesLeft, short *outbuf,size_t outputSamples);
 uint16_t FLACGetOutputSamps();
+bool     FLACOutputPending();
 uint64_t FLACGetTotoalSamplesInStream();
 uint8_t  FLACGetBitsPerSample();
 uint8_t  FLACGetChannels();
@@ -173,6 +211,6 @@ int8_t   decodeSubframe(uint8_t sampleDepth, uint8_t ch);
 int8_t   decodeFixedPredictionSubframe(uint8_t predOrder, uint8_t sampleDepth, uint8_t ch);
 int8_t   decodeLinearPredictiveCodingSubframe(int lpcOrder, int sampleDepth, uint8_t ch);
 int8_t   decodeResiduals(uint8_t warmup, uint8_t ch);
-void     restoreLinearPrediction(uint8_t ch, uint8_t shift);
+void     restoreLinearPrediction(uint8_t ch, int shift);
 
 

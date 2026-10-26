@@ -3,7 +3,7 @@ namespace lightplayer {
 // 320x240 accepted MINI layout. Cover pixels remain64x64 on flash;
 // an aspect-fill row scaler paints the larger background viewport without a framebuffer.
 constexpr int vuX=8,vuY=80,vuW=80,vuH=88;
-constexpr int clockX=102,clockY=96,clockW=210,clockH=70;
+constexpr int clockX=102,clockY=80,clockW=210,clockH=88;
 constexpr int coverX=136,coverY=53,coverW=176,coverH=115;
 constexpr unsigned signalBars(bool connected,int rssi){return !connected||rssi>=0?0:rssi>=-55?4:rssi>=-67?3:rssi>=-80?2:rssi>=-95?1:0;}
 struct Size{int w,h;};

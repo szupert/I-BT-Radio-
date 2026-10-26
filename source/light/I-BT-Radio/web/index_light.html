@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b24"><title>I-BT-Radio Light · beállítások</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#0b1219;color:#edf5fa}*{box-sizing:border-box}body{margin:0}main{max-width:600px;margin:auto;padding:20px 16px 40px}h1{font-size:1.4rem;margin:0 0 8px}h2{font-size:1.05rem}p{line-height:1.5}small,#status{color:#a9becb}details{margin:14px 0;border:1px solid #314756;border-radius:10px;background:#12212c}summary{padding:16px;cursor:pointer;font-weight:600}details>div{padding:0 16px 16px}label{display:block;margin:12px 0 5px}input,select,button{font:inherit;border-radius:7px;padding:10px;border:1px solid #456477;background:#102c3e;color:inherit}input,select{max-width:100%;width:100%}button{cursor:pointer;margin:7px 5px 0 0}button:active{background:#28ce89;color:#06150f}button:disabled{opacity:.5;cursor:wait}a{color:#70d8ff}.row{display:flex;gap:8px;flex-wrap:wrap}.row>label{flex:1;min-width:140px}.note{min-height:24px;overflow-wrap:anywhere}ul{list-style:none;padding:0}li{margin:7px 0}li button{width:100%;text-align:left}
+</style></head><body><main>
+<h1>I-BT-Radio <small>LIGHT</small></h1><p id="status" role="status">Verzió ellenőrzése…</p>
+<div class="row"><button id="toggle">Indít / Szünet</button><button id="volm">Halkabb</button><button id="volp">Hangosabb</button><button id="player-state">Állapot</button></div>
+<p><small>Az adatok csak gombnyomásra frissülnek. A beállításokhoz a rádió legyen Wi-Fi-n; BT/SD hálózat nélküli módban a weboldal nem érhető el.</small></p>
+<details><summary>Wi-Fi</summary><div><p>Új hálózat hozzáadásához bekapcsol a rádió beállító hotspotja. A mentett hálózatok megmaradnak, a jelenlegi webkapcsolat megszakadhat.</p><button id="hotspot">Új Wi-Fi hozzáadása</button></div></details>
+<details><summary>Indítókép</summary><div>
+<p><small>A mentéshez szüneteltesd a lejátszást Wi-Fi módban, a Bluetooth hangút legyen kikapcsolva. A változtatás a következő bekapcsoláskor látszik; nem indítjuk újra a rádiót.</small></p>
+<button id="boot-load">Beállítás betöltése</button><label for="boot-seconds">Legalább ennyi másodpercig jelenjen meg</label><input id="boot-seconds" type="number" min="0" max="120" step="1" value="0"><p><small>0 = gyári idő. Rövidebb érték sem gyorsítja a gyári betöltést: a betöltési állapotok és a Wi-Fi zöldre váltása utáni 2 másodperc megmarad.</small></p><button id="boot-time-save">Idő mentése</button>
+<label for="boot-file">Új indítókép · PNG, JPEG vagy WebP</label><input id="boot-file" type="file" accept="image/png,image/jpeg,image/webp"><p><small>320×240-es előnézet készül; az állapotfények és a Wi-Fi/SD/BT gombok a gyári helyükön maradnak. A képet csak a Feltöltés gomb küldi a rádióra.</small></p>
+<canvas id="boot-preview" width="320" height="240" style="display:block;max-width:100%;height:auto;border-radius:8px" hidden></canvas><button id="boot-image-save">Kép feltöltése</button><p id="boot-note" class="note" role="status"></p>
+</div></details>
+<details><summary>Kijelző és ébresztő</summary><div><div class="row"><button id="display">Kijelző</button><button id="alarm">Ébresztő</button></div><p><small>A rádió saját beállításai. Minden módosítás egy gombnyomás, nincs automatikus menüjárás.</small></p><h2 id="menu-title"></h2><ul id="menu"></ul><button id="menu-back" hidden>Vissza</button></div></details>
+<details><summary>Időjárás · helyszín</summary><div>
+<p><small>Open-Meteo, API-kulcs nélkül. A rádión az Időjárás menüpont leállítja a hangot.</small></p><button id="weather-load">Beállítás betöltése</button>
+<label for="city">Város keresése</label><input id="city" maxlength="80" placeholder="Budapest"><button id="city-search">Keresés</button><select id="city-results" aria-label="Talált városok" hidden></select>
+<form id="weather-form"><label for="location">Hely neve</label><input id="location" maxlength="39" required value="Budapest"><div class="row"><label>Szélesség<input id="lat" type="number" min="-90" max="90" step="0.00001" required value="47.49790"></label><label>Hosszúság<input id="lon" type="number" min="-180" max="180" step="0.00001" required value="19.04020"></label></div><label for="interval">Frissítés</label><select id="interval"><option value="15">15 perc</option><option value="30">30 perc</option><option value="60">60 perc</option></select><button type="submit">Időjárás mentése</button></form>
+<p id="weather-note" class="note" role="status"></p><small><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo</a></small></div></details>
+<details><summary>BLE-hőmérő · Kint / Bent</summary><div><p><small>Egy hőmérő egy helyhez rendelhető. Nyílt BTHome/ATC/PVVX adóhoz a kulcs üresen maradhat. Gyári Xiaomihoz mindig add meg a saját kulcsot. A kulcs nem kerül a böngésző tárhelyére.</small></p>
+<form id="sensor-form" autocomplete="off"><label for="role">Helye</label><select id="role"><option value="1">Bent</option><option value="0">Kint</option><option value="legacy">Óralap korábbi hőmérője</option></select><label for="mac">MAC-cím</label><input id="mac" maxlength="17" placeholder="AA:BB:CC:DD:EE:FF" required><label for="key">Saját bindkey, ha titkosított</label><input id="key" type="password" maxlength="32" pattern="([0-9a-fA-F]{32})?" autocomplete="new-password"><button type="submit">Hőmérő mentése</button><button id="sensor-load" type="button">Állapot betöltése</button></form><p id="sensor-note" class="note" role="status"></p></div></details>
+<details><summary>Rádióállomások · CSV</summary><div><p><a href="/api/radio-stations.csv" download="radioallomasok.csv">Állomáslista letöltése</a></p><p><small>CSV/M3U import, legfeljebb 480 állomás. A mentés lecseréli a teljes listát, szükség esetén leállítja a hangot, és teljes visszaolvasással ellenőriz. Wi-Fi és BT-párosítás megmarad.</small></p><input id="station-file" type="file" accept=".csv,.m3u,.m3u8,.txt"><p id="station-preview" class="note"></p><button id="station-save">Lista mentése</button><button id="station-check" hidden>Mentés ellenőrzése / folytatása</button><button id="station-cancel" hidden>Várakozó kérés törlése</button><p id="station-note" class="note" role="status"></p></div></details>
+</main><script>
+(function(root){'use strict';
+ var enc=new TextEncoder();
+ function validate(rows,source){
+  if(!rows.length||(!source&&rows.length>480))throw Error('1–480 állomás adható meg.');
+  return rows.map(function(r,i){
+   var name=String(r.name||'').trim(),url=String(r.url||'').trim(),volume=Number(r.volume===undefined?0:r.volume);
+   if(!name||enc.encode(name).length>169||/[\x00-\x1f\x7f]/.test(name))throw Error((i+1)+'. sor: hibás vagy túl hosszú név (legfeljebb 169 bájt).');
+   if(enc.encode(url).length>169||/[\x00-\x20\x7f]/.test(url)||!/^https?:\/\//i.test(url))throw Error((i+1)+'. sor: teljes http:// vagy https:// streamcím szükséges (legfeljebb 169 bájt).');
+   try{if(!new URL(url).hostname)throw Error();}catch(e){throw Error((i+1)+'. sor: hibás streamcím.');}
+   if(!Number.isInteger(volume)||volume< -80||volume>80)throw Error((i+1)+'. sor: a hangerőkorrekció −80 és +80 közötti egész szám.');
+   return {name:name,url:url,volume:volume};
+  });
+ }
+ function fields(line,separator){
+  var a=[],s='',quote=false;
+  for(var i=0;i<line.length;i++){
+   var c=line[i];if(c==='"'){if(quote&&line[i+1]==='"'){s+='"';i++;}else quote=!quote;}
+   else if(c===separator&&!quote){a.push(s);s='';}else s+=c;
+  }
+  if(quote)throw Error('Lezáratlan idézőjel az importált sorban.');a.push(s);return a;
+ }
+ function parse(text,source){
+  if(enc.encode(text).length>262144)throw Error('A fájl legfeljebb 256 KiB lehet.');
+  text=text.replace(/^\uFEFF/,'');var lines=text.split(/\r?\n/).filter(function(l){return l.trim();}),rows=[];
+  if(!lines.length)throw Error('A fájl üres.');
+  if(lines[0].trim()==='#EXTM3U'){
+   var title='';lines.forEach(function(l){if(l.indexOf('#EXTINF:')===0)title=l.slice(l.indexOf(',')+1).trim();
+    else if(l[0]!=='#'){rows.push({name:title||l,url:l,volume:0});title='';}});
+  }else{
+   var separator=lines[0].includes('\t')?'\t':lines[0].includes(';')?';':',';
+   lines.forEach(function(l,i){var f=separator==='\t'?l.split('\t'):fields(l,separator);
+    if(i===0&&/^(name|név|állomás)$/i.test(f[0].trim())&&/^(url|cím|stream)$/i.test((f[1]||'').trim()))return;
+    if(f.length<2||f.length>3)throw Error((i+1)+'. sor: név, streamcím és opcionális hangerőkorrekció kell.');
+    rows.push({name:f[0],url:f[1],volume:f[2]===undefined||f[2]===''?0:Number(f[2])});
+   });
+  }
+  return validate(rows,source===true);
+ }
+ function serialize(rows){return validate(rows).map(function(r){return r.name+'\t'+r.url+'\t'+r.volume;}).join('\n')+'\n';}
+ function merge(sources,initial){
+  if(!Array.isArray(sources)||!sources.length||sources.length>10)throw Error('Egyszerre 1–10 fájl egyesíthető.');
+  var rows=[],seen=new Set(),total=0;
+  function add(list){list.forEach(function(row){total++;
+   // Hostname/default port normalization is safe; path/query case and order
+   // stay intact. Fragments are not sent in an HTTP stream request.
+   var address=new URL(row.url);address.hash='';var key=address.href;
+   if(!seen.has(key)){seen.add(key);rows.push(row);}
+  });}
+  if(initial&&initial.length)add(validate(initial));
+  sources.forEach(function(text,i){try{add(parse(text,true));}catch(e){throw Error((i+1)+'. fájl: '+e.message);}});
+  if(rows.length>480)throw Error('Az egyesítés után '+rows.length+' különböző állomás marad ('+(total-rows.length)+' ismétlődés kiszűrve). A rádió legfeljebb 480-at fogad; az előnézet nem változott.');
+  return {rows:validate(rows),total:total,duplicates:total-rows.length};
+ }
+ var api={parse:parse,validate:validate,serialize:serialize,merge:merge};
+ if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.IBTStations=api;
+})(typeof globalThis!=='undefined'?globalThis:this);
+</script><script>
+(function(root){'use strict';
+ function encode(rgba){
+  if(!rgba||rgba.length!==320*240*4)throw Error('Hibás képméret.');
+  const data=new Uint8Array(153624),v=new DataView(data.buffer);
+  data.set(new TextEncoder().encode('IBTB5651'));v.setUint16(8,320,true);v.setUint16(10,240,true);v.setUint32(12,153600,true);
+  for(let p=0;p<76800;++p){const i=p*4,word=((Number(rgba[i])&248)<<8)|((Number(rgba[i+1])&252)<<3)|(Number(rgba[i+2])>>>3);v.setUint16(24+p*2,word,true);}
+  let crc=0xffffffff;for(let i=24;i<data.length;++i){crc^=data[i];for(let b=0;b<8;++b)crc=(crc>>>1)^(0xedb88320&-(crc&1));}crc=(crc^0xffffffff)>>>0;v.setUint32(16,crc,true);
+  return {data,crc};
+ }
+ root.IBTBoot={encode};
+})(globalThis);
+</script><script>
+'use strict';
+const $=id=>document.getElementById(id),say=s=>{$('status').textContent=s;};
+let operation=false,cities=[],menuStack=[];
+async function raw(path,opt={}){const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),12000);try{const r=await fetch(path,{cache:'no-store',...opt,signal:abort.signal});if(!r.ok)throw Error('HTTP '+r.status);const body=await r.text();return {status:r.status,json:async()=>JSON.parse(body),text:async()=>body};}finally{clearTimeout(timer);}}
+async function version(){try{const server=await(await raw('/api/version')).json(),client={major:'166',release:'270',webui:'IBT_R270_1'},token=v=>[v.major,v.release,v.webui].join('|');if(!['major','release','webui'].every(k=>typeof server[k]==='string'&&server[k]))throw Error('Hiányos verzió');const target=token(server),url=new URL(location.href);if(token(client)!==target&&url.searchParams.get('ibt-ui')!==target){url.searchParams.set('ibt-ui',target);location.replace(url.href);}say('Készen · '+server.release+' · frissítés csak gombnyomásra');}catch(e){say('A rádió nem érhető el: '+e.message);}}
+const versionReady=version();
+async function request(path,opt){await versionReady;return raw(path,opt);}
+function form(values){return {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(values).toString()};}
+async function perform(fn){if(operation)return;operation=true;document.querySelectorAll('button,input,select').forEach(e=>e.disabled=true);try{await fn();}catch(e){say('Nem sikerült: '+e.message);}finally{document.querySelectorAll('button,input,select').forEach(e=>e.disabled=false);operation=false;}}
+function on(id,fn){$(id).addEventListener('click',()=>perform(fn));}
+function action(page,item){return request('/api/menu-action',form({page,item}));}
+for(const id of ['toggle','volm','volp'])on(id,async()=>{await request('/api/player-action',form({action:id}));say('Vezérlés elküldve.');});
+on('player-state',async()=>{const s=await(await request('/api/player')).json();say((s.btIn?'BT → DAC':s.btOut?'SD → BT':s.sd?'SD → DAC':'Wi-Fi → DAC')+' · '+(s.playing?'Lejátszás':'Szünet')+' · hangerő '+s.volume+'% · puffer '+s.buffer+'%');});
+on('hotspot',async()=>{await action(76,0);say('Új Wi-Fi beállítása kérve. Csatlakozz a rádió hotspotjához.');});
+let bootImage=null;
+on('boot-load',async()=>{const s=await(await request('/api/boot')).json();$('boot-seconds').value=String(s.seconds);$('boot-note').textContent=(s.custom?'Egyedi indítókép.':'Gyári indítókép.')+' Minimum: '+(s.seconds?s.seconds+' másodperc':'gyári idő')+'. A gyári betöltési várakozás megmarad.';});
+on('boot-time-save',async()=>{const value=$('boot-seconds').value.trim(),seconds=Number(value);if(!/^\d+$/.test(value)||!Number.isInteger(seconds)||seconds<0||seconds>120)throw Error('0–120 egész másodpercet adj meg.');const saved=await(await request('/api/boot/time?seconds='+seconds,{method:'POST'})).json();if(!saved.saved||saved.seconds!==seconds)throw Error('Az idő mentése nem igazolt.');const read=await(await request('/api/boot')).json();if(read.seconds!==seconds||!read.factory_minimum)throw Error('Az idő visszaolvasása eltér.');$('boot-note').textContent='Idő mentve és visszaolvasva. A következő induláskor érvényes; a gyári minimum megmarad.';});
+$('boot-file').addEventListener('change',()=>perform(async()=>{
+ bootImage=null;$('boot-preview').hidden=true;const file=$('boot-file').files[0];if(!file)return;
+ if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>8388608)throw Error('Legfeljebb 8 MiB-os PNG, JPEG vagy WebP képet válassz.');
+ const image=await createImageBitmap(file);
+ try{
+  if(!image.width||!image.height||image.width*image.height>16777216)throw Error('A kép legfeljebb 16 megapixeles lehet.');
+  const canvas=$('boot-preview'),c=canvas.getContext('2d'),scale=Math.min(320/image.width,240/image.height),w=image.width*scale,h=image.height*scale;
+  c.fillStyle='#000';c.fillRect(0,0,320,240);c.drawImage(image,(320-w)/2,(240-h)/2,w,h);
+  // Keep the existing touch hitboxes and live status-light positions visible.
+  c.font='bold 11px sans-serif';c.textBaseline='middle';c.lineWidth=1;
+  [35,122,208].forEach((x,i)=>{c.fillStyle='#101719';c.strokeStyle='#86929b';c.beginPath();c.roundRect(x,141,i===0?81:80,31,7);c.fill();c.stroke();c.fillStyle='#fff';c.fillText(['Wi-Fi','SD','BT'][i],x+9,157);});
+  c.fillStyle='#636363';[[103,157,4],[189,157,4],[275,157,4],[123,194,5],[148,194,5],[173,194,5],[197,194,5]].forEach(([x,y,r])=>{c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();});
+  bootImage=IBTBoot.encode(c.getImageData(0,0,320,240).data);canvas.hidden=false;$('boot-note').textContent='Előnézet kész. A rádió képe még változatlan; a Kép feltöltése gombbal mentheted.';
+ }finally{image.close();}
+}));
+on('boot-image-save',async()=>{
+ if(!bootImage)throw Error('Előbb válassz képet és ellenőrizd az előnézetet.');const expected=bootImage;
+ $('boot-note').textContent='Feltöltés és ellenőrzés folyamatban…';
+ try{const saved=await(await request('/api/boot/image',{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:expected.data})).json();if(!saved.saved||saved.crc!==expected.crc||saved.bytes!==expected.data.length)throw Error('A mentés visszaigazolása eltér.');const read=await(await request('/api/boot')).json();if(!read.custom||read.crc!==expected.crc)throw Error('A kép visszaolvasott ellenőrzőösszege eltér.');$('boot-note').textContent='Indítókép mentve, ellenőrzőösszeg visszaolvasva. A következő bekapcsoláskor jelenik meg.';}
+ catch(e){$('boot-note').textContent='A mentés még nincs igazolva. Nem küldöm újra automatikusan. '+e.message;throw e;}
+});
+const allowedPages=new Set([10,46,59,60,61,62,63,64,68,70,71]);
+async function menu(page,push=true){if(!allowedPages.has(page))throw Error('Ez a beállítás a rádión érhető el.');const data=await(await request('/api/menu?page='+page)).json();if(push)menuStack.push(page);$('menu-title').textContent=data.title;$('menu').replaceChildren();$('menu-back').hidden=menuStack.length<2;for(const row of data.items){const li=document.createElement('li');if(row.child&&allowedPages.has(row.child)){const b=document.createElement('button');b.textContent=row.label;b.onclick=()=>perform(()=>menu(row.child));li.appendChild(b);}else if(row.enabled&&row.action){const b=document.createElement('button');b.textContent=row.label;b.onclick=()=>perform(async()=>{await action(page,row.index);say('Beállítás elfogadva; mentés a rádió nyugalmi állapotában.');await menu(page,false);});li.appendChild(b);}else li.textContent=row.label;$('menu').appendChild(li);}}
+on('display',()=>{menuStack=[];return menu(10);});on('alarm',()=>{menuStack=[];return menu(59);});on('menu-back',()=>{menuStack.pop();return menu(menuStack[menuStack.length-1],false);});
+on('weather-load',async()=>{const w=await(await request('/api/weather')).json();$('location').value=w.location;$('lat').value=w.latitude;$('lon').value=w.longitude;$('interval').value=String(w.interval);$('weather-note').textContent=w.status+(w.pending?' · mentésre vár':'')+(w.fresh?' · '+(w.temperature_tenths/10).toFixed(1)+' °C':'');});
+on('city-search',async()=>{const q=$('city').value.trim();if(q.length<2)throw Error('Legalább két karaktert adj meg.');const data=await(await raw('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=8&language=hu&format=json')).json();cities=Array.isArray(data.results)?data.results:[];$('city-results').replaceChildren();const blank=document.createElement('option');blank.value='';blank.textContent=cities.length?'Válassz várost':'Nincs találat';$('city-results').appendChild(blank);cities.forEach((c,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=[c.name,c.admin1,c.country].filter(Boolean).join(', ');$('city-results').appendChild(o);});$('city-results').hidden=false;});
+$('city-results').addEventListener('change',()=>{if($('city-results').value==='')return;const c=cities[Number($('city-results').value)];if(!c)return;const name=Array.from(c.name);while(new TextEncoder().encode(name.join('')).length>39)name.pop();$('location').value=name.join('');$('lat').value=Number(c.latitude).toFixed(5);$('lon').value=Number(c.longitude).toFixed(5);$('weather-note').textContent='Hely kiválasztva, még nincs mentve.';});
+$('weather-form').addEventListener('submit',e=>{e.preventDefault();perform(async()=>{await request('/api/weather',form({enabled:'1',provider:'0',location:$('location').value,latitude:$('lat').value,longitude:$('lon').value,interval:$('interval').value}));$('weather-note').textContent='Elfogadva. A rádión nyisd meg az Időjárást, majd később ellenőrizd a mentést.';});});
+$('role').addEventListener('change',()=>{$('mac').value='';$('key').value='';$('sensor-note').textContent='A kiválasztott hely adatai külön betölthetők.';});
+on('sensor-load',async()=>{const r=$('role').value,s=await(await request('/api/sensor'+(r==='legacy'?'':'?role='+r))).json();$('mac').value=s.mac||'';$('key').value='';$('sensor-note').textContent=s.pending?'Mentésre vár. Lejátszás STOP, majd időjárás vagy nyugalmi óralap.':s.fresh?(s.temperature_centi/100).toFixed(1)+' °C · '+(s.humidity_centi/100).toFixed(1)+'%':s.mac?(s.key_set?'Titkosított hőmérő, friss adat még nincs.':'Hozzárendelve, friss adat még nincs.'):'Nincs hozzárendelt hőmérő.';});
+$('sensor-form').addEventListener('submit',e=>{e.preventDefault();perform(async()=>{const mac=$('mac').value.trim().replace(/-/g,':'),key=$('key').value.trim(),role=$('role').value;if(!/^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)||!(key===''&&role!=='legacy'||/^[0-9a-fA-F]{32}$/.test(key)))throw Error('Hibás MAC-cím vagy bindkey.');try{await request('/api/sensor',form({mac,key,role}));$('sensor-note').textContent='Elfogadva. Lejátszás STOP, majd Időjárás vagy nyugalmi óralap; utána kérj állapotot.';}finally{$('key').value='';}});});
+let csv='',saveRecord=null;const saveKey='ibt-light-station-save:'+location.host;
+function remember(){localStorage.setItem(saveKey,JSON.stringify(saveRecord));}
+function saveClear(text){localStorage.removeItem(saveKey);saveRecord=null;$('station-check').hidden=$('station-cancel').hidden=true;$('station-note').textContent=text;}
+$('station-file').addEventListener('change',()=>perform(async()=>{if(saveRecord)throw Error('Előbb zárd le a korábbi mentési kérést.');const f=$('station-file').files[0];if(!f)return;if(f.size>262144)throw Error('A fájl legfeljebb 256 KiB lehet.');const rows=IBTStations.parse(await f.text());csv=IBTStations.serialize(rows);$('station-preview').textContent=rows.length+' állomás · '+f.name+' · a rádió listája még változatlan.';}));
+async function saveControl(command){const url='/api/station-save/'+command+'?job='+saveRecord.job+(command==='prepare'&&saveRecord.device?'&device='+encodeURIComponent(saveRecord.device):'');const s=await(await request(url,command==='status'?{}:{method:'POST'})).json();if(s.job!==saveRecord.job||typeof s.device!=='string'||!s.device||saveRecord.device&&saveRecord.device!==s.device)throw Error('Eltérő rádió vagy mentési kérés.');saveRecord.device=s.device;remember();return s;}
+async function saveRun(){
+ if(!saveRecord)throw Error('Nincs mentési kérés.');$('station-check').hidden=false;
+ let s=await saveControl(saveRecord.phase==='queued'?'prepare':'status'),deadline=Date.now()+30000;
+ for(;;){
+  if(saveRecord.cancel){if(s.phase==='ready'){await saveControl('cancel');saveClear('Várakozó kérés megszakítva, új lista nem került a rádióra.');return;}if(s.phase==='complete'||s.phase==='failed'){saveClear('A kérés már lezárult.');return;}}
+  if(s.phase==='ready'&&s.uploadReady&&!saveRecord.cancel){
+   if(saveRecord.phase!=='queued')throw Error('A korábbi küldés bizonytalan; nem küldöm újra vakon. Ellenőrizd a rádió listáját.');
+   saveRecord.phase='submitted';remember();const data=new FormData();data.append('plfile',new Blob([saveRecord.csv],{type:'text/plain;charset=utf-8'}),'playlist.csv');const r=await request('/upload',{method:'POST',headers:{'X-Station-Save':String(saveRecord.job)},body:data});if(r.status!==202)throw Error('A rádió nem fogadta el a listát.');await r.json();
+  }else if(s.phase==='saved'||s.phase==='complete'){
+   if(!s.installed)throw Error('A rádió nem igazolta a telepítést.');const r=await request('/api/radio-stations.csv');if(IBTStations.serialize(IBTStations.parse(await r.text()))!==saveRecord.csv)throw Error('A teljes visszaolvasott lista eltér.');saveRecord.phase='verified';remember();if(s.phase==='saved')await saveControl('finish');saveClear('Mentés kész, a teljes állomáslista visszaolvasva és ellenőrizve. A korábbi hang folytatását kértem.');return;
+  }else if(s.phase==='failed')throw Error('A rádiós mentés sikertelen.');
+  if(Date.now()>=deadline||document.hidden)throw Error('A mentés megmaradt. Később az ellenőrzés gombbal folytasd.');
+  await new Promise(resolve=>setTimeout(resolve,750));s=await saveControl('status');
+ }
+}
+async function checkSave(){try{await saveRun();}catch(e){$('station-note').textContent='Még nincs igazolva: '+e.message;$('station-check').hidden=false;$('station-cancel').hidden=!saveRecord||saveRecord.phase!=='queued';throw e;}}
+on('station-save',async()=>{if(saveRecord)throw Error('Már van mentési kérés; használd az ellenőrzést.');if(!csv)throw Error('Előbb válassz listafájlt.');saveRecord={schema:3,job:1+Math.floor(Math.random()*2147483646),device:'',csv,phase:'queued'};try{remember();}catch(e){saveRecord=null;throw Error('A böngésző nem tudta megőrizni a kérést; semmit nem küldtem.');}$('station-note').textContent='Mentés és ellenőrzés folyamatban…';await checkSave();});
+on('station-check',checkSave);on('station-cancel',async()=>{if(!saveRecord||saveRecord.phase!=='queued')throw Error('Ez a kérés már nem vonható vissza így.');saveRecord.cancel=true;remember();await checkSave();});
+try{const s=JSON.parse(localStorage.getItem(saveKey)||'null');if(s&&s.schema===3&&Number.isInteger(s.job)&&s.job>0&&s.job<=2147483646&&typeof s.device==='string'&&['queued','submitted','verified'].includes(s.phase)&&IBTStations.serialize(IBTStations.parse(s.csv))===s.csv){saveRecord=s;$('station-check').hidden=false;$('station-cancel').hidden=s.phase!=='queued';$('station-note').textContent='Korábbi kérés található. Csak az ellenőrzés gomb megnyomásakor folytatom.';}}catch(e){$('station-note').textContent='A korábbi kérés hibás, automatikus küldés nem indul.';}
+</script></body></html>

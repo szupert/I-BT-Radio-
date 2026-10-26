@@ -49,6 +49,7 @@ struct Settings {
     uint8_t vintageSkin = 0; // 0=off, 1=retro neon, 2=Hi-Fi, 3=classic wood
     uint8_t retroColor = 0; // 0..8; original green is the default
     bool swipeSkins = false; // touch-only home swipe; rotary remains unchanged
+    bool tapSelected = true; // Light menus: touch confirms highlighted row; optional direct row activation.
     bool hlsEnabled = false; // experimental M3U8/HLS support; disabled by default
 };
 inline bool validMenuIdle(uint16_t s){return s==0||s==10||s==20||s==30||s==60||s==120||s==300;}
@@ -85,7 +86,11 @@ inline void sanitize(Settings &s) {
     s.artworkEnabled=false;s.reelAnimation=false;s.bootScreen=0;s.bootSound=0;s.hlsEnabled=false;
 #else
     s.playerEnabled=true;s.cassetteEnabled=false;s.mediaPlayerSkin=false;s.kajonSkin=false;s.vintageSkin=0;
-    s.language=Language::HU;s.rotation&=2;s.reelAnimation=false;s.swipeSkins=false;s.bootScreen=0;s.bootSound=0;
+    s.language=Language::HU;s.rotation&=2;s.reelAnimation=false;
+#if !IBT_NO_PSRAM
+    s.swipeSkins=false;
+#endif
+    s.bootScreen=0;s.bootSound=0;
 #if !defined(IBT_SENSOR_EXPERIMENTAL)
     s.alarm.clockHome=false;
 #endif

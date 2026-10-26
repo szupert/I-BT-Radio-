@@ -1,6 +1,7 @@
 #pragma once
 #include <NetworkClientSecure.h>
 #include "light_network_gate.h"
+#include "stream_cancel.h"
 #include "memory_checkpoint.h"
 #if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO)
 #include "tls_record_policy.h"
@@ -33,6 +34,7 @@ public:
 #else
         {
 #endif
+        if(streamcancel::state().cancelled())return 0;
         _timeout=timeout;setupDeadline=false;
         const uint32_t start=millis();
         // Split at the SDK's supported STARTTLS boundary; no plaintext request
@@ -42,6 +44,7 @@ public:
         const uint32_t elapsed=millis()-start;
         char message[48];const int code=lastError(message,sizeof(message));
         Serial.printf("[STREAM-TRANSPORT] phase=TCP_TLS_INIT ok=%u code=%d elapsed_ms=%lu timeout_ms=%ld\n",unsigned(ready!=0),code,(unsigned long)elapsed,(long)timeout);
+        if(streamcancel::state().cancelled()){_stillinPlainStart=false;stop();return 0;}
         if(!ready){_stillinPlainStart=false;setupDeadline=code==-1&&timeout>0&&elapsed>=uint32_t(timeout);return 0;}
 #if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO)
         const bool compact=pass==0;

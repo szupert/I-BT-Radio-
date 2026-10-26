@@ -1,5 +1,6 @@
 #pragma once
 #include "dns_packet.h"
+#include "stream_cancel.h"
 #include "dns_auto.h"
 #include "core.h"
 #include "dns_policy.h"
@@ -23,9 +24,11 @@ inline bool direct(const char* host,IPAddress server,IPAddress& result,unsigned 
     if(sent){
         while(uint32_t(millis()-start)<1500){
             const unsigned elapsed=uint32_t(millis()-start);if(elapsed>=1500)break;
-            const unsigned left=1500-elapsed;timeval wait={0,long(left*1000)};
+            const unsigned left=1500-elapsed;timeval wait={0,long(std::min(left,50u)*1000)};
             fd_set reads;FD_ZERO(&reads);FD_SET(fd,&reads);
-            if(select(fd+1,&reads,nullptr,nullptr,&wait)<=0)break;
+            if(streamcancel::state().cancelled())break;
+            const int selected=select(fd+1,&reads,nullptr,nullptr,&wait);
+            if(selected<0)break;if(selected==0)continue;
             const int n=recv(fd,packet,sizeof(packet),0);if(n>0)++received;uint8_t bytes[4];
             if(n>0&&answer(packet,n,id,host,bytes)){result=IPAddress(bytes[0],bytes[1],bytes[2],bytes[3]);good=true;break;}
         }
@@ -38,22 +41,33 @@ inline int connect(NetworkClient* client,SecureClient& secure,const char* host,u
     auto& gate=lightnet::gate();const uint32_t streamToken=gate.beginStream();
     struct Opening { lightnet::Gate& gate;uint32_t token;bool ok=false,tls=false;~Opening(){gate.endStream(ok,tls,token);} } opening{gate,streamToken};
     const uint32_t drainAt=millis();
-    while(!gate.drained()&&uint32_t(millis()-drainAt)<1500)vTaskDelay(1);
+    while(!gate.drained()&&!streamcancel::state().cancelled()&&uint32_t(millis()-drainAt)<1500)vTaskDelay(1);
+    if(streamcancel::state().cancelled())return 0;
     if(!gate.drained()){Serial.println("[LIGHT-NET] stream=DEFERRED reason=background_cleanup");return 0;}
 #endif
     IPAddress address;const uint32_t started=millis();
-    const auto settings=dual::snapshot().settings;
+    const auto settings=dual::settingsSnapshot();
     unsigned preferredServer=0;
     bool resolved=preferred(settings.dnsManual,settings.dnsPrimary,settings.dnsSecondary,[&](const uint8_t* a,unsigned index){
         const bool ok=direct(host,IPAddress(a[0],a[1],a[2],a[3]),address,index);if(ok)preferredServer=index;return ok;
     });
+    #if IBT_NO_PSRAM
+    // Same configured DNS servers, cancellable UDP A lookup; no new task,
+    // global resolver change or unconditional fallback DNS benchmark.
+    if(!resolved&&!streamcancel::state().cancelled())resolved=address.fromString(host);
+    if(!resolved&&!streamcancel::state().cancelled())resolved=direct(host,WiFi.dnsIP(0),address,0);
+    const int status=resolved?1:0;
+#else
     const int status=resolved?1:Network.hostByName(host,address);
+#endif
+    if(streamcancel::state().cancelled())return 0;
     if(!resolved)resolved=status==1&&address.type()==IPv4&&uint32_t(address)!=0;
     unsigned fallback=0;
     Serial.printf("[STREAM-DNS-CONFIG] manual=%u preferred=%u\n",unsigned(settings.dnsManual),preferredServer);
     if(!resolved&&WiFi.status()==WL_CONNECTED){
         IPAddress servers[3]={WiFi.dnsIP(1),IPAddress(1,1,1,1),IPAddress(8,8,8,8)};
         for(unsigned i=0;i<3&&!resolved;++i){
+            if(streamcancel::state().cancelled())return 0;
             if(!uint32_t(servers[i])||servers[i]==WiFi.dnsIP(0))continue;
             bool duplicate=false;for(unsigned j=0;j<i;++j)if(servers[j]==servers[i])duplicate=true;
             if(duplicate)continue;if(WiFi.status()!=WL_CONNECTED)break;
@@ -61,6 +75,7 @@ inline int connect(NetworkClient* client,SecureClient& secure,const char* host,u
         }
     }
     Serial.printf("[STREAM-DNS] sdk=%d resolved=%u fallback=%u elapsed_ms=%lu\n",status,unsigned(resolved),fallback,(unsigned long)(millis()-started));
+    if(streamcancel::state().cancelled())return 0;
     if(!resolved){radiodnsauto::failed();return 0;} // A DNS error must never enter TCP/TLS with 0.0.0.0.
     radiodnsauto::succeeded();
     if(client==static_cast<NetworkClient*>(&secure)){
@@ -68,9 +83,9 @@ inline int connect(NetworkClient* client,SecureClient& secure,const char* host,u
         int result=secure.resolvedConnect(address,port,host,timeout);
         // One bounded retry for the observed pre-handshake deadline only.
         // No retry for DNS, certificate, handshake or low-memory failures.
-        const bool retry=!result&&secure.preHandshakeTimeout()&&WiFi.status()==WL_CONNECTED&&ibtlimit::allowAllocation(0);
+        const bool retry=!streamcancel::state().cancelled()&&!result&&secure.preHandshakeTimeout()&&WiFi.status()==WL_CONNECTED&&ibtlimit::allowAllocation(0);
         Serial.printf("[STREAM-OPEN] ok=%u retry=%u wifi=%u rssi=%d free=%lu largest=%lu\n",unsigned(result!=0),unsigned(retry),unsigned(WiFi.status()==WL_CONNECTED),WiFi.RSSI(),(unsigned long)heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT),(unsigned long)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT));
-        if(retry){vTaskDelay(pdMS_TO_TICKS(100));if(WiFi.status()==WL_CONNECTED)result=secure.resolvedConnect(address,port,host,timeout);}
+        if(retry){vTaskDelay(pdMS_TO_TICKS(100));if(!streamcancel::state().cancelled()&&WiFi.status()==WL_CONNECTED)result=secure.resolvedConnect(address,port,host,timeout);}
 #if IBT_NO_PSRAM
         opening.ok=result!=0;opening.tls=result!=0;
 #endif

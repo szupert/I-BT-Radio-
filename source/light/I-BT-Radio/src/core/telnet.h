@@ -21,8 +21,10 @@ class Telnet {
     void info();
     void serialCommand(const char* text){on_input(text,100);}
   protected:
+#if !defined(IBT_LIGHT4_DNS_AUTO) || !IBT_LIGHT4_DNS_AUTO
     WiFiServer server = WiFiServer(23);
     WiFiClient clients[MAX_TLN_CLIENTS];
+#endif
     void emptyClientStream(WiFiClient client);
     void on_connect(const char* str, uint8_t clientId);
     void on_input(const char* str, uint8_t clientId);

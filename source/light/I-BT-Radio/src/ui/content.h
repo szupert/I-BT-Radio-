@@ -9,6 +9,7 @@
 #include "../dual/sensors/receiver.h"
 #include <stdio.h>
 #include "menu_structure.h"
+#include "light_navigation.h"
 #include "../dual/vu_probe.h"
 #include "light_ui_policy.h"
 namespace content {
@@ -21,20 +22,26 @@ inline unsigned itemCount(unsigned page){
 #if IBT_COMPACT_UI
       case 74:return 17;
 #endif
-      case 1:return 5;   // root, including clock home
+      case 1:return IBT_NO_PSRAM?lightnav::mainCount:5;
+      case 76:return IBT_NO_PSRAM?3:0;
+      case 77:return IBT_NO_PSRAM?8:0;
+#if IBT_NO_PSRAM
+      case 81:return menustructure::advancedCount+1;
+#endif
+      case 79:case 80:return IBT_NO_PSRAM?10:0;
       case 3:return 8;   // Bluetooth input, output, DAC, status, rate, back
       case 45:return 8;
       case 46:return IBT_NO_PSRAM?8:6;
       case 43:return 5;  // four standard SBC rates and back
-      case 6:return 6;
-      case 73:return 13;   // sound
+      case 6:return IBT_NO_PSRAM?3:6;
+      case 73:return IBT_NO_PSRAM?0:13;   // sound
       case 7:return menustructure::settingsCount+1;   // settings, alarm, skin swipe toggle, back
       case 59:return 7;  // alarm groups, mode and back
       case 60:return 10;
       case 61:return 4;
       case 62:return 7;
       case 63:return 6;
-      case 64:return 11;
+      case 64:return IBT_NO_PSRAM?7:11;
       case 70:return 5;
       case 71:return 9;
       case 68:return 5;
@@ -42,21 +49,21 @@ inline unsigned itemCount(unsigned page){
       case 9:return 9;
       case 53:return 7;
       case 54:return 6;   // wifi
-      case 47:return IBT_COMPACT_UI?4:15;
+      case 47:return IBT_NO_PSRAM?0:IBT_COMPACT_UI?4:15;
       case 72:return 9;
       case 56:return 10; // nine retro illumination colors and back
-      case 49:return 4;
+      case 49:return IBT_NO_PSRAM?2:4;
       case 50:return 6;
       case 52:return 4;
-      case 10:return IBT_NO_PSRAM?7:12;  // display
-      case 11:return 7;  // controls
-      case 12:return 5;  // storage
+      case 10:return IBT_NO_PSRAM?6:12;  // display
+      case 11:return IBT_NO_PSRAM?lightnav::controlsCount:7;  // controls
+      case 12:return IBT_NO_PSRAM?4:5;  // storage
       case 13:return 6;  // diagnostics
       case 19:return 6;  // system
       case 14:return 5;  // volume/stream
-      case 15:return 5;  // eq
-      case 57:return 13; // ten bands, AUTO, enable, back
-      case 58:return eq10::PresetCount+1;
+      case 15:return IBT_NO_PSRAM?0:5;  // eq
+      case 57:return IBT_NO_PSRAM?0:13; // ten bands, AUTO, enable, back
+      case 58:return IBT_NO_PSRAM?0:eq10::PresetCount+1;
       case 16:return 5;  // outputs
       case 37:return 5;  // SD data backup / restore
       default:return 0;
@@ -66,6 +73,9 @@ inline bool isMenuPage(unsigned page){return itemCount(page)!=0;}
 inline const char* pageTitle(dual::Language l,unsigned page){
     switch(page){
       case 75:return "Forrás / hangút";
+      case 76:return "Kapcsolatok";
+      case 81:return pick(l,"Egyéb beállítások","More settings","Weitere Einstellungen");
+      case 77:return "Időjárás és BLE";case 79:return "Kint · érzékelő";case 80:return "Bent · érzékelő";
 #if IBT_COMPACT_UI
       case 74:return "IR taviranyito";
 #endif
@@ -92,7 +102,7 @@ inline const char* pageTitle(dual::Language l,unsigned page){
       case 52:return pick(l,"Akkumulátor","Battery","Akku");
       case 49:return pick(l,"Érzékelők és hardver","Sensors and hardware","Sensoren und Hardware");
       case 50:return pick(l,"Speciális / Akkumérés","Special / Battery","Spezial / Akku");
-      case 10:return pick(l,"Kijelző és skinek","Display and skins","Anzeige und Skins");
+      case 10:return IBT_NO_PSRAM?"Kijelző":pick(l,"Kijelző és skinek","Display and skins","Anzeige und Skins");
       case 11:return pick(l,"Kezelés","Controls","Bedienung");
       case 12:return pick(l,"Tárhely","Storage","Speicher");
       case 13:return pick(l,"Diagnosztika","Diagnostics","Diagnose");
@@ -139,23 +149,28 @@ inline unsigned alarmField(unsigned page,unsigned item){
     if(page==61)return item<3?source[item]:27;
     if(page==62)return item==0?29:item<6?5+item:27;
     if(page==63)return item<5?11+item:27;
+    if(IBT_NO_PSRAM&&page==64){static constexpr uint8_t f[]={16,28,30,31,33,37,27};return item<7?f[item]:27;}
     if(page==64)return item==0?24:item==1?16:item==2?28:item==3?30:item==4?31:item==5?32:item==6?33:item==7?34:item==8?35:item==9?36:27;
     return 27;
 }
 inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,unsigned item){
 #if IBT_NO_PSRAM
  if(page==10){
-  const char* names[]={"Fényerő","Forgatás","Jelszintmérő","Pufferjelző","Térerő","Borítókép","Vissza"};
+  const char* names[]={"Fényerő","Forgatás","Jelszintmérő","Pufferjelző","Térerő","Vissza"};
   char value[32]={};
   if(item==0)snprintf(value,sizeof(value),"%u%%",s.settings.brightness);
   else if(item==1)snprintf(value,sizeof(value),"%u fok",s.settings.rotation*90);
   else if(item==3)snprintf(value,sizeof(value),"%s",s.settings.bufferIndicator?"Be":"Ki");
   else if(item==4)snprintf(value,sizeof(value),"%s",s.settings.wifiIndicator?"Be":"Ki");
-  else if(item==5)snprintf(value,sizeof(value),"%s",s.settings.artworkEnabled?"Be":"Ki (VU)");
-  snprintf(out,cap,"%s%s%s",names[item<7?item:6],value[0]?": ":"",value);return true;
+  snprintf(out,cap,"%s%s%s",names[item<6?item:5],value[0]?": ":"",value);return true;
  }
+ if(page==76){const char* n[]={"Wi-Fi csatlakozás","SD → DAC","Telefon → DAC"};snprintf(out,cap,"%s",n[item<3?item:0]);return true;}
+ if(page==6){const char* n[]={"Hangerő / Stream","Kimenetek","Vissza"};snprintf(out,cap,"%s",n[item<3?item:2]);return true;}
+ if(page==11){const char* n[]={"Rotary","Érintés kalibrálása (Stop)","Gombkiosztás","Menü bezárási idő","Lapozásos módváltás","Koppintás","Vissza"};snprintf(out,cap,"%s%s%s",n[item<7?item:6],item==4||item==5?": ":"",item==4?(s.settings.swipeSkins?"Be":"Ki"):item==5?(s.settings.tapSelected?"Kijelölt sor":"Érintett sor"):"");return true;}
+ if(page==12){const char* n[]={"Memória","SD-kártya","Fájlrendszer","Vissza"};snprintf(out,cap,"%s",n[item<4?item:3]);return true;}
+ if(page==49){snprintf(out,cap,"%s",item?"Vissza":"BLE hőmérő");return item||sensors::available();}
  if(page==46){
-  const char* names[]={"Kikapcsolva","Függőleges B/J","Vízszintes B/J","Magnórádió","Frissítés: 100 ms","Frissítés: 200 ms","Frissítés: 500 ms","Vissza"};
+  const char* names[]={"Kikapcsolva","Függőleges sztereó","Vízszintes sztereó","Magnórádió","Frissítés: 100 ms","Frissítés: 200 ms","Frissítés: 500 ms","Vissza"};
   const bool active=item<4?lightui::style.load()==item:item<7?vuprobe::refreshMs.load()==(item==4?100:item==5?200:500):false;
   snprintf(out,cap,"%s%s",names[item<8?item:7],active?" *":"");return true;
  }
@@ -169,6 +184,13 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
     if(page>=60&&page<=64){item=alarmField(page,item);page=66;}
     const auto l=s.settings.language; const char* label="?"; char value[48]={}; bool enabled=false;
     switch(page){
+#if IBT_NO_PSRAM
+    case 77:{const char* n[]={"Időjárás megnyitása · hang nélkül","Frissítés most","BLE-keresés · utána időjárás","Kint: érzékelő kiválasztása","Bent: érzékelő kiválasztása","Frissítési idő","Open-Meteo · beállítás weben","Vissza"};
+        if(item==5)snprintf(out,cap,"%s: %u perc",n[5],weather::configuration().intervalMinutes);else snprintf(out,cap,"%s",n[item<8?item:7]);return item!=6;}
+    case 79:case 80:
+        if(item<8){if(sensors::deviceLabel(item,out,cap))return true;snprintf(out,cap,"—");return false;}
+        snprintf(out,cap,"%s",item==8?"Hozzárendelés törlése":"Vissza");return true;
+#endif
     case 70:
         if(item==0)snprintf(out,cap,"%s: %s",pick(l,"Hőmérő","Sensor","Sensor"),sensors::enabled()?pick(l,"Be","On","Ein"):pick(l,"Ki","Off","Aus"));
         else if(item==1)snprintf(out,cap,"%s",pick(l,"Keresés · utána vissza az órára","Search · then return to clock","Suche · dann zur Uhr"));
@@ -183,13 +205,27 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
         if(item<4){const auto servers=dual::clockServers();snprintf(out,cap,"NTP %u: %s",item+1,servers.values[item][0]?servers.values[item]:pick(l,"Kikapcsolva","Disabled","Deaktiviert"));}
         else snprintf(out,cap,"%s",dual::tr(l,dual::Text::Back));
         return true;
+#if IBT_NO_PSRAM
+    case 81:
+        snprintf(out,cap,"%s",item<menustructure::advancedCount?pick(l,menustructure::advanced[item].hu,menustructure::advanced[item].en,menustructure::advanced[item].de):dual::tr(l,dual::Text::Back));return true;
+#endif
     case 1:
+#if IBT_NO_PSRAM
+        {const char* hu[]={"Hang","Bluetooth","Beállítások","Óra","Időjárás","Lejátszó"};
+         const char* en[]={"Sound","Bluetooth","Settings","Clock","Weather","Player"};
+         const char* de[]={"Klang","Bluetooth","Einstellungen","Uhr","Wetter","Player"};
+         snprintf(out,cap,"%s",pick(l,hu[item<6?item:5],en[item<6?item:5],de[item<6?item:5]));return true;}
+#else
         {static const char* hu[]={"Forrás és lejátszás","Hang","Bluetooth","Beállítások"};
          static const char* en[]={"Sources and playback","Sound","Bluetooth","Settings"};
          static const char* de[]={"Quellen und Wiedergabe","Klang","Bluetooth","Einstellungen"};
          if(item<4){label=unsigned(l)==0?hu[item]:unsigned(l)==1?en[item]:de[item];enabled=true;}
+         else if(IBT_NO_PSRAM&&item==5){label="Kapcsolatok";enabled=true;}
+         else if(IBT_NO_PSRAM&&item==6){label="Időjárás · hang nélkül";enabled=true;}
+         else if(IBT_NO_PSRAM&&item==7){label="Időjárás / Kint / Bent";enabled=true;}
          else if(item==4){label=pick(l,s.settings.alarm.clockHome?"Rádió megjelenítése":"Óra megjelenítése",s.settings.alarm.clockHome?"Show radio":"Show clock",s.settings.alarm.clockHome?"Radio anzeigen":"Uhr anzeigen");enabled=true;}}
         break;
+#endif
     case 8:
         switch(item){
           case 0:label=pick(l,"Internet rádió","Internet radio","Internetradio");enabled=true;break;
@@ -242,6 +278,7 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
           case 3:label=pick(l,"EQ látvány","EQ visual","EQ-Optik");enabled=true;break;
           default:label=dual::tr(l,dual::Text::Back);enabled=true;break;
         } break;
+#if !IBT_NO_PSRAM
     case 57:
         if(item<eq10::Bands){
             snprintf(out,cap,"%s %u Hz  %+d dB",item<5?" ":"",unsigned(eq10::Hz[item]),
@@ -256,6 +293,7 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
         if(item<eq10::PresetCount){label=eq10::name(eq10::Preset(item),unsigned(l));enabled=true;}
         else {label=dual::tr(l,dual::Text::Back);enabled=true;}
         break;
+#endif
     case 16:
         switch(item){
           case 0:label="PCM5102A";enabled=true;break;
@@ -343,6 +381,9 @@ inline bool menuItem(char *out,size_t cap,const dual::Snapshot &s,unsigned page,
               snprintf(value,sizeof(value),"%s",s.settings.alarm.daysMask&(1u<<day)?
                   pick(l,"Be","On","Ein"):pick(l,"Ki","Off","Aus"));break;
           }
+#if IBT_NO_PSRAM
+          case 37:label="Órastílus";snprintf(value,sizeof(value),"%s",lightui::clockStyle.load()?"Digitális":"Lapozós");break;
+#endif
           case 28:label=pick(l,"Kettőspont villogás","Blink colon","Doppelpunkt blinken");
               snprintf(value,sizeof(value),"%s",s.settings.alarm.blinkColon?pick(l,"Be","On","Ein"):pick(l,"Ki","Off","Aus"));break;
           case 24:label=pick(l,"Óra nézete","Clock view","Uhransicht");

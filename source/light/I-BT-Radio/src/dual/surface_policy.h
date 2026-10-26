@@ -8,7 +8,13 @@ constexpr bool allows(Surface s,Route r,bool alarm=false){
  if(s==Surface::Clock)return alarm&&(r==Route::WifiDac||r==Route::SdDac||r==Route::InternalDac);
  if(s==Surface::Service)return true; // Existing WEB->BT and resource guards remain separate.
  if(s==Surface::BtInput)return r==Route::BtInDac;
- if(s==Surface::Weather)return r==Route::WifiDac||r==Route::SdDac||r==Route::BtInDac;
+ if(s==Surface::Weather){
+#if IBT_NO_PSRAM
+  return false; // Dedicated weather-only surface: no playback, including BT-IN.
+#else
+  return r==Route::WifiDac||r==Route::SdDac||r==Route::BtInDac;
+#endif
+ }
  return r!=Route::InternalDac;
 }
 constexpr bool ble(Surface s){return s==Surface::Clock||s==Surface::Weather;}

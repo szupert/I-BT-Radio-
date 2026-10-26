@@ -24,10 +24,15 @@ struct Meter {
  bool sample(int16_t l,int16_t r,uint32_t now){
   unsigned a=l<0?-int(l):int(l),b=r<0?-int(r):int(r);
   if(a>peakL)peakL=a;if(b>peakR)peakR=b;
-  if(uint32_t(now-stamp)<67)return false;
+  #if IBT_NO_PSRAM
+  constexpr unsigned interval=50,weight=1;
+#else
+  constexpr unsigned interval=67,weight=3;
+#endif
+  if(uint32_t(now-stamp)<interval)return false;
   stamp=now;
-  left=left>peakL?(left*3+peakL)/4:peakL;
-  right=right>peakR?(right*3+peakR)/4:peakR;
+  left=left>peakL?(left*weight+peakL)/(weight+1):peakL;
+  right=right>peakR?(right*weight+peakR)/(weight+1):peakR;
   peakL=peakR=0;return true;
  }
 };

@@ -3,6 +3,7 @@
 #include <atomic>
 #include <freertos/semphr.h>
 #include "sd_path.h"
+#include "../dual/sd_route_error.h"
 struct AlarmFolderScan {
     File playlist;
     uint16_t* tracks=nullptr;
@@ -18,6 +19,7 @@ class SDManager : public SDFS {
   public:
     bool ready;
     std::atomic<bool> catalogReady{false};
+    std::atomic<sdroute::Error> indexError{sdroute::Error::None};
     std::atomic<uint32_t> indexedTracks{0};
   public:
     SDManager(FSImplPtr impl) : SDFS(impl) {}
@@ -38,6 +40,7 @@ class SDManager : public SDFS {
     bool indexWasCancelled() const {return indexCancel.load();}
   private:
     uint32_t _sdFCount;
+    struct {uint32_t entries=0,files=0,unsupported=0,nomedia=0,depth=0,invalid=0,logged=0;} scanStats;
     std::atomic<bool> indexCancel{false};
     uint32_t indexStarted=0;
     SemaphoreHandle_t scanIoLock=nullptr;

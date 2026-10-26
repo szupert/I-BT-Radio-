@@ -16,8 +16,13 @@ bool outputSelected();
 bool inputSelected();
 bool inputPlaying();
 bool inputArtworkSafe(); // bounded RX headroom gate; no waiting
+struct InputStatus { uint32_t buffered=0,capacity=0,rate=0;unsigned channels=0;bool connected=false,playing=false; };
+InputStatus inputStatus(); // Actual RX ring, RAM-only; no allocation or SDK call.
+bool inputVuSafe(); // Cheap PCM observer uses RX headroom, not the artwork budget.
 bool transmitting();
-bool uiHeadroomSafe(); // Actual TX PCM reserve, not compressed SD input.
+unsigned uiHeadroomMs();
+bool uiHeadroomSafe();
+void waitUiHeadroom(unsigned timeoutMs); // permanent display task, default notify slot // Actual TX PCM reserve, not compressed SD input.
 uint32_t producedFrames(); // existing BT OUT PCM counter, read-only recovery signal
 bool connected(); // A2DP link is connected, including paused playback.
 unsigned signalBars(); // coarse 0..4 Classic BT RSSI-delta indication; 0 when unavailable
@@ -46,6 +51,10 @@ bool device(unsigned index,Device& result);
 bool targetDevice(Device& result); // pending/selected OUT peer, bounded RAM-only lookup
 bool connectedDevice(Device& result); // bounded RAM lookup, no scan or NVS read
 bool selectDevice(unsigned index);
+unsigned pickerHistoryCount();
+unsigned pickerCount();
+bool pickerDevice(unsigned index,Device& result);
+bool selectPickerDevice(unsigned index);
 bool scanning();
 bool linkFailed();
 bool linkRequestPending(); // queued reconnect not yet consumed by service

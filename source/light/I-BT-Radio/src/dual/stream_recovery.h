@@ -15,7 +15,13 @@ public:
     constexpr void begin(uint16_t id){station=id;alarmToken=0;stalled=false;healthy=false;attempts=0;lastBuffer=0;progressSeen=false;progressHealthy=false;lastReason=Reason::None;limited=false;limitEvent=false;}
     constexpr void cancel(){begin(0);alarmToken=0;}
     constexpr uint32_t connectionDelay() const {
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO)
+        // A manual start must not look dead for a minute after one TCP timeout.
+        // Delay starts AFTER connect completes; the finite retry cap is unchanged.
+        return attempts==0?3000:attempts==1?6000:attempts==2?12000:30000;
+#else
         return attempts==0?60000:attempts==1?120000:attempts==2?240000:300000;
+#endif
     }
     // Called by the audio owner AFTER the blocking connection attempt completes.
     // Reuse the existing stall clock; no extra persistent RAM or another owner.

@@ -9,6 +9,7 @@
 #include "../codec_int_memory.h"
 #include "../../dual/mp3_offload.h"
 #include "../../dual/stage_cpu.h"
+#include "../../dual/bt_audio.h"
 #if defined(ESP_PLATFORM)
 #include <esp_heap_caps.h>
 #include <esp_memory_utils.h>
@@ -57,6 +58,16 @@ SideInfoSub_t m_SideInfoSub[m_MAX_NGRAN][m_MAX_NCHAN];
 SideInfo_t *m_SideInfo;
 CriticalBandInfo_t m_CriticalBandInfo[m_MAX_NCHAN];  /* filled in dequantizer, used in joint stereo reconstruction */
 DequantInfo_t *m_DequantInfo;
+static bool reorderBorrowed=false;
+bool MP3Decoder_BorrowReorder(void* scratch,unsigned bytes){
+#if IBT_NO_PSRAM
+    if(m_DequantInfo||!scratch||(uintptr_t(scratch)&3)||bytes<sizeof(DequantInfo_t))return false;
+    static_assert(sizeof(DequantInfo_t)<=2304,"Reorder must fit unused final PCM granule");
+    m_DequantInfo=static_cast<DequantInfo_t*>(scratch);reorderBorrowed=true;return true;
+#else
+    (void)scratch;(void)bytes;return false;
+#endif
+}
 HuffmanInfo_t *m_HuffmanInfo;
 static uint8_t m_huffmanMemoryLocation=0; // 0=not allocated, 1=internal, 2=PSRAM
 IMDCTInfo_t *m_IMDCTInfo;
@@ -74,9 +85,13 @@ struct Mp3ByteWorkspace {
     ScaleFactorJS_t scale;
     MP3FrameInfo_t frame;
 };
-static_assert(sizeof(Mp3ByteWorkspace)==sizeof(MP3DecInfo_t)+sizeof(FrameHeader_t)+
-    sizeof(SideInfo_t)+sizeof(ScaleFactorJS_t)+sizeof(MP3FrameInfo_t),"unexpected workspace padding");
+static_assert(sizeof(Mp3ByteWorkspace)<=sizeof(MP3DecInfo_t)+sizeof(FrameHeader_t)+
+    sizeof(SideInfo_t)+sizeof(ScaleFactorJS_t)+sizeof(MP3FrameInfo_t)+alignof(Mp3ByteWorkspace),"unexpected workspace padding");
 static Mp3ByteWorkspace* m_byteWorkspace=nullptr;
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+static unsigned char* m_mainReservoir=nullptr;
+static bool m_mainReservoirSeparate=false;
+#endif
 #endif
 
 const unsigned short huffTable[4242] PROGMEM = {
@@ -1527,14 +1542,31 @@ int MP3Decode( unsigned char *inbuf, int *bytesLeft, short *outbuf, int useSize)
 void MP3Decoder_ClearBuffer(void) {
 
     /* important to do this - DSP primitives assume a bunch of state variables are 0 on first use */
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+    // ClearBuffer also runs between files: retain ownership before zeroing state.
+    unsigned char* reservoir=m_MP3DecInfo->mainBuf;
+#endif
     memset( m_MP3DecInfo,         0, sizeof(MP3DecInfo_t));                                    //Clear MP3DecInfo
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+    m_MP3DecInfo->mainBuf=reservoir;
+    memset(reservoir,0,m_MAINBUF_SIZE);
+#endif
     memset(&m_ScaleFactorInfoSub, 0, sizeof(ScaleFactorInfoSub_t)*(m_MAX_NGRAN *m_MAX_NCHAN)); //Clear ScaleFactorInfo
     memset( m_SideInfo,           0, sizeof(SideInfo_t));                                      //Clear SideInfo
     memset( m_FrameHeader,        0, sizeof(FrameHeader_t));                                   //Clear FrameHeader
     ibtCodecZeroWords(m_HuffmanInfo,sizeof(HuffmanInfo_t));                                   //Clear HuffmanInfo
     ibtCodecZeroWords(m_DequantInfo,sizeof(DequantInfo_t));                                   //Clear DequantInfo
     ibtCodecZeroWords(m_IMDCTInfo,sizeof(IMDCTInfo_t));                                     //Clear IMDCTInfo
+#if IBT_MP3_PAGED_SYNTHESIS
+    for(unsigned i=0;i<SubbandInfo_t::History::Pages;++i){
+        const bool split=m_SubbandInfo->vbuf.splitMask&(uint32_t(1)<<i);
+        ibtCodecZeroWords(m_SubbandInfo->vbuf.page[i],SubbandInfo_t::History::PageWords*sizeof(int)/(split?2:1));
+        if(split)ibtCodecZeroWords(m_SubbandInfo->vbuf.second[i],SubbandInfo_t::History::PageWords*sizeof(int)/2);
+    }
+    m_SubbandInfo->vindex=0;
+#else
     ibtCodecZeroWords(m_SubbandInfo,sizeof(SubbandInfo_t));                                   //Clear SubbandInfo
+#endif
     memset(&m_CriticalBandInfo,   0, sizeof(CriticalBandInfo_t)*m_MAX_NCHAN);                  //Clear CriticalBandInfo
     memset( m_ScaleFactorJS,      0, sizeof(ScaleFactorJS_t));                                 //Clear ScaleFactorJS
     memset(&m_SideInfoSub,        0, sizeof(SideInfoSub_t)*(m_MAX_NGRAN *m_MAX_NCHAN));        //Clear SideInfoSub
@@ -1567,22 +1599,91 @@ void MP3Decoder_ClearBuffer(void) {
 static void mp3WorkspaceSnapshot(const char* phase) {
 #if defined(ESP_PLATFORM)
     const unsigned exec=MALLOC_CAP_INTERNAL|MALLOC_CAP_EXEC|MALLOC_CAP_32BIT;
+#if IBT_MP3_PAGED_SYNTHESIS
+    constexpr size_t synthesisPayload=SubbandInfo_t::History::Words*sizeof(int);
+#else
+    constexpr size_t synthesisPayload=sizeof(SubbandInfo_t);
+#endif
     const unsigned missing=(!m_HuffmanInfo?1:0)|(!m_MP3DecInfo?2:0)|(!m_FrameHeader?4:0)|
         (!m_SideInfo?8:0)|(!m_ScaleFactorJS?16:0)|(!m_DequantInfo?32:0)|
         (!m_IMDCTInfo?64:0)|(!m_SubbandInfo?128:0)|(!m_MP3FrameInfo?256:0);
-    Serial.printf("[MP3-WORKSPACE] phase=%s missing_mask=%u internal8_free=%u internal8_largest=%u exec32_free=%u exec32_largest=%u reserve_internal=10000 reserve_exec=%u int_payload=%u\n",
+    Serial.printf("[MP3-WORKSPACE] phase=%s missing_mask=%u internal8_free=%u internal8_largest=%u exec32_free=%u exec32_largest=%u reserve_internal=%u reserve_exec=%u int_payload=%u\n",
         phase,missing,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
         unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
         unsigned(heap_caps_get_free_size(exec)),unsigned(heap_caps_get_largest_free_block(exec)),
-        unsigned(IBT_NO_PSRAM?4096:0),unsigned(sizeof(HuffmanInfo_t)+sizeof(DequantInfo_t)+sizeof(IMDCTInfo_t)+sizeof(SubbandInfo_t)));
+        unsigned(ibtram::reserve),unsigned(IBT_NO_PSRAM&&ibtram::reserve?4096:0),unsigned(sizeof(HuffmanInfo_t)+sizeof(DequantInfo_t)+sizeof(IMDCTInfo_t)+synthesisPayload));
 #endif
 }
 
+#if IBT_MP3_PAGED_SYNTHESIS
+int** SubbandInfo_t::History::second=nullptr;
+uint32_t SubbandInfo_t::History::splitMask=0;
+static bool allocateSynthesisHistory(){
+    const bool fresh=!m_SubbandInfo;
+    if(!m_SubbandInfo){
+        m_SubbandInfo=static_cast<SubbandInfo_t*>(ibtCodecAlloc(sizeof(SubbandInfo_t)));
+        if(!m_SubbandInfo){mp3WorkspaceSnapshot("DENIED_SYNTHESIS_HEADER");return false;}
+        memset(m_SubbandInfo,0,sizeof(SubbandInfo_t));
+    }
+    using H=SubbandInfo_t::History;
+    static_assert(H::Pages<=32,"Bounded synthesis ownership");
+    for(unsigned i=0;i<H::Pages;++i){
+        auto& h=m_SubbandInfo->vbuf;
+        if(h.page[i])continue;
+        h.page[i]=static_cast<int*>(ibtCodecIntAlloc(H::PageWords*sizeof(int)));
+        if(!h.page[i]){
+            if(!h.second){
+                h.second=static_cast<int**>(ibtCodecAlloc(H::Pages*sizeof(int*)));
+                if(!h.second){mp3WorkspaceSnapshot("DENIED_SYNTHESIS_SPLIT_TABLE");return false;}
+                memset(h.second,0,H::Pages*sizeof(int*));
+            }
+            h.splitMask|=uint32_t(1)<<i;
+            h.page[i]=static_cast<int*>(ibtCodecIntAlloc(H::PageWords*sizeof(int)/2));
+            if(h.page[i])h.second[i]=static_cast<int*>(ibtCodecIntAlloc(H::PageWords*sizeof(int)/2));
+            if(!h.page[i]||!h.second[i]){
+#if defined(ESP_PLATFORM)
+                Serial.printf("[MP3-SYNTH-MEM] result=DENIED page_index=%u page_bytes=128 history_bytes=%u free=%u largest=%u\n",i,unsigned(H::Words*sizeof(int)),unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+#endif
+                return false; // caller releases both halves, including a partial pair
+            }
+        }
+    }
+#if defined(ESP_PLATFORM)
+    if(fresh)Serial.printf("[MP3-SYNTH-MEM] result=READY pages=%u preferred_bytes=256 fallback_bytes=128 history_bytes=%u split_mask=%u\n",unsigned(H::Pages),unsigned(H::Words*sizeof(int)),unsigned(m_SubbandInfo->vbuf.splitMask));
+#endif
+    return true;
+}
+#endif
 bool MP3Decoder_AllocateBuffers(void) {
     mp3WorkspaceSnapshot("BEGIN");
 #if IBT_NO_PSRAM
+    // SD-BT has little contiguous heap left after the SDK/PCM buffers.
+    // Admit integer workspaces largest-first; do not split the IMDCT slot.
+    // Wi-Fi/DAC/PSRAM allocation order and all workspace sizes stay unchanged.
+#if !IBT_MP3_PAGED_SYNTHESIS
+    if(btaudio::outputSelected()){
+        if(!m_IMDCTInfo) m_IMDCTInfo=(IMDCTInfo_t*)ibtCodecIntAlloc(sizeof(IMDCTInfo_t));
+        if(!m_HuffmanInfo) m_HuffmanInfo=(HuffmanInfo_t*)ibtCodecIntAlloc(sizeof(HuffmanInfo_t));
+        if(!m_SubbandInfo) m_SubbandInfo=(SubbandInfo_t*)ibtCodecIntAlloc(sizeof(SubbandInfo_t));
+    }
+#endif
     if(!m_byteWorkspace){
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+        // Preserve one normal allocation when contiguous space is available.
+        // SD-BT fallback: reservoir first, small metadata second, in separate holes.
+        // The 1940-byte MP3 bit reservoir is never reduced or shared with PCM.
+        m_byteWorkspace=static_cast<Mp3ByteWorkspace*>(ibtCodecAlloc(sizeof(Mp3ByteWorkspace)+m_MAINBUF_SIZE));
+        if(m_byteWorkspace){
+            m_mainReservoir=reinterpret_cast<unsigned char*>(m_byteWorkspace+1);
+            m_mainReservoirSeparate=false;
+        }else if(btaudio::outputSelected()){
+            m_mainReservoir=static_cast<unsigned char*>(ibtCodecAlloc(m_MAINBUF_SIZE));
+            m_mainReservoirSeparate=m_mainReservoir!=nullptr;
+            if(m_mainReservoir)m_byteWorkspace=static_cast<Mp3ByteWorkspace*>(ibtCodecAlloc(sizeof(Mp3ByteWorkspace)));
+        }
+#else
         m_byteWorkspace=static_cast<Mp3ByteWorkspace*>(ibtCodecAlloc(sizeof(Mp3ByteWorkspace)));
+#endif
         if(!m_byteWorkspace){
             mp3WorkspaceSnapshot("DENIED_BYTE_WORKSPACE");
             MP3Decoder_FreeBuffers();
@@ -1592,18 +1693,37 @@ bool MP3Decoder_AllocateBuffers(void) {
         m_MP3DecInfo=&m_byteWorkspace->decoder;m_FrameHeader=&m_byteWorkspace->header;
         m_SideInfo=&m_byteWorkspace->side;m_ScaleFactorJS=&m_byteWorkspace->scale;
         m_MP3FrameInfo=&m_byteWorkspace->frame;
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+        m_MP3DecInfo->mainBuf=m_mainReservoir;
+#if defined(ESP_PLATFORM)
+        Serial.printf("[MP3-BYTE-MEM] layout=%s metadata=%u reservoir=%u free=%u largest=%u\n",
+            m_mainReservoirSeparate?"SPLIT":"CONTIGUOUS",unsigned(sizeof(Mp3ByteWorkspace)),unsigned(m_MAINBUF_SIZE),
+            unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+            unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+#endif
+#endif
     }
 #endif
-    // Allocate this hot workspace first. The existing 64 KiB internal-memory
-    // reserve still decides whether it may stay internal or must use PSRAM.
+#if IBT_MP3_PAGED_SYNTHESIS
+    // Keep the largest indivisible integer workspace first, after byte state.
+    if(!m_IMDCTInfo)m_IMDCTInfo=(IMDCTInfo_t*)ibtCodecIntAlloc(sizeof(IMDCTInfo_t));
+    if(!m_IMDCTInfo){mp3WorkspaceSnapshot("DENIED_IMDCT");MP3Decoder_FreeBuffers();return false;}
+#endif
     if(!m_HuffmanInfo)      {m_HuffmanInfo   = (HuffmanInfo_t*)   ibtCodecIntAlloc(sizeof(HuffmanInfo_t)  );}
+    if(!m_HuffmanInfo){mp3WorkspaceSnapshot("DENIED_HUFFMAN");MP3Decoder_FreeBuffers();return false;}
     if(!m_MP3DecInfo)       {m_MP3DecInfo    = (MP3DecInfo_t*)    __malloc_heap_psram(sizeof(MP3DecInfo_t)   );}
     if(!m_FrameHeader)      {m_FrameHeader   = (FrameHeader_t*)   __malloc_heap_psram(sizeof(FrameHeader_t)  );}
     if(!m_SideInfo)         {m_SideInfo      = (SideInfo_t*)      __malloc_heap_psram(sizeof(SideInfo_t)     );}
     if(!m_ScaleFactorJS)    {m_ScaleFactorJS = (ScaleFactorJS_t*) __malloc_heap_psram(sizeof(ScaleFactorJS_t));}
     if(!m_DequantInfo)      {m_DequantInfo   = (DequantInfo_t*)   ibtCodecIntAlloc(sizeof(DequantInfo_t)  );}
     if(!m_IMDCTInfo)        {m_IMDCTInfo     = (IMDCTInfo_t*)     ibtCodecIntAlloc(sizeof(IMDCTInfo_t)    );}
+#if IBT_MP3_PAGED_SYNTHESIS
+    if(!allocateSynthesisHistory()){
+        mp3WorkspaceSnapshot("DENIED_SYNTHESIS_PAGE");MP3Decoder_FreeBuffers();return false;
+    }
+#else
     if(!m_SubbandInfo)      {m_SubbandInfo   = (SubbandInfo_t*)   ibtCodecIntAlloc(sizeof(SubbandInfo_t)  );}
+#endif
     if(!m_MP3FrameInfo)     {m_MP3FrameInfo  = (MP3FrameInfo_t*)  __malloc_heap_psram(sizeof(MP3FrameInfo_t) );}
 
     if(!m_MP3DecInfo || !m_FrameHeader || !m_SideInfo || !m_ScaleFactorJS || !m_HuffmanInfo ||
@@ -1655,6 +1775,10 @@ void MP3Decoder_FreeBuffers()
 //    uint32_t i = ESP.getFreeHeap();
 
 #if IBT_NO_PSRAM
+#if IBT_MP3_SPLIT_BYTE_RESERVOIR
+    if(m_mainReservoirSeparate&&m_mainReservoir)free(m_mainReservoir);
+    m_mainReservoir=nullptr;m_mainReservoirSeparate=false;
+#endif
     if(m_byteWorkspace){
         free(m_byteWorkspace);m_byteWorkspace=nullptr;
         m_MP3DecInfo=nullptr;m_FrameHeader=nullptr;m_SideInfo=nullptr;
@@ -1666,9 +1790,19 @@ void MP3Decoder_FreeBuffers()
     if(m_SideInfo)          {free(m_SideInfo);        m_SideInfo=NULL;}
     if(m_ScaleFactorJS )    {free(m_ScaleFactorJS);   m_ScaleFactorJS=NULL;}
     if(m_HuffmanInfo)       {free(m_HuffmanInfo);     m_HuffmanInfo=NULL;}
-    if(m_DequantInfo)       {free(m_DequantInfo);     m_DequantInfo=0;}
+    if(m_DequantInfo)       {if(!reorderBorrowed)free(m_DequantInfo);m_DequantInfo=0;reorderBorrowed=false;}
     if(m_IMDCTInfo)         {free(m_IMDCTInfo);       m_IMDCTInfo=0;}
-    if(m_SubbandInfo)       {free(m_SubbandInfo);     m_SubbandInfo=0;}
+    if(m_SubbandInfo)       {
+#if IBT_MP3_PAGED_SYNTHESIS
+        auto& h=m_SubbandInfo->vbuf;
+        for(unsigned i=0;i<SubbandInfo_t::History::Pages;++i){
+            free(h.page[i]);h.page[i]=nullptr;
+            if(h.second)free(h.second[i]);
+        }
+        free(h.second);h.second=nullptr;h.splitMask=0;
+#endif
+        free(m_SubbandInfo);m_SubbandInfo=0;
+    }
     if(m_MP3FrameInfo)      {free(m_MP3FrameInfo);    m_MP3FrameInfo=0;}
 
 //    log_i("MP3Decoder: %lu bytes memory was freed", ESP.getFreeHeap() - i);
@@ -3526,17 +3660,59 @@ int IMDCT( int gr, int ch) {
  *
  * Return:      0 on success,  -1 if null input pointers
  **********************************************************************************************************************/
+// Light stores each duplicated eight-word synthesis history only once.
+// Logical indices retain the original shuffle and convolution arithmetic.
+static inline size_t mp3Vindex(size_t logical) {
+#if IBT_NO_PSRAM
+    return ((logical >> 4) << 3) + (logical & 7);
+#else
+    return logical;
+#endif
+}
+static inline Mp3VPosition mp3Vbase(size_t logical) {
+#if IBT_MP3_PAGED_SYNTHESIS
+    return logical;
+#else
+    return m_SubbandInfo->vbuf + mp3Vindex(logical);
+#endif
+}
+static inline size_t mp3Vlogical(Mp3VPosition physical) {
+#if IBT_MP3_PAGED_SYNTHESIS
+    return physical;
+#else
+    size_t i=physical-m_SubbandInfo->vbuf;
+#if IBT_NO_PSRAM
+    return ((i >> 3) << 4) + (i & 7);
+#else
+    return i;
+#endif
+#endif
+}
+#if IBT_MP3_PAGED_SYNTHESIS && defined(ESP_PLATFORM)
+// One word-only accessor per operation: do not expand the page lookup dozens
+// of times inside the IRAM synthesis kernel and consume BT's remaining heap.
+#define IBT_SYNTH_ACCESS IRAM_ATTR __attribute__((noinline))
+#else
+#define IBT_SYNTH_ACCESS inline
+#endif
+static IBT_SYNTH_ACCESS int mp3Vread(size_t logical) { return m_SubbandInfo->vbuf[mp3Vindex(logical)]; }
+static IBT_SYNTH_ACCESS int mp3Vwrite(size_t logical,int value) {
+#if !IBT_NO_PSRAM
+    m_SubbandInfo->vbuf[logical+8]=value;
+#endif
+    m_SubbandInfo->vbuf[mp3Vindex(logical)]=value;return value;
+}
 int Subband( short *pcmBuf) {
     int b;
     if (m_MP3DecInfo->nChans == 2) {
         /* stereo */
         for (b = 0; b < m_BLOCK_SIZE; b++) {
-            FDCT32(m_IMDCTInfo->outBuf[0][b], m_SubbandInfo->vbuf + 0 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[0][b], mp3Vbase(0 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[0]);
-            FDCT32(m_IMDCTInfo->outBuf[1][b], m_SubbandInfo->vbuf + 1 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[1][b], mp3Vbase(1 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[1]);
             PolyphaseStereo(pcmBuf,
-                    m_SubbandInfo->vbuf + m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01),
+                    mp3Vbase(m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01)),
                     polyCoef);
             m_SubbandInfo->vindex = (m_SubbandInfo->vindex - (b & 0x01)) & 7;
             pcmBuf += (2 * m_NBANDS);
@@ -3544,10 +3720,10 @@ int Subband( short *pcmBuf) {
     } else {
         /* mono */
         for (b = 0; b < m_BLOCK_SIZE; b++) {
-            FDCT32(m_IMDCTInfo->outBuf[0][b], m_SubbandInfo->vbuf + 0 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[0][b], mp3Vbase(0 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[0]);
             PolyphaseMono(pcmBuf,
-                    m_SubbandInfo->vbuf + m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01),
+                    mp3Vbase(m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01)),
                     polyCoef);
             m_SubbandInfo->vindex = (m_SubbandInfo->vindex - (b & 0x01)) & 7;
             pcmBuf += m_NBANDS;
@@ -3564,14 +3740,14 @@ int SubbandSampled( short *pcmBuf) {
         /* stereo */
         for (b = 0; b < m_BLOCK_SIZE; b++) {
             {stagecpu::DecoderScope scope(true,stagecpu::Fdct);
-            FDCT32(m_IMDCTInfo->outBuf[0][b], m_SubbandInfo->vbuf + 0 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[0][b], mp3Vbase(0 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[0]);
-            FDCT32(m_IMDCTInfo->outBuf[1][b], m_SubbandInfo->vbuf + 1 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[1][b], mp3Vbase(1 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[1]);
             }
             {stagecpu::DecoderScope scope(true,stagecpu::Polyphase);
             PolyphaseStereo(pcmBuf,
-                    m_SubbandInfo->vbuf + m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01),
+                    mp3Vbase(m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01)),
                     polyCoef);
             }
             m_SubbandInfo->vindex = (m_SubbandInfo->vindex - (b & 0x01)) & 7;
@@ -3581,12 +3757,12 @@ int SubbandSampled( short *pcmBuf) {
         /* mono */
         for (b = 0; b < m_BLOCK_SIZE; b++) {
             {stagecpu::DecoderScope scope(true,stagecpu::Fdct);
-            FDCT32(m_IMDCTInfo->outBuf[0][b], m_SubbandInfo->vbuf + 0 * 32, m_SubbandInfo->vindex,
+            FDCT32(m_IMDCTInfo->outBuf[0][b], mp3Vbase(0 * 32), m_SubbandInfo->vindex,
                     (b & 0x01), m_IMDCTInfo->gb[0]);
             }
             {stagecpu::DecoderScope scope(true,stagecpu::Polyphase);
             PolyphaseMono(pcmBuf,
-                    m_SubbandInfo->vbuf + m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01),
+                    mp3Vbase(m_SubbandInfo->vindex + m_VBUF_LENGTH * (b & 0x01)),
                     polyCoef);
             }
             m_SubbandInfo->vindex = (m_SubbandInfo->vindex - (b & 0x01)) & 7;
@@ -3636,12 +3812,12 @@ int SubbandSampled( short *pcmBuf) {
 
 static const uint8_t FDCT32s1s2[16] = {5,3,3,2,2,1,1,1, 1,1,1,1,1,2,2,4};
 
-void FDCT32(int *buf, int *dest, int offset, int oddBlock, int gb) {
+void FDCT32(int *buf, Mp3VPosition dest, int offset, int oddBlock, int gb) {
     int i, s, tmp, es;
     const int *cptr = (const int*)m_dcttab;
     int a0, a1, a2, a3, a4, a5, a6, a7;
     int b0, b1, b2, b3, b4, b5, b6, b7;
-	int *d;
+	size_t d;
 
 	/* scaling - ensure at least 6 guard bits for DCT
 	 * (in practice this is already true 99% of time, so this code is
@@ -3690,81 +3866,81 @@ void FDCT32(int *buf, int *dest, int offset, int oddBlock, int gb) {
 	buf -= 32;	/* reset */
 
 	/* sample 0 - always delayed one block */
-	d = dest + 64*16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
-	s = buf[ 0];				d[0] = d[8] = s;
+	d = mp3Vlogical(dest) + 64*16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
+	s = buf[ 0];				mp3Vwrite(d, s);
 
 	/* samples 16 to 31 */
-	d = dest + offset + (oddBlock ? m_VBUF_LENGTH  : 0);
+	d = mp3Vlogical(dest) + offset + (oddBlock ? m_VBUF_LENGTH  : 0);
 
-	s = buf[ 1];				d[0] = d[8] = s;	d += 64;
+	s = buf[ 1];				mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[25] + buf[29];
-	s = buf[17] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[ 9] + buf[13];		d[0] = d[8] = s;	d += 64;
-	s = buf[21] + tmp;			d[0] = d[8] = s;	d += 64;
+	s = buf[17] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[ 9] + buf[13];		mp3Vwrite(d, s);	d += 64;
+	s = buf[21] + tmp;			mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[29] + buf[27];
-	s = buf[ 5];				d[0] = d[8] = s;	d += 64;
-	s = buf[21] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[13] + buf[11];		d[0] = d[8] = s;	d += 64;
-	s = buf[19] + tmp;			d[0] = d[8] = s;	d += 64;
+	s = buf[ 5];				mp3Vwrite(d, s);	d += 64;
+	s = buf[21] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[13] + buf[11];		mp3Vwrite(d, s);	d += 64;
+	s = buf[19] + tmp;			mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[27] + buf[31];
-	s = buf[ 3];				d[0] = d[8] = s;	d += 64;
-	s = buf[19] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[11] + buf[15];		d[0] = d[8] = s;	d += 64;
-	s = buf[23] + tmp;			d[0] = d[8] = s;	d += 64;
+	s = buf[ 3];				mp3Vwrite(d, s);	d += 64;
+	s = buf[19] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[11] + buf[15];		mp3Vwrite(d, s);	d += 64;
+	s = buf[23] + tmp;			mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[31];
-	s = buf[ 7];				d[0] = d[8] = s;	d += 64;
-	s = buf[23] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[15];				d[0] = d[8] = s;	d += 64;
-	s = tmp;					d[0] = d[8] = s;
+	s = buf[ 7];				mp3Vwrite(d, s);	d += 64;
+	s = buf[23] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[15];				mp3Vwrite(d, s);	d += 64;
+	s = tmp;					mp3Vwrite(d, s);
 
 	/* samples 16 to 1 (sample 16 used again) */
-	d = dest + 16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
+	d = mp3Vlogical(dest) + 16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
 
-	s = buf[ 1];				d[0] = d[8] = s;	d += 64;
+	s = buf[ 1];				mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[30] + buf[25];
-	s = buf[17] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[14] + buf[ 9];		d[0] = d[8] = s;	d += 64;
-	s = buf[22] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[ 6];				d[0] = d[8] = s;	d += 64;
+	s = buf[17] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[14] + buf[ 9];		mp3Vwrite(d, s);	d += 64;
+	s = buf[22] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[ 6];				mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[26] + buf[30];
-	s = buf[22] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[10] + buf[14];		d[0] = d[8] = s;	d += 64;
-	s = buf[18] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[ 2];				d[0] = d[8] = s;	d += 64;
+	s = buf[22] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[10] + buf[14];		mp3Vwrite(d, s);	d += 64;
+	s = buf[18] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[ 2];				mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[28] + buf[26];
-	s = buf[18] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[12] + buf[10];		d[0] = d[8] = s;	d += 64;
-	s = buf[20] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[ 4];				d[0] = d[8] = s;	d += 64;
+	s = buf[18] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[12] + buf[10];		mp3Vwrite(d, s);	d += 64;
+	s = buf[20] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[ 4];				mp3Vwrite(d, s);	d += 64;
 
 	tmp = buf[24] + buf[28];
-	s = buf[20] + tmp;			d[0] = d[8] = s;	d += 64;
-	s = buf[ 8] + buf[12];		d[0] = d[8] = s;	d += 64;
-	s = buf[16] + tmp;			d[0] = d[8] = s;
+	s = buf[20] + tmp;			mp3Vwrite(d, s);	d += 64;
+	s = buf[ 8] + buf[12];		mp3Vwrite(d, s);	d += 64;
+	s = buf[16] + tmp;			mp3Vwrite(d, s);
 
 	/* this is so rarely invoked that it's not worth making two versions of the output
 	 *   shuffle code (one for no shift, one for clip + variable shift) like in IMDCT
 	 * here we just load, clip, shift, and store on the rare instances that es != 0
 	 */
 	if (es) {
-		d = dest + 64*16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
-		s = d[0];	CLIP_2N(s, (31 - es));	d[0] = d[8] = (s << es);
+		d = mp3Vlogical(dest) + 64*16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
+		s = mp3Vread(d);	CLIP_2N(s, (31 - es));	mp3Vwrite(d, (s << es));
 
-		d = dest + offset + (oddBlock ? m_VBUF_LENGTH  : 0);
+		d = mp3Vlogical(dest) + offset + (oddBlock ? m_VBUF_LENGTH  : 0);
 		for (i = 16; i <= 31; i++) {
-			s = d[0];	CLIP_2N(s, (31 - es));	d[0] = d[8] = (s << es);	d += 64;
+			s = mp3Vread(d);	CLIP_2N(s, (31 - es));	mp3Vwrite(d, (s << es));	d += 64;
 		}
 
-		d = dest + 16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
+		d = mp3Vlogical(dest) + 16 + ((offset - oddBlock) & 7) + (oddBlock ? 0 : m_VBUF_LENGTH);
 		for (i = 15; i >= 0; i--) {
-			s = d[0];	CLIP_2N(s, (31 - es));	d[0] = d[8] = (s << es);	d += 64;
+			s = mp3Vread(d);	CLIP_2N(s, (31 - es));	mp3Vwrite(d, (s << es));	d += 64;
 		}
 	}
 }
@@ -3808,10 +3984,10 @@ short ClipToShort(int x, int fracBits){
  *
  * Return:      none
  **********************************************************************************************************************/
-void PolyphaseMono(short *pcm, int *vbuf, const uint32_t *coefBase){
+void PolyphaseMono(short *pcm, Mp3VPosition vbuf, const uint32_t *coefBase){
     int i;
     const uint32_t *coef;
-    int *vb1;
+    size_t vb1;
     int vLo, vHi, c1, c2;
     uint64_t sum1L, sum2L, rndVal;
 
@@ -3819,33 +3995,33 @@ void PolyphaseMono(short *pcm, int *vbuf, const uint32_t *coefBase){
 
     /* special case, output sample 0 */
     coef = coefBase;
-    vb1 = vbuf;
+    vb1 = mp3Vlogical(vbuf);
     sum1L = rndVal;
     for(int j=0; j<8; j++){
-        c1=*coef; coef++; c2=*coef; coef++; vLo=*(vb1+(j)); vHi=*(vb1+(23-(j))); // 0...7
+        c1=*coef; coef++; c2=*coef; coef++; vLo=mp3Vread(vb1+(j)); vHi=mp3Vread(vb1+(23-(j))); // 0...7
         sum1L=MADD64(sum1L, vLo, c1); sum1L=MADD64(sum1L, vHi, -c2);
     }
     *(pcm + 0) = ClipToShort((int)SAR64(sum1L, (32-m_CSHIFT)), m_DQ_FRACBITS_OUT - 2 - 2 - 15);
 
     /* special case, output sample 16 */
     coef = coefBase + 256;
-    vb1 = vbuf + 64*16;
+    vb1 = mp3Vlogical(vbuf) + 64*16;
     sum1L = rndVal;
     for(int j=0; j<8; j++){
-        c1=*coef; coef++; vLo=*(vb1+(j)); sum1L = MADD64(sum1L, vLo,  c1); // 0...7
+        c1=*coef; coef++; vLo=mp3Vread(vb1+(j)); sum1L = MADD64(sum1L, vLo,  c1); // 0...7
     }
     *(pcm + 16) = ClipToShort((int)SAR64(sum1L, (32-m_CSHIFT)), m_DQ_FRACBITS_OUT - 2 - 2 - 15);
 
     /* main convolution loop: sum1L = samples 1, 2, 3, ... 15   sum2L = samples 31, 30, ... 17 */
     coef = coefBase + 16;
-    vb1 = vbuf + 64;
+    vb1 = mp3Vlogical(vbuf) + 64;
     pcm++;
 
     /* right now, the compiler creates bad asm from this... */
     for (i = 15; i > 0; i--) {
         sum1L = sum2L = rndVal;
         for(int j=0; j<8; j++){
-            c1=*coef; coef++; c2=*coef; coef++; vLo=*(vb1+(j)); vHi = *(vb1+(23-(j)));
+            c1=*coef; coef++; c2=*coef; coef++; vLo=mp3Vread(vb1+(j)); vHi = mp3Vread(vb1+(23-(j)));
             sum1L=MADD64(sum1L, vLo,  c1); sum2L = MADD64(sum2L, vLo,  c2);
             sum1L=MADD64(sum1L, vHi, -c2); sum2L = MADD64(sum2L, vHi,  c1);
         }
@@ -3875,10 +4051,10 @@ void PolyphaseMono(short *pcm, int *vbuf, const uint32_t *coefBase){
  **********************************************************************************************************************/
 // R162: avoid instruction-cache refills in this hot synthesis loop.
 // Arithmetic, coefficient data, workspace and stack are unchanged.
-void IBT_MP3_STEREO_HOT PolyphaseStereo(short *pcm, int *vbuf, const uint32_t *coefBase){
+void IBT_MP3_STEREO_HOT PolyphaseStereo(short *pcm, Mp3VPosition vbuf, const uint32_t *coefBase){
     int i;
     const uint32_t *coef;
-    int *vb1;
+    size_t vb1;
     int vLo, vHi, c1, c2;
     uint64_t sum1L, sum2L, sum1R, sum2R, rndVal;
 
@@ -3886,15 +4062,15 @@ void IBT_MP3_STEREO_HOT PolyphaseStereo(short *pcm, int *vbuf, const uint32_t *c
 
     /* special case, output sample 0 */
     coef = coefBase;
-    vb1 = vbuf;
+    vb1 = mp3Vlogical(vbuf);
     sum1L = sum1R = rndVal;
 
     // Fixed eight-tap loop; preserve accumulator order and PCM bit-exactness.
     #pragma GCC unroll 8
     for(int j=0; j<8; j++){
-        c1=*coef; coef++; c2=*coef; coef++; vLo=*(vb1+(j)); vHi = *(vb1+(23-(j)));
+        c1=*coef; coef++; c2=*coef; coef++; vLo=mp3Vread(vb1+(j)); vHi = mp3Vread(vb1+(23-(j)));
         sum1L=MADD64(sum1L, vLo,  c1); sum1L=MADD64(sum1L, vHi, -c2);
-        vLo=*(vb1+32+(j)); vHi=*(vb1+32+(23-(j)));
+        vLo=mp3Vread(vb1+32+(j)); vHi=mp3Vread(vb1+32+(23-(j)));
         sum1R=MADD64(sum1R, vLo,  c1); sum1R=MADD64(sum1R, vHi, -c2); \
     }
     *(pcm + 0) = ClipToShort((int)SAR64(sum1L, (32-m_CSHIFT)), m_DQ_FRACBITS_OUT - 2 - 2 - 15);
@@ -3902,21 +4078,21 @@ void IBT_MP3_STEREO_HOT PolyphaseStereo(short *pcm, int *vbuf, const uint32_t *c
 
     /* special case, output sample 16 */
     coef = coefBase + 256;
-    vb1 = vbuf + 64*16;
+    vb1 = mp3Vlogical(vbuf) + 64*16;
     sum1L = sum1R = rndVal;
 
     // Fixed eight-tap loop; preserve accumulator order and PCM bit-exactness.
     #pragma GCC unroll 8
     for(int j=0; j<8; j++){
-        c1=*coef; coef++; vLo = *(vb1+(j)); sum1L = MADD64(sum1L, vLo,  c1);
-        vLo = *(vb1+32+(j)); sum1R = MADD64(sum1R, vLo,  c1);
+        c1=*coef; coef++; vLo = mp3Vread(vb1+(j)); sum1L = MADD64(sum1L, vLo,  c1);
+        vLo = mp3Vread(vb1+32+(j)); sum1R = MADD64(sum1R, vLo,  c1);
     }
     *(pcm + 2*16 + 0) = ClipToShort((int)SAR64(sum1L, (32-m_CSHIFT)), m_DQ_FRACBITS_OUT - 2 - 2 - 15);
     *(pcm + 2*16 + 1) = ClipToShort((int)SAR64(sum1R, (32-m_CSHIFT)), m_DQ_FRACBITS_OUT - 2 - 2 - 15);
 
     /* main convolution loop: sum1L = samples 1, 2, 3, ... 15   sum2L = samples 31, 30, ... 17 */
     coef = coefBase + 16;
-    vb1 = vbuf + 64;
+    vb1 = mp3Vlogical(vbuf) + 64;
     pcm += 2;
 
     /* right now, the compiler creates bad asm from this... */
@@ -3927,10 +4103,10 @@ void IBT_MP3_STEREO_HOT PolyphaseStereo(short *pcm, int *vbuf, const uint32_t *c
         // Fixed eight-tap loop; preserve accumulator order and PCM bit-exactness.
         #pragma GCC unroll 8
         for(int j=0; j<8; j++){
-            c1=*coef; coef++; c2=*coef; coef++; vLo=*(vb1+(j)); vHi = *(vb1+(23-(j)));
+            c1=*coef; coef++; c2=*coef; coef++; vLo=mp3Vread(vb1+(j)); vHi = mp3Vread(vb1+(23-(j)));
             sum1L=MADD64(sum1L, vLo,  c1); sum2L=MADD64(sum2L, vLo,  c2);
             sum1L=MADD64(sum1L, vHi, -c2); sum2L=MADD64(sum2L, vHi,  c1);
-            vLo=*(vb1+32+(j));  vHi=*(vb1+32+(23-(j)));
+            vLo=mp3Vread(vb1+32+(j));  vHi=mp3Vread(vb1+32+(23-(j)));
             sum1R=MADD64(sum1R, vLo,  c1); sum2R=MADD64(sum2R, vLo,  c2);
             sum1R=MADD64(sum1R, vHi, -c2); sum2R=MADD64(sum2R, vHi,  c1);
         }

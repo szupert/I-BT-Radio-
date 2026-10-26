@@ -36,7 +36,19 @@ Result decode(const Config& c,const Frame& f,uint32_t now,Reading& output){
  // Other encrypted protocols are not silently accepted.
  if(f.encrypted||encrypted(f.uuid,f.service,f.length))return Result::NeedsDecryption;
 #if IBT_BLE_NATIVE_ONLY
- return Result::Unknown; // No generic JSON/model engine in Light.
+ // Public BTHome v2 and ATC/PVVX formats, with fixed bounds and no JSON heap.
+ bool ht=false,hh=false;int t=0,h=0,battery=-1;const uint8_t* p=f.service;
+ if(f.uuid==0x181a&&(f.length==13||f.length==15)){
+  ht=hh=true;
+  if(f.length==13){t=int16_t((unsigned(p[6])<<8)|p[7])*10;h=int(p[8])*100;battery=p[9];}
+  else{t=int16_t(unsigned(p[6])|(unsigned(p[7])<<8));h=unsigned(p[8])|(unsigned(p[9])<<8);battery=p[12];}
+ }else if(f.uuid==0xfcd2){
+  if((p[0]>>5)!=2)return Result::Unknown;if(p[0]&1)return Result::NeedsDecryption;
+  for(size_t i=1;i<f.length;){const unsigned id=p[i++];unsigned n=id==0||id==1||id==0x2e?1:id==2||id==3?2:0;if(!n||i+n>f.length)return Result::InvalidFrame;
+   if(id==1)battery=p[i];else if(id==2){ht=true;t=int16_t(unsigned(p[i])|(unsigned(p[i+1])<<8));}else if(id==3){hh=true;h=unsigned(p[i])|(unsigned(p[i+1])<<8);}else if(id==0x2e){hh=true;h=int(p[i])*100;}i+=n;
+  }
+ }else return decodeMiBeacon(c,f,now,output);
+ Reading next=output;if((!ht&&!hh)||!updateReading(next,ht,t,hh,h,battery,now))return Result::InvalidReading;output=next;return Result::Decoded;
 #else
  char mac[18],uuid[7],hex[129];
  snprintf(mac,sizeof(mac),"%02X:%02X:%02X:%02X:%02X:%02X",f.address[0],f.address[1],f.address[2],f.address[3],f.address[4],f.address[5]);

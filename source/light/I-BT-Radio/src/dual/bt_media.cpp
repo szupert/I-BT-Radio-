@@ -1,4 +1,5 @@
 #include "bt_media.h"
+#include <sdkconfig.h>
 #include "bt_audio.h"
 #include <Arduino.h>
 #include <esp_heap_caps.h>
@@ -7,6 +8,52 @@
 #include <algorithm>
 #include <string.h>
 namespace btmedia {
+static void copyText(char* dst,size_t cap,const uint8_t* src,int len){
+    size_t n=src&&len>0?std::min(cap-1,size_t(len)):0;
+    if(n)memcpy(dst,src,n);
+    dst[n]=0;
+    // Drop an incomplete UTF-8 tail; never expose a split multibyte glyph.
+    if(n){size_t s=n-1;while(s&&((uint8_t(dst[s])&0xc0)==0x80))--s;
+        unsigned char c=dst[s];unsigned need=c<128?1:(c&0xe0)==0xc0?2:(c&0xf0)==0xe0?3:4;
+        if(n-s<need)dst[s]=0;}
+}
+#if !defined(CONFIG_BT_AVRCP_CT_COVER_ART_ENABLED)
+// SDK cover-art disabled: keep AVRCP text metadata without image state/tasks.
+static portMUX_TYPE mux=portMUX_INITIALIZER_UNLOCKED;
+static View info{};
+static bool connected=false,refresh=false;
+static uint32_t lastPoll=0;
+static void invalidate(){++info.generation;info.image=false;}
+void event(esp_avrc_ct_cb_event_t e,esp_avrc_ct_cb_param_t* p){
+    if(!p)return;
+    portENTER_CRITICAL(&mux);
+    if(e==ESP_AVRC_CT_CONNECTION_STATE_EVT){
+        connected=p->conn_stat.connected;invalidate();info.title[0]=info.artist[0]=0;
+        refresh=connected;lastPoll=0;
+    }else if(connected&&e==ESP_AVRC_CT_CHANGE_NOTIFY_EVT&&p->change_ntf.event_id==ESP_AVRC_RN_TRACK_CHANGE){
+        invalidate();info.title[0]=info.artist[0]=0;refresh=true;
+    }else if(connected&&e==ESP_AVRC_CT_METADATA_RSP_EVT){
+        auto& m=p->meta_rsp;
+        if(m.attr_id==ESP_AVRC_MD_ATTR_TITLE){char next[128];copyText(next,sizeof(next),m.attr_text,m.attr_length);
+            if(strcmp(next,info.title)){invalidate();memcpy(info.title,next,sizeof(next));}}
+        if(m.attr_id==ESP_AVRC_MD_ATTR_ARTIST)copyText(info.artist,sizeof(info.artist),m.attr_text,m.attr_length);
+    }
+    portEXIT_CRITICAL(&mux);
+}
+void service(bool active){
+    if(!active){portENTER_CRITICAL(&mux);
+        if(connected){connected=false;invalidate();info.title[0]=info.artist[0]=0;}
+        refresh=false;portEXIT_CRITICAL(&mux);return;
+    }
+    const uint32_t now=millis();
+    portENTER_CRITICAL(&mux);bool query=connected&&(refresh||uint32_t(now-lastPoll)>=10000);
+    bool registerTrack=refresh;if(query){refresh=false;lastPoll=now;}portEXIT_CRITICAL(&mux);
+    if(query){esp_avrc_ct_send_metadata_cmd(14,ESP_AVRC_MD_ATTR_TITLE|ESP_AVRC_MD_ATTR_ARTIST);
+        if(registerTrack)esp_avrc_ct_send_register_notification_cmd(15,ESP_AVRC_RN_TRACK_CHANGE,0);}
+}
+View view(){portENTER_CRITICAL(&mux);View v=info;portEXIT_CRITICAL(&mux);return v;}
+bool row(uint32_t,unsigned,uint16_t*,unsigned,unsigned){return false;}
+#else
 static portMUX_TYPE mux=portMUX_INITIALIZER_UNLOCKED;
 static View info{};
 static bool connected=false,capable=false,refresh=false,coverConnected=false;
@@ -21,15 +68,7 @@ static uint32_t transferGen=0,jobGen=0,started=0,lastPoll=0;
 static bool allocTried=false;
 static int imageW=0,imageH=0;
 static void invalidate(){++info.generation;info.image=false;decodePending=false;attempted=false;}
-static void copyText(char* dst,size_t cap,const uint8_t* src,int len){
-    size_t n=src&&len>0?std::min(cap-1,size_t(len)):0;
-    if(n)memcpy(dst,src,n);
-    dst[n]=0;
-    // Drop an incomplete UTF-8 tail; never expose a split multibyte glyph.
-    if(n){size_t s=n-1;while(s&&((uint8_t(dst[s])&0xc0)==0x80))--s;
-        unsigned char c=dst[s];unsigned need=c<128?1:(c&0xe0)==0xc0?2:(c&0xf0)==0xe0?3:4;
-        if(n-s<need)dst[s]=0;}
-}
+
 void event(esp_avrc_ct_cb_event_t e,esp_avrc_ct_cb_param_t* p){
     portENTER_CRITICAL(&mux);
     if(e==ESP_AVRC_CT_CONNECTION_STATE_EVT){
@@ -142,4 +181,5 @@ bool row(uint32_t generation,unsigned y,uint16_t* out,unsigned width,unsigned he
     }
     portEXIT_CRITICAL(&mux);return valid;
 }
+#endif
 }

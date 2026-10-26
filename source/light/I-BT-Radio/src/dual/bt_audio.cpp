@@ -1,7 +1,14 @@
+#include "bt_rx_probe.h"
+#include "bt_navigation_policy.h"
+#include "bt_teardown_policy.h"
 #include "lite_memory.h"
 #include "pcm_gain_cache.h"
+#include "bt_pcm_proof.h"
+#include "../audioI2S/pcm_gain.h"
 #include "../core/options.h"
 #include "bt_audio.h"
+#include "bt_ui_wake.h"
+#include "bt_peer_volume.h"
 #include "sensors/receiver.h"
 #include "ram_reserve.h"
 #include "surface_policy.h"
@@ -14,8 +21,10 @@
 #include "resource_limiter.h"
 #include "media_start_gate.h"
 #include "bt_media.h"
+#include "track_text.h"
 #include "bt_input_vu.h"
 #include "pcm_ring.h"
+#include "bt_light_buffer.h"
 #include "payload_gate.h"
 #include "pcm_work_queue.h"
 #include "pcm_space_signal.h"
@@ -47,8 +56,25 @@
 #include <esp32-hal-bt.h>
 #endif
 extern "C" uint32_t ibt_l2cap_guard_count(void);
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+extern "C" uint32_t ibt_sbc_packet_last(void);
+extern "C" uint32_t ibt_sbc_proof(unsigned field);
+#endif
+#if IBT_NO_PSRAM
+// IDF5.5.5 version-locked BTA API: queues disconnect on its owner;
+// does not free a profile, stack or controller. Normal completion ACKs still win.
+#if defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+extern "C" int ibt_bt_disconnect_acl(uint8_t* remote_bda);
+#else
+extern "C" void BTA_AvDisconnect(uint8_t* remote_bda);
+#endif
+static bool signallingDisconnectSent=false;
+#endif
 #include <strings.h>
 namespace btaudio {
+#if IBT_NO_PSRAM
+static PcmProof txInputProof,txCallbackProof;
+#endif
 static std::atomic<int> txCallbackCore{-1};
 static std::atomic<unsigned> txCallbackTask{0};
 static Device devices[12]{};static unsigned devicesUsed=0;
@@ -83,7 +109,8 @@ static std::atomic<bool> mono{false};
 static portMUX_TYPE txMux=portMUX_INITIALIZER_UNLOCKED;
 static int16_t* txPcm=nullptr;
 #if IBT_NO_PSRAM
-static constexpr unsigned txFrames=16384,internalReserve=ibtram::reserve;
+static constexpr unsigned txFrames=ibtaudio::LightTxFrames,internalReserve=ibtram::reserve;
+static ibtaudio::LightStereoPages liteTx;
 #else
 static constexpr unsigned txFrames=32768,internalReserve=ibtram::reserve;
 #endif
@@ -153,7 +180,10 @@ static bool scanTimingLogged=false,connectTimingLogged=false,streamTimingLogged=
 static uint32_t appliedRequest=0,stageAt=0,linkAt=0,lastCheck=0,retryAt=0;
 static uint8_t connectAttempts=0;
 static PcmResampler resampler;
-static int16_t block[512];static unsigned frames=0; // PCM owner only
+// emit() flushes at64 stereo frames: the old512-sample array retained768B unused.
+static constexpr unsigned legacyEmitFrames=64;
+static int16_t block[IBT_NO_PSRAM?legacyEmitFrames*2:512];
+static unsigned frames=0; // PCM owner only; always below legacyEmitFrames before write
 // One decoder producer, one core0 PCM consumer. Allocations live until reboot.
 static std::atomic<bool> pcmWorkerReady{false};
 struct PcmPipeline : PcmWorkQueue {
@@ -201,14 +231,14 @@ bool inputSelected(){return mode()==Mode::In;}
 bool idle(){return stage.load()==Stage::Off;}
 unsigned pcmTaskId(){return (pcmJobs&&pcmWorkerReady.load())?pcmJobs->taskId.load():0;}
 bool setDiagnosticRate(unsigned hz){
-    if(IBT_NO_PSRAM&&hz!=32000)return false;
+    if(IBT_NO_PSRAM&&hz!=ibtaudio::LightBtRate)return false;
     if(!idle()||wanted()||(hz!=16000&&hz!=32000&&hz!=44100&&hz!=48000))return false;
     requestedRate.store(btrate::effective(config.getMode()==PM_WEB,hz));return true;
 }
 unsigned negotiatedOutputRate(){return producerReady()?txRate.load():0;}
-unsigned outputRate(){return IBT_NO_PSRAM?32000:btrate::effective(config.getMode()==PM_WEB,requestedRate.load());}
+unsigned outputRate(){return IBT_NO_PSRAM?ibtaudio::LightBtRate:btrate::effective(config.getMode()==PM_WEB,requestedRate.load());}
 bool setOutputRate(unsigned hz){
-    if(IBT_NO_PSRAM&&hz!=32000)return false;
+    if(IBT_NO_PSRAM&&hz!=ibtaudio::LightBtRate)return false;
     if(!btrate::selectable(config.getMode()==PM_WEB,hz))return false;
     if(!idle()||wanted())return false;
     if(requestedRate.load()==hz)return true;
@@ -224,12 +254,27 @@ bool setOutputRate(unsigned hz){
 }
 static bool flowing(Mode m){return desired.load()==m&&active.load()==m&&stage.load()==Stage::Active&&streaming.load()&&!failed.load()&&(m!=Mode::Out||txCodecConfigured.load());}
 bool transmitting(){return flowing(Mode::Out);}
+static btuiwake::Waiter<TaskHandle_t> uiHeadroomWaiter;
+void waitUiHeadroom(unsigned timeoutMs){
+#if IBT_NO_PSRAM
+    const auto self=xTaskGetCurrentTaskHandle();
+    uiHeadroomWaiter.arm(self);
+    // Recheck after arming: a fill before/while arming cannot be lost. The
+    // render loop always rechecks uiHeadroomSafe(), even after a notification.
+    if(!uiHeadroomSafe())ulTaskNotifyTake(pdTRUE,pdMS_TO_TICKS(timeoutMs));
+    uiHeadroomWaiter.cancel(self);
+    ulTaskNotifyTake(pdTRUE,0); // display task owns this otherwise unused slot
+#else
+    vTaskDelay(pdMS_TO_TICKS(timeoutMs));
+#endif
+}
+unsigned uiHeadroomMs(){return ibtaudio::btPrimeMs(IBT_NO_PSRAM!=0);}
 bool uiHeadroomSafe(){
     if(!transmitting())return true; // Pairing/teardown UI must remain available.
     portENTER_CRITICAL(&txMux);
     const unsigned frames=txUsed;
     portEXIT_CRITICAL(&txMux);
-    return frames>=std::min<unsigned>(txFrames-1,txRate.load()/2);
+    return frames>=std::min<unsigned>(txFrames-1,ibtaudio::btPrimeFrames(txRate.load(),IBT_NO_PSRAM!=0));
 }
 uint32_t producedFrames(){return blockFrames.load(std::memory_order_relaxed);}
 bool connected(){const auto m=desired.load();return m!=Mode::Off&&active.load()==m&&stage.load()==Stage::Active&&connection.load()==ESP_A2D_CONNECTION_STATE_CONNECTED&&!failed.load();}
@@ -247,8 +292,19 @@ static bool pushTx(const int16_t* samples,unsigned count){
         portENTER_CRITICAL(&txMux);
         const bool active=producerReady()&&processGeneration==pcmGeneration.load()&&processEpoch==epoch.load();
         const unsigned n=active?std::min({count-done,txFrames-txUsed,txFrames-txHead}):0;
-        if(n){memcpy(txPcm+txHead*2,samples+done*2,n*4);txHead=(txHead+n)%txFrames;txUsed+=n;}
+        if(n){
+#if IBT_NO_PSRAM
+            liteTx.write(txHead,samples+done*2,n);
+#else
+            memcpy(txPcm+txHead*2,samples+done*2,n*4);
+#endif
+            txHead=(txHead+n)%txFrames;txUsed+=n;}
         portEXIT_CRITICAL(&txMux);
+#if IBT_NO_PSRAM
+        if(n&&uiHeadroomWaiter.armed()&&uiHeadroomSafe()){
+            if(auto waiter=uiHeadroomWaiter.take())xTaskNotifyGive(waiter);
+        }
+#endif
         if(!active)return false;
         done+=n;
         if(n)space.progress();
@@ -263,7 +319,7 @@ static bool pushTx(const int16_t* samples,unsigned count){
 }
 static void emit(int16_t l,int16_t r){
     block[frames*2]=l;block[frames*2+1]=r;
-    if(++frames<64)return;
+    if(++frames<legacyEmitFrames)return;
     pushTx(block,frames);
     frames=0;
 }
@@ -279,6 +335,18 @@ static void processBlock(const int16_t* samples,uint32_t count,unsigned channels
     if(!targetHz)return;
     sourceRate.store(rate);
     blockFrames.fetch_add(count);
+#if IBT_NO_PSRAM
+    // Use the proven DAC PCM gain and existing single-sample resampler/emitter.
+    // Avoid a second quadratic volume curve and a separate block interpolator.
+    static pcmgain::Cached dacGain;
+    txInputProof.observe(samples,count,channels);
+    for(uint32_t i=0;i<count;++i){
+        const int16_t l=samples[i*channels],r=samples[i*channels+(channels==2?1:0)];
+        const uint32_t frame=dacGain.apply(l,r,volume,balance);
+        processSample(int16_t(frame>>16),int16_t(frame),rate);
+    }
+    return;
+#else
     const uint32_t generation=processGeneration;
     if(consumedGeneration!=generation||consumedEpoch!=processEpoch||legacyRate!=rate||legacyOutputRate!=targetHz){
         consumedGeneration=generation;consumedEpoch=processEpoch;legacyRate=rate;legacyOutputRate=targetHz;legacyPhase=0;frames=0;
@@ -326,6 +394,7 @@ static void processBlock(const int16_t* samples,uint32_t count,unsigned channels
         legacyPhase-=targetHz;legacyPrevious[0]=now[0];legacyPrevious[1]=now[1];
     }
     if(pending)pushTx(out,pending);
+#endif
 }
 static void processJob(const PcmWorkQueue::Job& job){
     pathprobe::Scope probe(pathprobe::Worker);probe.units(job.count);
@@ -434,6 +503,17 @@ bool beginServicePcm(ServiceLease& lease){
 serviceui::Transfer writeServicePcm(const int16_t* samples,uint16_t count,const ServiceLease& lease){
     PayloadUse payload;if(!payload)return {0,true};
     if(!player.onAudioTask()||player.isRunning()||!lease.valid)return {0,true};
+#if IBT_NO_PSRAM
+    if(!samples||count>256||!lease.rate||lease.rate!=txRate.load())return {0,true};
+    portENTER_CRITICAL(&txMux);
+    if(!producerReady()||lease.generation!=pcmGeneration.load()||lease.epoch!=epoch.load()){
+        portEXIT_CRITICAL(&txMux);return {0,true};
+    }
+    const uint16_t n=uint16_t(std::min<unsigned>(count,txFrames-txUsed));
+    liteTx.write(txHead,samples,n);txHead=(txHead+n)%txFrames;txUsed+=n;
+    if(n){blockFrames.fetch_add(n);sourceRate.store(lease.rate);}
+    portEXIT_CRITICAL(&txMux);return {n,false};
+#endif
     portENTER_CRITICAL(&txMux);
     uint32_t head=txHead,used=txUsed;
     auto result=serviceui::nativeRing(txPcm,txFrames,head,used,samples,count,true,
@@ -508,7 +588,7 @@ static int32_t data(uint8_t* bytes,int32_t n){
     if(generation!=seen){seen=generation;primed=false;}
     if(!primed){
         portENTER_CRITICAL(&txMux);
-        primed=txUsed>=std::min<unsigned>(txFrames-1,unsigned(txRate.load()/2));
+        primed=txUsed>=std::min<unsigned>(txFrames-1,unsigned(ibtaudio::btPrimeFrames(txRate.load(),IBT_NO_PSRAM!=0)));
         portEXIT_CRITICAL(&txMux);
         if(!primed){prefillCallbacks.fetch_add(1);txPrefillBytes.fetch_add(unsigned(n),std::memory_order_relaxed);return n;}
         startFade.begin(txRate.load()); // Initial start and each underflow recovery.
@@ -517,7 +597,13 @@ static int32_t data(uint8_t* bytes,int32_t n){
     while(done<wanted){
         portENTER_CRITICAL(&txMux);
         const unsigned count=txPcm&&transmitting()?std::min({wanted-done,txUsed,txReadBatchFrames,txFrames-txTail}):0;
-        if(count){memcpy(bytes+done*4,txPcm+txTail*2,count*4);txTail=(txTail+count)%txFrames;txUsed-=count;delivered.fetch_add(count*4);}
+        if(count){
+#if IBT_NO_PSRAM
+            liteTx.read(txTail,reinterpret_cast<uint8_t*>(bytes)+done*4,count);
+#else
+            memcpy(bytes+done*4,txPcm+txTail*2,count*4);
+#endif
+            txTail=(txTail+count)%txFrames;txUsed-=count;delivered.fetch_add(count*4);}
         portEXIT_CRITICAL(&txMux);
         if(!count)break;
         done+=count;
@@ -528,14 +614,33 @@ static int32_t data(uint8_t* bytes,int32_t n){
     // Fade actual PCM only, after copying and outside the ring critical section.
     // Silence while prebuffering never consumes the fade; steady state is one check.
     if(startFade.active())startFade.apply(bytes,done);
+#if IBT_NO_PSRAM
+    txCallbackProof.observe(bytes,done,2);
+#endif
     if(done<wanted){const bool boundary=!sourcePlaying.load()||uint32_t(millis()-boundaryAt.load())<1000u;(boundary?boundaryUnderruns:steadyUnderruns).fetch_add(1);txShortageBytes.fetch_add((wanted-done)*4,std::memory_order_relaxed);underruns.fetch_add(1);rebufferEvents.fetch_add(1);primed=false;}
     return n;
 }
 
 bool inputArtworkSafe(){PayloadUse payload;if(!payload)return false;auto q=rxRing.load();return inputSelected()&&(!streaming.load()||(q&&q->size()>=16384));}
+InputStatus inputStatus(){
+    InputStatus out;if(!inputSelected())return out;
+    out.connected=connected();out.playing=inputPlaying();
+    out.rate=out.connected?sourceRate.load():0;out.channels=out.rate?(mono.load()?1u:2u):0;
+    PayloadUse payload;if(!payload)return out;
+    auto q=rxRing.load();if(q){out.capacity=q->capacityBytes();const auto n=q->size();out.buffered=out.connected&&n<=out.capacity?n:0;}
+    return out;
+}
+bool inputVuSafe(){
+#if IBT_NO_PSRAM
+    const auto s=inputStatus();return s.connected&&s.capacity&&s.buffered>=std::min<uint32_t>(1024u,s.capacity/4u);
+#else
+    return inputArtworkSafe();
+#endif
+}
 static void sinkData(const uint8_t* bytes,uint32_t n){
     PayloadUse payload;if(!payload)return;
     auto q=rxRing.load();if(!q||!flowing(Mode::In))return;
+    const auto callbackStarted=micros();btrxprobe::stats().callback(n,q->capacityBytes());
     if(!mono.load()){
         auto accepted=q->push(bytes,n);received.fetch_add(accepted);if(accepted<n)dropped.fetch_add(n-accepted);
     }else{
@@ -546,6 +651,7 @@ static void sinkData(const uint8_t* bytes,uint32_t n){
             auto accepted=q->push((uint8_t*)stereo,count*4);received.fetch_add(accepted);if(accepted<count*4)dropped.fetch_add(count*4-accepted);
         }
     }
+    btrxprobe::maximum(btrxprobe::stats().callbackWall,uint32_t(micros()-callbackStarted));
 }
 size_t pcm(uint8_t* out,size_t capacity,uint32_t& rate){
     static uint32_t seen=0;static bool primed=false;
@@ -553,8 +659,8 @@ size_t pcm(uint8_t* out,size_t capacity,uint32_t& rate){
     auto q=rxRing.load();if(!q)return 0;auto current=epoch.load();
     if(seen!=current){seen=current;q->discard();primed=false;}
     if(!flowing(Mode::In)){q->discard();primed=false;return 0;}
-    if(!primed){if(q->size()<32768)return 0;primed=true;}
-    rate=rxRate.load();auto n=q->pop(out,capacity);delivered.fetch_add(n);
+    if(!primed){if(q->size()<(IBT_NO_PSRAM?ibtaudio::rxPrime(q->capacityBytes()):32768u)){btrxprobe::stats().primeWaits.fetch_add(1,std::memory_order_relaxed);return 0;}primed=true;}
+    rate=rxRate.load();auto n=q->pop(out,capacity);delivered.fetch_add(n);btrxprobe::stats().pop(n);
     if(n)btinputvu::observe(out,n,millis());
     if(!n){primed=false;underruns.fetch_add(1);}return n;
 }
@@ -602,6 +708,27 @@ void loadSavedDevice(){
     savedValid.store(loaded.count!=0);
 }
 bool hasSavedDevice(){return savedValid.load();}
+// Bounded view over existing history/scan storage: no copied list or heap.
+unsigned pickerHistoryCount(){return std::min<unsigned>(savedDeviceCount(),2);}
+bool pickerDevice(unsigned index,Device& out){
+    const unsigned history=pickerHistoryCount();
+    if(index<history)return savedDevice(index,out);
+    index-=history;
+    for(unsigned i=0;i<deviceCount();++i){
+        Device candidate{};if(!device(i,candidate))continue;
+        bool duplicate=false;
+        for(unsigned j=0;j<history;++j){Device old{};if(savedDevice(j,old)&&!memcmp(old.address,candidate.address,6)){duplicate=true;break;}}
+        if(!duplicate){if(index==0){out=candidate;return true;}--index;}
+    }
+    return false;
+}
+unsigned pickerCount(){unsigned count=0;Device entry{};while(pickerDevice(count,entry))++count;return count;}
+bool selectPickerDevice(unsigned index){
+    if(index<pickerHistoryCount())return connectSavedDevice(index);
+    Device entry{};if(!pickerDevice(index,entry))return false;
+    for(unsigned i=0;i<deviceCount();++i){Device scanned{};if(device(i,scanned)&&!memcmp(entry.address,scanned.address,6))return selectDevice(i);}
+    return false;
+}
 unsigned savedDeviceCount(){
     portENTER_CRITICAL(&peerMux);unsigned count=savedHistory.count;portEXIT_CRITICAL(&peerMux);
     return count;
@@ -636,7 +763,7 @@ bool connectedDevice(Device& out){
 
     out=Device{};
 
-    if(!outputSelected()||!connected())return false;
+    if((!outputSelected()&&!inputSelected())||!connected())return false;
 
     uint8_t address[6];
 
@@ -644,7 +771,7 @@ bool connectedDevice(Device& out){
 
     memcpy(address,peer,6);
 
-    for(unsigned i=0;i<savedHistory.count;++i)
+    for(unsigned i=0;outputSelected()&&i<savedHistory.count;++i)
 
         if(!memcmp(savedHistory.entries[i].address,address,6)){out=savedHistory.entries[i];break;}
 
@@ -706,13 +833,43 @@ bool control(unsigned key){
     int empty=-1;bool ok=pendingKey.compare_exchange_strong(empty,int(key));controlResult.store(ok?1:-2);return ok;
 }
 const char* controlStatus(){return !controlConnected.load()?"Telefon: I-BT-Radio-Audio":controlResult.load()<0?"Vezerles nem elerheto":streaming.load()?"Lejatszas / telefon":"Csatlakozva / szunet";}
+#if IBT_NO_PSRAM
+static ibtaudio::PeerVolume peerVolume;
+#endif
 static void avrc(esp_avrc_ct_cb_event_t e,esp_avrc_ct_cb_param_t* p){
+    if(!p)return;
+    #if IBT_NO_PSRAM
+    if(outputSelected()){
+        if(e==ESP_AVRC_CT_CONNECTION_STATE_EVT)peerVolume.connection(p->conn_stat.connected);
+        else if(e==ESP_AVRC_CT_GET_RN_CAPABILITIES_RSP_EVT)
+            peerVolume.capabilities((p->get_rn_caps_rsp.evt_set.bits&(1u<<ESP_AVRC_RN_VOLUME_CHANGE))!=0);
+        else if(e==ESP_AVRC_CT_CHANGE_NOTIFY_EVT&&p->change_ntf.event_id==ESP_AVRC_RN_VOLUME_CHANGE)
+            peerVolume.changed(p->change_ntf.event_parameter.volume);
+    }
+    #endif
     if(inputSelected())btmedia::event(e,p);
     if(e==ESP_AVRC_CT_PROF_STATE_EVT){controlReady.store(p->avrc_ct_init_stat.state==ESP_AVRC_INIT_SUCCESS);controlGone.store(p->avrc_ct_init_stat.state==ESP_AVRC_DEINIT_SUCCESS);}
-    if(e==ESP_AVRC_CT_CONNECTION_STATE_EVT)controlConnected.store(p->conn_stat.connected);
+    if(e==ESP_AVRC_CT_CONNECTION_STATE_EVT){controlConnected.store(p->conn_stat.connected);
+#if IBT_NO_PSRAM
+        if(!p->conn_stat.connected)peerVolume.connection(false);
+#endif
+    }
     if(e==ESP_AVRC_CT_PASSTHROUGH_RSP_EVT)controlResult.store(p->psth_rsp.rsp_code==ESP_AVRC_RSP_ACCEPT?2:-3);
 }
 static void serviceControl(){
+#if IBT_NO_PSRAM
+    if(outputSelected()&&stage.load()==Stage::Active&&controlConnected.load()){
+        const auto cmd=peerVolume.next(millis());
+        if(cmd.action!=ibtaudio::PeerVolume::None){
+            // Exact peer value: no +step demo behavior, no double PCM gain/NVS write.
+            const auto err=cmd.action==ibtaudio::PeerVolume::Capabilities?esp_avrc_ct_send_get_rn_capabilities_cmd(cmd.label):
+                cmd.action==ibtaudio::PeerVolume::Notification?esp_avrc_ct_send_register_notification_cmd(cmd.label,ESP_AVRC_RN_VOLUME_CHANGE,0):
+                esp_avrc_ct_send_set_absolute_volume_cmd(cmd.label,cmd.volume);
+            peerVolume.result(cmd,err==ESP_OK,millis());
+            Serial.printf("[BT-PEER-VOLUME] action=%u value=%u err=%d mailbox=%u scope=PEER_NOT_PCM\n",unsigned(cmd.action),cmd.volume,int(err),peerVolume.snapshot());
+        }
+    }
+    #endif
     if(!surfacepolicy::remoteTransport(surfacepolicy::current())||!inputSelected()||stage.load()!=Stage::Active||!controlConnected.load()){
         if(keyHeld.load()&&controlConnected.load())esp_avrc_ct_send_passthrough_cmd(transaction,heldKey,ESP_AVRC_PT_CMD_STATE_RELEASED);
         transaction=(transaction+1)%14;pendingKey.store(-1);keyHeld.store(false);heldKey=-1;return;
@@ -777,6 +934,15 @@ static void printDiscoveryStats(const char* reason){
         (unsigned long)d.codUnknown.load(),(unsigned long)d.codNonRendering.load(),(unsigned long)d.started.load(),(unsigned long)d.completed.load(),d.startError.load(),deviceCount());
 }
 static void gap(esp_bt_gap_cb_event_t e,esp_bt_gap_cb_param_t* p){
+    if(e==ESP_BT_GAP_READ_REMOTE_NAME_EVT){
+        uint8_t address[6];portENTER_CRITICAL(&peerMux);memcpy(address,peer,6);portEXIT_CRITICAL(&peerMux);
+        if(inputSelected()&&connected()&&p->read_rmt_name.stat==ESP_BT_STATUS_SUCCESS&&!memcmp(address,p->read_rmt_name.bda,6)){
+            portENTER_CRITICAL(&devicesMux);
+            if(devicesUsed&& !memcmp(devices[0].address,address,6))tracktext::copy(devices[0].name,sizeof(devices[0].name),(const char*)p->read_rmt_name.rmt_name);
+            portEXIT_CRITICAL(&devicesMux);
+        }
+        return;
+    }
     // Control events only, no additional queries and no address/key disclosure.
     if(e==ESP_BT_GAP_ACL_CONN_CMPL_STAT_EVT)
         Serial.printf("[BT-CONNECT-DIAG] phase=ACL sdk_status=%d\n",int(p->acl_conn_cmpl_stat.stat));
@@ -818,11 +984,12 @@ static void event(esp_a2d_cb_event_t e,esp_a2d_cb_param_t* p){
         linkSignal.store(0xffffff80u,std::memory_order_relaxed);
         if(p->conn_stat.state==ESP_A2D_CONNECTION_STATE_CONNECTED){
             connectedAt.store(millis());connectionRejected.store(false);
-            if(active.load()==Mode::Out)savePeerPending.store(true);
+            savePeerPending.store(true); // OUT history save, IN one-shot RAM name query.
         }
         else {
             if(p->conn_stat.state==ESP_A2D_CONNECTION_STATE_DISCONNECTED&&mode()==Mode::Out&&found.load())connectionRejected.store(true);
             streaming.store(false);txCodecConfigured.store(false);txRate.store(0);flush();
+            if(active.load()==Mode::In){sourceRate.store(0);savePeerPending.store(false);}
             mediaCheckAck.store(0);mediaStartFailed.store(false);
         }
     }
@@ -838,6 +1005,7 @@ static void event(esp_a2d_cb_event_t e,esp_a2d_cb_param_t* p){
         if(active.load()==Mode::In){
             mono.store((codec.cie.sbc_info.ch_mode&ESP_A2D_SBC_CIE_CH_MODE_MONO)!=0);
             rxRate.store((frequency&ESP_A2D_SBC_CIE_SF_16K)?16000:(frequency&ESP_A2D_SBC_CIE_SF_32K)?32000:(frequency&ESP_A2D_SBC_CIE_SF_44K)?44100:48000);epoch.fetch_add(1);
+            sourceRate.store(codec.type==ESP_A2D_MCT_SBC?rxRate.load():0); // Negotiated SBC rate, not the phone's original file format.
             Serial.printf("[BT-IN-CODEC] type=%u rate=%lu channel_mode=0x%02x bitpool_min=%u bitpool_max=%u subbands=0x%02x blocks=0x%02x allocation=0x%02x\n",
                 unsigned(codec.type),(unsigned long)rxRate.load(),unsigned(codec.cie.sbc_info.ch_mode),
                 unsigned(codec.cie.sbc_info.min_bitpool),unsigned(codec.cie.sbc_info.max_bitpool),
@@ -848,7 +1016,7 @@ static void event(esp_a2d_cb_event_t e,esp_a2d_cb_param_t* p){
                 frequency==ESP_A2D_SBC_CIE_SF_32K?32000:
                 frequency==ESP_A2D_SBC_CIE_SF_44K?44100:
                 frequency==ESP_A2D_SBC_CIE_SF_48K?48000:0;
-            const bool accepted=codec.type==ESP_A2D_MCT_SBC&&btrate::accepted(config.getMode()==PM_WEB,negotiatedHz);
+            const bool accepted=codec.type==ESP_A2D_MCT_SBC&&(IBT_NO_PSRAM?negotiatedHz==ibtaudio::LightBtRate:btrate::accepted(config.getMode()==PM_WEB,negotiatedHz));
             // Reconfiguration invalidates old-rate PCM before producers resume.
             txCodecConfigured.store(false);flush();
             txRate.store(accepted?negotiatedHz:0);txCodecConfigured.store(accepted);
@@ -875,34 +1043,39 @@ static bool releaseLiteBtPayload(){
     txPcm=nullptr;txHead=txTail=txUsed=0;
     portEXIT_CRITICAL(&txMux);
     auto bytes=liteBtPayload;const size_t released=liteBtBytes;liteBtPayload=nullptr;liteBtBytes=0;
-    delete q;heap_caps_free(bytes);
+    delete q;heap_caps_free(bytes);liteTx.release([](void* p){heap_caps_free(p);});
     if(bytes)Serial.printf("[BT-PAYLOAD] released=%u reason=QUIESCENT\n",unsigned(released));
     return true;
 }
+static bool liteRxWords=false;
 static bool allocateLiteBtPayload(size_t bytes=16384*4){
     if(liteBtPayload)return liteBtBytes>=bytes;
-    if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<bytes+internalReserve)return false;
-    auto p=(uint8_t*)heap_caps_malloc(bytes,MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
+    auto p=(uint8_t*)heap_caps_malloc(bytes,MALLOC_CAP_INTERNAL|MALLOC_CAP_EXEC|MALLOC_CAP_32BIT);
+    liteRxWords=p!=nullptr;
+    if(!p)p=(uint8_t*)heap_caps_malloc(bytes,MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
     if(!p)return false;
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve){free(p);return false;}
     liteBtPayload=p;liteBtBytes=bytes;return true;
 }
-static_assert(16384>32000/2,"Lite TX must retain at least500ms PCM");
+static_assert(txFrames>=ibtaudio::btPrimeFrames(ibtaudio::LightBtRate,true),"Lite TX must retain at least250ms PCM");
 #endif
 static bool allocateRx(){
     auto& target=rxRing;
     if(target.load())return true;
-    const uint32_t capacity=IBT_NO_PSRAM?8192:131072;
+    const uint32_t capacity=IBT_NO_PSRAM?ibtaudio::LightRxBytes:131072;
     const uint32_t caps=litememory::payloadCaps;
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve)return false;
 #if IBT_NO_PSRAM
     if(!allocateLiteBtPayload(capacity))return false;
-    auto q=new(std::nothrow) PcmRing(liteBtPayload,capacity);if(!q)return false;
+    auto q=new(std::nothrow) PcmRing(liteBtPayload,capacity,liteRxWords);if(!q)return false;
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve){delete q;return false;}
 #else
     auto bytes=(uint8_t*)heap_caps_malloc(capacity,caps);if(!bytes)return false;
     auto q=new(std::nothrow) PcmRing(bytes,capacity);if(!q){free(bytes);return false;}
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve){delete q;free(bytes);return false;}
+#endif
+#if IBT_NO_PSRAM
+    Serial.printf("[BT-RX-STORAGE] bytes=%u storage=%s access=ALIGNED32 internal_reserve=0\n",unsigned(capacity),liteRxWords?"EXEC32":"DRAM");
 #endif
     target.store(q);return true;
 }
@@ -910,8 +1083,12 @@ static bool allocateTx(){
     if(txPcm)return true;
     if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<internalReserve)return false;
 #if IBT_NO_PSRAM
-    if(!allocateLiteBtPayload())return false;
-    txPcm=(int16_t*)liteBtPayload;
+    if(!liteTx.allocate([](size_t n,bool exec)->void*{
+        const unsigned caps=exec?(MALLOC_CAP_INTERNAL|MALLOC_CAP_EXEC|MALLOC_CAP_32BIT):(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
+        return heap_caps_malloc(n,caps);
+    },[](void* p){heap_caps_free(p);}))return false;
+    txPcm=reinterpret_cast<int16_t*>(liteTx.pages[0]); // Readiness marker only; Light copies use32-bit pages.
+    Serial.printf("[BT-TX-PAGES] capacity=%u exec_bytes=%u dram_bytes=%u rate=%u prefill_ms=%u\n",txFrames*4,liteTx.execBytes,txFrames*4-liteTx.execBytes,ibtaudio::LightBtRate,uiHeadroomMs());
 #else
     txPcm=(int16_t*)heap_caps_malloc(txFrames*4,litememory::payloadCaps);
     if(!txPcm)return false;
@@ -923,10 +1100,21 @@ static bool stackResult(const char* step,esp_err_t error){
     if(error!=ESP_OK)Serial.printf("[BT-STACK] step=%s error=%d host=%u controller=%u free=%u largest=%u\n",step,int(error),unsigned(esp_bluedroid_get_status()),unsigned(esp_bt_controller_get_status()),unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
     return error==ESP_OK;
 }
+// Light4 speakers also initiate AVRCP/AVCTP (PSM0x17). Register before A2DP,
+// and retain the same asynchronous init/deinit acknowledgements as BT-IN.
+static bool controlProfileRequired(Mode role){
+#if defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+    return role==Mode::In || role==Mode::Out;
+#else
+    return role==Mode::In;
+#endif
+}
 #if IBT_NO_PSRAM
 // Only before any profile starts, or after A2DP+AVRCP deinit ACK and a closed
 // payload gate. Ordinary deinit is reversible; never call *_mem_release().
 static bool stopLiteStack(){
+    if(!btteardown::stackStopAllowed(active.load()!=Mode::Off,deinitialized.load(),
+                                   controlProfileRequired(active.load()),controlGone.load()))return false;
     if(esp_bluedroid_get_status()==ESP_BLUEDROID_STATUS_ENABLED && !stackResult("host_disable",esp_bluedroid_disable()))return false;
     if(esp_bluedroid_get_status()==ESP_BLUEDROID_STATUS_INITIALIZED && !stackResult("host_deinit",esp_bluedroid_deinit()))return false;
     if(esp_bluedroid_get_status()!=ESP_BLUEDROID_STATUS_UNINITIALIZED)return false;
@@ -975,13 +1163,29 @@ static bool initializeStack(bool audit=false){
         Serial.println("[BT-MEMORY] result=DENIED reason=classic_memory_released reboot_with_fixed_firmware=1");
         return false;
     }
+    #if IBT_NO_PSRAM
+    static esp_bt_mode_t initializedMode=ESP_BT_MODE_IDLE;
+    const esp_bt_mode_t selectedMode=audit?ESP_BT_MODE_BLE:ESP_BT_MODE_CLASSIC_BT;
+    if(esp_bt_controller_get_status()!=ESP_BT_CONTROLLER_STATUS_IDLE&&initializedMode!=selectedMode){
+        if(!sensors::quiescent()||!stopLiteStack())return false;
+    }
+#endif
     if(esp_bt_controller_get_status()==ESP_BT_CONTROLLER_STATUS_IDLE){
         if(!initMemoryPhase("before_controller",btstart::stackPlan))return false;
         esp_bt_controller_config_t cfg=BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+#if IBT_NO_PSRAM
+        cfg.mode=selectedMode;cfg.bt_max_acl_conn=1;
+#endif
         const esp_err_t error=esp_bt_controller_init(&cfg);
         if(!checkpoint("controller_init"))return false;if(!stackResult("controller_init",error))return false;
+#if IBT_NO_PSRAM
+        initializedMode=selectedMode;
+        Serial.printf("[BT-CONTROLLER-MODE] mode=%s reversible=1\n",audit?"BLE":"CLASSIC");
+#endif
     }
-#if CONFIG_BTDM_CTRL_MODE_BTDM
+#if IBT_NO_PSRAM
+    const esp_bt_mode_t controllerMode=selectedMode;
+#elif CONFIG_BTDM_CTRL_MODE_BTDM
     constexpr esp_bt_mode_t controllerMode=ESP_BT_MODE_BTDM;
 #else
     constexpr esp_bt_mode_t controllerMode=ESP_BT_MODE_CLASSIC_BT;
@@ -1081,10 +1285,20 @@ void service(){
     btmedia::service(inputSelected()&&controlConnected.load());
     serviceControl();
     auto s=stage.load();auto target=mode();auto current=active.load();uint32_t now=millis();
+    if(current==Mode::In&&connected()&&savePeerPending.exchange(false)){
+        Device source{};portENTER_CRITICAL(&peerMux);memcpy(source.address,peer,6);portEXIT_CRITICAL(&peerMux);
+        // IN and discovery are mutually exclusive; reuse the existing peer cache.
+        portENTER_CRITICAL(&devicesMux);devices[0]=source;devicesUsed=1;portEXIT_CRITICAL(&devicesMux);
+        esp_bt_gap_read_remote_name(source.address); // One asynchronous request, never NVS.
+    }
     if(s!=Stage::Active||current!=Mode::Out){mediaGate.reset();mediaCheckAck.store(0);mediaStartFailed.store(false);}
     if(s==Stage::Fault){
 #if IBT_NO_PSRAM
         if(faultCleanupAttempted)return;
+        // Never disable the host underneath a live or still-deinitializing profile.
+        // A delayed SDK acknowledgement can make cleanup eligible on a later tick.
+        if(!btteardown::stackStopAllowed(current!=Mode::Off,deinitialized.load(),
+                                       controlProfileRequired(current),controlGone.load()))return;
         faultCleanupAttempted=true;desired.store(Mode::Off);streaming.store(false);ready.store(false);
         // Close reader admission first; SDK owns callbacks until disabled/deinitialized.
         if(!litePayloadGate.close()){faultCleanupAttempted=false;return;}
@@ -1134,7 +1348,7 @@ void service(){
         }}
 #if IBT_NO_PSRAM
         // Mutually exclusive profiles retain their original buffer capacities.
-        // IN32KiB has no unused OUT64KiB arena; OUT still protects500ms at32kHz.
+        // RX is connection-delayed; paged OUT32KiB retains250ms at32kHz.
         // SDK sink startup has a 9680B contiguous allocation: do not pre-allocate RX.
         // RX is attached only after profile-ready, before discoverability is enabled.
         // Profile callbacks may allocate more queues after controller/host setup.
@@ -1143,7 +1357,7 @@ void service(){
             rollbackLiteStartup("profile_memory_admission");return;
         }
         if(!litePayloadGate.open()){fault("payload_not_quiescent");return;}
-        if(target==Mode::Out)Serial.println("[BT-PAYLOAD] TX=DEFERRED_UNTIL_CONNECTED capacity=65536 prefill_ms=500");
+        if(target==Mode::Out)Serial.println("[BT-PAYLOAD] TX=DEFERRED_UNTIL_CONNECTED capacity=32768 layout=PAGES rate=32000 prefill_ms=250");
 #endif
         heapCheckpoint("after_stack_init");
         appliedRequest=requestId.load();active.store(target);ready.store(false);deinitialized.store(false);failed.store(false);
@@ -1158,7 +1372,7 @@ void service(){
         scanTimingLogged=false;connectTimingLogged=false;streamTimingLogged=false;
         controlConnected.store(false);controlResult.store(0);
         portENTER_CRITICAL(&devicesMux);devicesUsed=0;portEXIT_CRITICAL(&devicesMux);
-        if(target==Mode::In){
+        if(controlProfileRequired(target)){
             controlReady.store(false);controlGone.store(false);enter(Stage::AvrcInit);
             if(esp_avrc_ct_init()!=ESP_OK)fault("avrc_init");
         }else initProfile(target);
@@ -1173,7 +1387,7 @@ void service(){
     if(s==Stage::Init){
         if(ready.load()){
 #if IBT_NO_PSRAM
-            if(current==Mode::In&&!allocateRx()){fault("rx_after_profile");return;}
+            // Allocate RX only after A2DP connection queues, not while advertising.
 #endif
             heapCheckpoint("after_profile_init");linkAt=now;lastCheck=0;enter(Stage::Active);
         }
@@ -1184,6 +1398,9 @@ void service(){
         heapCheckpoint("before_disconnect");
         if(esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE,ESP_BT_NON_DISCOVERABLE)!=ESP_OK){fault("scan_disable");return;}
         if(discovering.load())esp_bt_gap_cancel_discovery();
+#if IBT_NO_PSRAM
+        signallingDisconnectSent=false;
+#endif
         enter(Stage::Disconnect);s=Stage::Disconnect;
         // enter() reads millis() again; use that fresh time for the timeout.
         // The stale value can underflow now-stageAt and fault immediately.
@@ -1196,10 +1413,34 @@ void service(){
             auto result=current==Mode::Out?esp_a2d_source_disconnect(address):esp_a2d_sink_disconnect(address);
             if(result!=ESP_OK){fault("disconnect");return;}
         }
+#if IBT_NO_PSRAM
+        // A stalled remote AVDTP Close can otherwise run several SDK timers.
+        // Queue link disconnect on the SDK owner after the normal close grace period.
+        if(current==Mode::Out&&disconnectSent&&!signallingDisconnectSent&&
+           connection.load()!=ESP_A2D_CONNECTION_STATE_DISCONNECTED&&uint32_t(now-stageAt)>=2000){
+            esp_bd_addr_t address;portENTER_CRITICAL(&peerMux);memcpy(address,peer,6);portEXIT_CRITICAL(&peerMux);
+            signallingDisconnectSent=true;
+#if defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+            const bool queued=ibt_bt_disconnect_acl(address)!=0;
+#else
+            BTA_AvDisconnect(address);const bool queued=true;
+#endif
+            Serial.printf("[BT-TEARDOWN] link_disconnect=%s grace_ms=2000 cleanup=WAIT_ACK\n",queued?"QUEUED":"NO_MEMORY");
+        }
+#endif
         if(connection.load()==ESP_A2D_CONNECTION_STATE_DISCONNECTED&&!discovering.load()){
-            if(current==Mode::In){controlGone.store(false);enter(Stage::AvrcDeinit);if(esp_avrc_ct_deinit()!=ESP_OK)fault("avrc_deinit");}
+            if(controlProfileRequired(current)){controlGone.store(false);enter(Stage::AvrcDeinit);if(esp_avrc_ct_deinit()!=ESP_OK)fault("avrc_deinit");}
             else deinitProfile(current);
-        }else if(uint32_t(now-stageAt)>10000)fault("disconnect_timeout");
+        }
+#if IBT_NO_PSRAM
+        else if(uint32_t(now-stageAt)>10000&&!failed.exchange(true)){
+            // Sniff-mode exit and HCI disconnect can finish after this deadline.
+            // Retain Disconnect so its late acknowledgement follows normal deinit.
+            Serial.println("[BT-AUDIO] disconnect_wait=TIMEOUT teardown=WAIT_ACK reboot=0");
+        }
+#else
+        else if(uint32_t(now-stageAt)>10000)fault("disconnect_timeout");
+#endif
         return;
     }
     if(s==Stage::Deinit){
@@ -1215,12 +1456,13 @@ void service(){
     }
     if(s!=Stage::Active)return;
 #if IBT_NO_PSRAM
+    if(current==Mode::In&&connected()&&!rxRing.load()&&!allocateRx()){fault("rx_after_connection");return;}
     if(current==Mode::Out&&connected()&&txCodecConfigured.load()&&!txPcm){
         if(!allocateTx()){
             failed.store(true);desired.store(Mode::Off);autoDacFallback.store(true);
-            Serial.println("[BT-PAYLOAD] TX=DENIED reserve_retained=10000 teardown=QUEUED");return;
+            Serial.printf("[BT-PAYLOAD] TX=DENIED capacity=%u reserve=%u free=%u largest=%u teardown=QUEUED\n",txFrames*4,internalReserve,unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));return;
         }
-        Serial.println("[BT-PAYLOAD] TX=READY capacity=65536 prefill_ms=500");
+        Serial.println("[BT-PAYLOAD] TX=READY capacity=32768 layout=PAGES rate=32000 prefill_ms=250");
     }
 #endif
     if(connected()&&!heapConnectedChecked){heapConnectedChecked=true;heapCheckpoint("after_connection");}
@@ -1296,7 +1538,7 @@ void service(){
             Serial.println("[BT-LINK] empty_scan_restart=REQUESTED");
         }
     }
-    if(found.load()&&!streaming.load()&&selectedAt.load()&&uint32_t(now-selectedAt.load())>=90000){
+    if(btnavigation::connectionTimedOut(now,selectedAt.load(),found.load(),streaming.load(),connection.load()==ESP_A2D_CONNECTION_STATE_CONNECTED)){
         failed.store(true);autoDacFallback.store(true);
         Serial.printf("[BT-LINK] auto_dac=CONNECT_TIMEOUT attempts=%u elapsed_ms=%lu\n",unsigned(connectAttempts),(unsigned long)(now-selectedAt.load()));
         return;
@@ -1344,7 +1586,7 @@ void service(){
     }
     unsigned buffered=0;
     portENTER_CRITICAL(&txMux);buffered=txUsed;portEXIT_CRITICAL(&txMux);
-    const bool primed=producerReady()&&buffered>=std::min<unsigned>(txFrames-1,unsigned(txRate.load()/2));
+    const bool primed=producerReady()&&buffered>=std::min<unsigned>(txFrames-1,unsigned(ibtaudio::btPrimeFrames(txRate.load(),IBT_NO_PSRAM!=0)));
     const auto action=mediaGate.poll(now,connected(),primed,streaming.load(),epoch.load(),
                                      mediaCheckAck.exchange(0),mediaStartFailed.exchange(false));
     if(action==ibtaudio::MediaStartGate::Check||action==ibtaudio::MediaStartGate::Start){
@@ -1367,7 +1609,29 @@ const char* status(){
     return streaming.load()?"BT ki: lejatszas":connection.load()==ESP_A2D_CONNECTION_STATE_CONNECTED?"BT ki: csatlakozva":found.load()?"Csatlakozas...":discovering.load()?"Kereses...":"Valassz eszkozt";
 }
 void diagnostics(){
+#if IBT_NO_PSRAM
+    for(unsigned point=0;point<2;++point){
+        const auto& proof=point?txCallbackProof:txInputProof;
+        const uint32_t packed=proof.peakNonzero.load(std::memory_order_relaxed);
+        Serial.printf("[BT-PCM-PROOF] point=%s sampled=%lu nonzero=%u peak=%u hash=%08lx scope=SPARSE_FIRST4096_SAMPLES_LIFETIME snapshot=NONATOMIC_HOST_ONLY\n",
+            point?"CALLBACK_POST_FADE":"DECODER_PRE_GAIN",(unsigned long)proof.sampled.load(std::memory_order_relaxed),unsigned(packed&65535),unsigned(packed>>16),(unsigned long)proof.hash.load(std::memory_order_relaxed));
+    }
+#endif
+#if IBT_NO_PSRAM && defined(IBT_LIGHT4_DNS_AUTO) && IBT_LIGHT4_DNS_AUTO
+    const uint32_t packet=ibt_sbc_packet_last();
+    Serial.printf("[BT-SBC-PACKET] bytes=%u legacy=4112 mtu=%u frames=%u scope=LIFETIME_LAST_ATTEMPT logging=HOST_QUERY_ONLY\n",
+        unsigned(packet&0x1fff),unsigned((packet>>13)&0xfff),unsigned((packet>>25)&15));
+    const uint32_t pcm=ibt_sbc_proof(1),meta=ibt_sbc_proof(4);
+    Serial.printf("[BT-SBC-PROOF] pcm_sampled=%lu pcm_nonzero=%u pcm_peak=%u pcm_hash=%08lx first_header=%08lx last_len=%u last_header=%04x crc_checked=%u crc_failed=%u avdt_queued_seen=%u avdt_rejected_seen=%u encoded=%lu queued=%lu dequeued=%lu scope=LIFETIME snapshot=NONATOMIC_HOST_ONLY air_delivery=NOT_PROVEN\n",
+        (unsigned long)ibt_sbc_proof(0),unsigned(pcm&65535),unsigned(pcm>>16),(unsigned long)ibt_sbc_proof(2),(unsigned long)ibt_sbc_proof(3),unsigned(meta&65535),unsigned((meta>>16)&255u),unsigned((meta>>24)&127u),unsigned(meta>>31),unsigned((packet>>29)&1u),unsigned((packet>>30)&1u),(unsigned long)ibt_sbc_proof(5),(unsigned long)ibt_sbc_proof(6),(unsigned long)ibt_sbc_proof(7));
+#endif
     printDiscoveryStats("STATUS");
+    const auto& rx=btrxprobe::stats();
+    Serial.printf("[BT-RX-BLOCKS] callbacks=%lu raw_input_bytes=%lu max_bytes=%lu over_capacity=%lu le1024=%lu le2048=%lu le4096=%lu le8192=%lu larger=%lu callback_max_wall_us=%lu scope=U32_LIFETIME counter_wrap=1 no_callback_logging=1\n",
+      (unsigned long)rx.callbacks.load(),(unsigned long)rx.inputBytes.load(),(unsigned long)rx.maxBytes.load(),(unsigned long)rx.overCapacity.load(),(unsigned long)rx.le1024.load(),(unsigned long)rx.le2048.load(),(unsigned long)rx.le4096.load(),(unsigned long)rx.le8192.load(),(unsigned long)rx.larger.load(),(unsigned long)rx.callbackWall.load());
+    Serial.printf("[BT-RX-DRAIN] pops=%lu bytes=%lu pop_max=%lu prime_waits=%lu writes=%lu dac_calls=%lu write_max_wall_us=%lu write_failures=%lu i2s_frames_per_submit=64 scope=U32_LIFETIME counter_wrap=1\n",
+      (unsigned long)rx.pops.load(),(unsigned long)rx.popBytes.load(),(unsigned long)rx.popMax.load(),(unsigned long)rx.primeWaits.load(),(unsigned long)rx.writes.load(),(unsigned long)rx.writeCalls.load(),(unsigned long)rx.writeWall.load(),(unsigned long)rx.writeFailures.load());
+
 #if IBT_NO_PSRAM
     Serial.printf("[BT-LIFECYCLE] sdk_initialized=%u controller=%u host=%u payload_bytes=%u pcm_worker=%u release=REVERSIBLE_SDK_DEINIT static_memory=RETAINED\n",
       unsigned(initialized),unsigned(esp_bt_controller_get_status()),unsigned(esp_bluedroid_get_status()),
@@ -1398,7 +1662,7 @@ void diagnostics(){
     Serial.printf("[BT-CORE] btc_target_core=%u pcm_callback_core=%d pcm_task_id=%u decoder_core=1 controller_core=%u btu_target_core=%u\n",
         unsigned(CONFIG_BT_BLUEDROID_PINNED_TO_CORE),txCallbackCore.load(),txCallbackTask.load(),unsigned(CONFIG_BTDM_CTRL_PINNED_TO_CORE),unsigned(CONFIG_BT_BLUEDROID_PINNED_TO_CORE));
     portENTER_CRITICAL(&txMux);const unsigned buffered=txUsed*4;portEXIT_CRITICAL(&txMux);
-    Serial.printf("[BT-AUDIO] direction=%s active=%u stage=%u state=%s delivered_bytes=%lu requested_bytes=%lu received_bytes=%lu dropped_bytes=%lu underruns=%lu prefill_callbacks=%lu rebuffer_events=%lu tx_buffer=%lu rx_buffer=%lu rate=%lu source_rate=%lu codec_ok=%u block_frames=%lu tx_internal=%u tx_capacity=%u tx_prefill=%u tx_prefill_ms=500 target_rate=%lu eq_enabled=0\n",inputSelected()?"IN":outputSelected()?"OUT":"OFF",unsigned(active.load()),unsigned(stage.load()),status(),(unsigned long)delivered.load(),(unsigned long)requestedBytes.load(),(unsigned long)received.load(),(unsigned long)dropped.load(),(unsigned long)underruns.load(),(unsigned long)prefillCallbacks.load(),(unsigned long)rebufferEvents.load(),(unsigned long)buffered,(unsigned long)(diagnosticRx?diagnosticRx->size():0),(unsigned long)(inputSelected()?rxRate.load():txRate.load()),(unsigned long)sourceRate.load(),unsigned(txCodecConfigured.load()),(unsigned long)blockFrames.load(),unsigned(IBT_NO_PSRAM!=0),txFrames*4,(txRate.load()/2)*4,(unsigned long)outputRate());
+    Serial.printf("[BT-AUDIO] direction=%s active=%u stage=%u state=%s delivered_bytes=%lu requested_bytes=%lu received_bytes=%lu dropped_bytes=%lu underruns=%lu prefill_callbacks=%lu rebuffer_events=%lu tx_buffer=%lu rx_buffer=%lu rate=%lu source_rate=%lu codec_ok=%u block_frames=%lu tx_internal=%u tx_capacity=%u tx_prefill=%u tx_prefill_ms=%u target_rate=%lu eq_enabled=0\n",inputSelected()?"IN":outputSelected()?"OUT":"OFF",unsigned(active.load()),unsigned(stage.load()),status(),(unsigned long)delivered.load(),(unsigned long)requestedBytes.load(),(unsigned long)received.load(),(unsigned long)dropped.load(),(unsigned long)underruns.load(),(unsigned long)prefillCallbacks.load(),(unsigned long)rebufferEvents.load(),(unsigned long)buffered,(unsigned long)(diagnosticRx?diagnosticRx->size():0),(unsigned long)(inputSelected()?rxRate.load():txRate.load()),(unsigned long)sourceRate.load(),unsigned(txCodecConfigured.load()),(unsigned long)blockFrames.load(),unsigned(IBT_NO_PSRAM!=0),txFrames*4,(ibtaudio::btPrimeFrames(txRate.load(),IBT_NO_PSRAM!=0))*4,uiHeadroomMs(),(unsigned long)outputRate());
 }
 }
 

@@ -2,9 +2,11 @@
 #include "../dual/sensors/receiver.h"
 #include "../dual/weather.h"
 #include "../dual/bt_rate_policy.h"
+#include "../dual/bt_light_buffer.h"
 #include "../dual/v026_probe.h"
 #include "options.h"
 #include "../dual/light_network_gate.h"
+#include "../dual/stream_cancel.h"
 #include "player.h"
 #include "config.h"
 #include "network.h"
@@ -13,6 +15,7 @@
 #include "sdmanager.h"
 #include "netserver.h"
 #include "timekeeper.h"
+#include "../ui/boot_custom.h"
 #include "../displays/tools/l10n.h"
 #include "../pluginsManager/pluginsManager.h"
 #include "../dual/core.h"
@@ -46,13 +49,47 @@ static std::atomic<uint32_t> rejectedCommands{0};
 static std::atomic<bool> pendingVuMaintenance{false};
 // Periodic card checks are coalesced, including while setup has no consumer.
 static std::atomic<bool> pendingSdCheck{false};
+#if IBT_NO_PSRAM
+static StaticQueue_t routeQueueState;
+static uint8_t routeQueueBytes[4*sizeof(playerRequestParams_t)];
+static QueueHandle_t routeQueue=nullptr;
+static std::atomic<uint32_t> latestRouteCommand{0},commandSequence{0};
+static bool routeControl(playerRequestType_e t){return t==PR_STOP||t==PR_ALARM_STOP||t==PR_SOURCE||t==PR_BT||t==PR_CANCEL_SOURCE;}
+static bool startsPlayback(playerRequestType_e t){return t==PR_PLAY||t==PR_NEXT||t==PR_PREV||t==PR_TOGGLE||t==PR_RESTART_LOCAL||t==PR_BURL;}
+#endif
+static BaseType_t receivePlayerCommand(playerRequestParams_t* request,TickType_t wait){
+#if IBT_NO_PSRAM
+ if(routeQueue){while(xQueueReceive(routeQueue,request,0)==pdPASS){
+  if(latestRouteCommand.load()&&int32_t(request->commandSequence-latestRouteCommand.load())<0)continue;
+  latestRouteCommand.store(request->commandSequence);streamcancel::state().accept(request->commandSequence);return pdPASS;
+ }}
+ while(xQueueReceive(playerQueue,request,wait)==pdPASS){
+  if(startsPlayback(request->type)&&latestRouteCommand.load()&&int32_t(request->commandSequence-latestRouteCommand.load())<0){
+   Serial.printf("[AUDIO-QUEUE] stale_start=DISCARDED type=%u\n",unsigned(request->type));wait=0;continue;}
+  if(!request->alarmToken&&startsPlayback(request->type))streamcancel::state().accept(request->commandSequence);
+  return pdPASS;
+ }return pdFAIL;
+#else
+ return xQueueReceive(playerQueue,request,wait);
+#endif
+}
+extern "C" bool ibt_stream_open_cancelled(){
+#if IBT_NO_PSRAM
+ return player.onAudioTask()&&streamcancel::state().cancelled();
+#else
+ return false;
+#endif
+}
 // The SD scanner owns the card while the audio task remains responsive to
 // stop, BT and source commands. State 2/3 is consumed once by the audio task.
 static std::atomic<uint8_t> sdWorkerState{0}; // 0 idle, 1 indexing, 2 ready, 3 failed
 static std::atomic<SdPrepareState> sdPrepare{SdPrepareState::Idle};
+static std::atomic<sdroute::Error> sdFailure{sdroute::Error::None};
 static void sdIndexTask(void*){
 #ifdef USE_SD
-  const bool good=sdman.start() && sdman.indexSDPlaylist();
+  const bool mounted=sdman.start();
+  const bool good=mounted && sdman.indexSDPlaylist();
+  sdFailure.store(good?sdroute::Error::None:mounted?sdman.indexError.load():sdroute::Error::Unavailable);
   sdWorkerState.store(good?2:3);
 #else
   sdWorkerState.store(3);
@@ -197,7 +234,7 @@ bool Player::serviceTick(){
   pendingVolumeSteps.store(0);pendingAbsoluteVolume.store(-1);
     // Local STOP/source/station commands cancel generation, then execute after restore.
     playerRequestParams_t command;
-    for(unsigned n=0;n<5&&xQueueReceive(playerQueue,&command,0)==pdPASS;++n){
+    for(unsigned n=0;n<5&&receivePlayerCommand(&command,0)==pdPASS;++n){
       if(!serviceDeferredValid||serviceDeferred.type!=PR_STOP){serviceDeferred=command;serviceDeferredValid=true;}
       serviceSession.restore(now);
     }
@@ -264,7 +301,10 @@ bool Player::serviceTick(){
 #include "boot_sound.inc"
 bool Player::startTask(){
   if(audioTaskStarted.exchange(true))return audioOwner.load()!=nullptr;
-  if(playerQueue==nullptr || xTaskCreatePinnedToCore(audioTask,"ibt_audio",20480,nullptr,3,nullptr,1)!=pdPASS){
+  // R225 proved that steady SD/BT HWM does not bound cold Wi-Fi/TLS peaks.
+  // Restore the established no-PSRAM stack; retain allocation/canary checks.
+  constexpr unsigned audioStackBytes=IBT_NO_PSRAM?12288:20480;
+  if(playerQueue==nullptr || xTaskCreatePinnedToCore(audioTask,"ibt_audio",audioStackBytes,nullptr,3,nullptr,1)!=pdPASS){
     // Keep ownership closed on failure: no fallback decoder on the UI task.
     Serial.println("[AUDIO-TASK] FAIL allocation; playback disabled");
     return false;
@@ -326,6 +366,9 @@ void Player::init() {
   _resumeFilePos = 0;
   _hasError=false;
   playerQueue = xQueueCreate( 5, sizeof( playerRequestParams_t ) );
+#if IBT_NO_PSRAM
+  routeQueue=xQueueCreateStatic(4,sizeof(playerRequestParams_t),routeQueueBytes,&routeQueueState);
+#endif
   setOutputPins(false);
   delay(50);
 #ifdef MQTT_ROOT_TOPIC
@@ -375,6 +418,9 @@ static bool surfaceRequestAllowed(const playerRequestParams_t& request){
 }
 bool Player::sendCommand(playerRequestParams_t request){
   request.queuedAtUs=micros();
+#if IBT_NO_PSRAM
+  request.commandSequence=commandSequence.fetch_add(1)+1;
+#endif
   if(request.type==PR_STOP)stationsave::manualStop();
   if(stationsave::holdsAudio() && request.type!=PR_STATION_SAVE && request.type!=PR_STOP && request.type!=PR_ALARM_STOP && request.type!=PR_VOL && request.type!=PR_GAIN && request.type!=PR_TONE && request.type!=PR_BALANCE)return false;
   if(!surfaceRequestAllowed(request)){Serial.printf("[SURFACE-GATE] result=DENIED type=%u surface=%s\n",unsigned(request.type),surfacepolicy::name(surfacepolicy::current()));return false;}
@@ -391,8 +437,17 @@ bool Player::sendCommand(playerRequestParams_t request){
     rejectedCommands.fetch_add(1);
     return false;
   }
-  if(request.type==PR_PLAY||request.type==PR_NEXT||request.type==PR_PREV||request.type==PR_TOGGLE||request.type==PR_SOURCE||request.type==PR_BT||request.type==PR_BT_TRANSPORT||request.type==PR_BURL||request.type==PR_RESTART_LOCAL){sensors::audioRequested();weather::audioRequested();}
-  if(xQueueSend(playerQueue, &request, owner()?0:pdMS_TO_TICKS(10))==pdPASS){
+  if(request.type==PR_PLAY||request.type==PR_NEXT||request.type==PR_PREV||request.type==PR_TOGGLE||request.type==PR_SOURCE||request.type==PR_BT||request.type==PR_BT_TRANSPORT||request.type==PR_BURL||request.type==PR_RESTART_LOCAL){sensors::audioRequested();weather::audioRequested();if(IBT_NO_PSRAM&&weather::busy()&&!(request.type==PR_BT&&request.payload<0)){Serial.println("[LIGHT-WEATHER] audio=WAIT_TLS_CLEANUP retry=1");return false;}}
+#if IBT_NO_PSRAM
+  const bool control=!request.alarmToken&&routeControl(request.type);
+  QueueHandle_t destination=control?routeQueue:playerQueue;
+#else
+  QueueHandle_t destination=playerQueue;
+#endif
+  if(destination&&xQueueSend(destination, &request, owner()?0:pdMS_TO_TICKS(10))==pdPASS){
+#if IBT_NO_PSRAM
+    if(control||(!request.alarmToken&&startsPlayback(request.type)))streamcancel::state().cancel(request.commandSequence);
+#endif
 #if IBT_NO_PSRAM
     if(request.type==PR_STOP||request.type==PR_PLAY||request.type==PR_NEXT||request.type==PR_PREV||request.type==PR_TOGGLE||request.type==PR_SOURCE||request.type==PR_BT||request.type==PR_BURL||request.type==PR_RESTART_LOCAL)lightnet::gate().cancel();
 #endif
@@ -408,12 +463,21 @@ bool Player::sendCommand(playerRequestParams_t request){
   Serial.printf("[AUDIO-QUEUE] FULL type=%d payload=%d depth=%u command rejected\n",int(request.type),int(request.payload),unsigned(uxQueueMessagesWaiting(playerQueue)));
   return false;
 }
-unsigned Player::queueDepth() const {return playerQueue?uxQueueMessagesWaiting(playerQueue):0;}
+unsigned Player::queueDepth() const {unsigned count=playerQueue?uxQueueMessagesWaiting(playerQueue):0;
+#if IBT_NO_PSRAM
+ if(routeQueue)count+=uxQueueMessagesWaiting(routeQueue);
+#endif
+ return count;}
 uint32_t Player::commandDrops() const {return rejectedCommands.load();}
 SdPrepareState Player::sdPrepareState() const {return sdPrepare.load();}
+sdroute::Error Player::sdPrepareError() const {return sdFailure.load();}
 
 void Player::resetQueue(){
   if(playerQueue!=NULL) xQueueReset(playerQueue);
+#if IBT_NO_PSRAM
+  if(routeQueue)xQueueReset(routeQueue);
+  streamcancel::state().cancel(commandSequence.fetch_add(1)+1);
+#endif
   pendingSdCheck.store(false);
   pendingVolumeSteps.store(0);
   pendingAbsoluteVolume.store(-1);
@@ -528,23 +592,23 @@ void Player::loop() {
     const unsigned localRate=config.getMode()==PM_SDCARD?getSampleRate():0;
     _recovery.cancel();_stop();btStarted=false;
     if(mode==0&&config.getMode()==PM_SDCARD&&btaudio::idle()&&!btaudio::wanted()){
-        const unsigned target=btrate::native(localRate,btaudio::outputRate());
+        const unsigned target=IBT_NO_PSRAM?ibtaudio::LightBtRate:btrate::native(localRate,btaudio::outputRate());
         const bool selected=btaudio::setDiagnosticRate(target); // RAM only, no NVS write during audio
         Serial.printf("[BT-LOCAL-RATE] source_hz=%u target_hz=%u result=%s\n",localRate,target,selected?"SELECTED":"DENIED");
     }
-    returnToDac=mode<0;
+    returnToDac=mode==-1; // -2 is teardown without stale-source auto-resume.
     if(returnToDac)returnToDacAt=millis();
 #if IBT_NO_PSRAM
     // _stop joined the producer and freed decoder/input buffers on this owner.
     // The unused DAC DMA must not consume the controller's startup workspace.
-    if(mode==0&&btaudio::idle()&&!btaudio::wanted()){
+    if(mode>=0&&btaudio::idle()&&!btaudio::wanted()){
 #ifdef USE_SD
       if(!sdman.releaseIdlePath()){Serial.println("[BT-STARTUP] request=DENIED reason=sd_path_not_quiescent");return;}
 #endif
-      if(!suspendDacForBtSearch()){Serial.println("[BT-STARTUP] request=DENIED reason=dac_release");return;}
+      if(mode==0&&!suspendDacForBtSearch()){Serial.println("[BT-STARTUP] request=DENIED reason=dac_release");return;}
     }
 #endif
-    btaudio::request(returnToDac?btaudio::Mode::Off:mode==1?btaudio::Mode::In:btaudio::Mode::Out);
+    btaudio::request(mode<0?btaudio::Mode::Off:mode==1?btaudio::Mode::In:btaudio::Mode::Out);
     const auto source=config.getMode()==PM_SDCARD?ibtsource::Source::Sd:ibtsource::Source::Web;
     if(source!=ibtsource::afterBt(source,mode))config.changeMode(PM_WEB);
     _loadVol(config.store.volume);
@@ -562,7 +626,7 @@ void Player::loop() {
     if(sdWorkerState.load()!=0){sdWanted=false;sdResumeWeb=false;sdman.cancelIndex();}
     sdSourceAlarmToken=0;
   }
-  bool haveRequest=xQueueReceive(playerQueue, &requestP, (isRunning()||btaudio::wanted())?PL_QUEUE_TICKS:PL_QUEUE_TICKS_ST)==pdPASS;
+  bool haveRequest=receivePlayerCommand(&requestP,(isRunning()||btaudio::wanted())?PL_QUEUE_TICKS:PL_QUEUE_TICKS_ST)==pdPASS;
   // User commands take precedence; one card check remains pending until idle.
   if(!haveRequest && pendingSdCheck.exchange(false)){
     requestP={PR_CHECKSD,0};haveRequest=true;
@@ -582,6 +646,11 @@ void Player::loop() {
     if(!surfaceRequestAllowed(requestP)){
       Serial.printf("[SURFACE-GATE] result=CANCEL_QUEUED type=%u\n",unsigned(requestP.type));requestP.type=playerRequestType_e(0);
     }
+#if IBT_NO_PSRAM
+    if(bootcustom::busy()&&!requestP.alarmToken&&(requestP.type==PR_SOURCE||requestP.type==PR_CHECKSD||requestP.type==PR_PLAY||requestP.type==PR_TOGGLE||requestP.type==PR_NEXT||requestP.type==PR_PREV||requestP.type==PR_RESTART_LOCAL)){
+      setError("Inditokep feltoltes folyamatban");requestP.type=playerRequestType_e(0);
+    }
+#endif
     // The owner can dequeue before the sender returns from xQueueSend. Apply
     // manual ownership here too, before any later queued alarm cleanup.
     if(!requestP.alarmToken&&(requestP.type==PR_PLAY||requestP.type==PR_SOURCE||
@@ -615,11 +684,16 @@ void Player::loop() {
         if(!btaudio::outputSelected()||sdWorkerState.load()!=0||!btaudio::producerReady())break;
         if(isRunning()){sourcePaused=true;_recovery.cancel();_stop();btaudio::flush();}
         else {sourcePaused=false;btaudio::flush();_recovery.begin(config.lastStation());_play(config.lastStation(),false,false);}
-        btStarted=true;
+        btStarted=isRunning();
+        if(!btStarted)sourcePaused=true;
         Serial.printf("[BT-TRANSPORT] playing=%u route_preserved=1\n",unsigned(isRunning()));break;
       case PR_BT:
+#if IBT_NO_PSRAM
+        if(requestP.payload>=0&&bootcustom::busy())break;
+#endif
         sourcePaused=false;
         deferredSource=-1;sourceResumeAfterRetry=false;
+        if(requestP.payload==-2)returnToDac=false; // Explicit route replaces stale fallback intent.
         if(requestP.payload<0&&!btaudio::wanted()&&btaudio::idle())break;
         if(sdWorkerState.load()!=0){sdWanted=false;sdResumeWeb=false;sdman.cancelIndex();deferredBt=requestP.payload;break;}
         applyBt(requestP.payload);
@@ -648,8 +722,14 @@ void Player::loop() {
           if(target==PM_WEB){sdWanted=false;sdman.cancelIndex();}
           break;
         }
-        if(target==config.getMode()&&!(target==PM_SDCARD&&!sdman.catalogReady.load()))break;
-        const bool resume=isRunning()||sourceResumeAfterRetry;
+        if(target==config.getMode()&&!(target==PM_SDCARD&&!sdman.catalogReady.load())){
+          if(requestP.sourceAutoplay&&!isRunning()){
+            sourcePaused=false;_recovery.begin(target==PM_WEB?config.lastStation():0);
+            _play(config.lastStation());btStarted=btaudio::outputSelected()&&isRunning();
+          }
+          break;
+        }
+        const bool resume=requestP.sourceAutoplay||isRunning()||sourceResumeAfterRetry;
         sourceResumeAfterRetry=false;
         sdKeepBt=btaudio::outputSelected();sourcePaused=!resume;
         _recovery.cancel();_stop();dual::track("");
@@ -661,6 +741,7 @@ void Player::loop() {
           sdSourceAlarmToken=requestP.alarmToken;
           sdWebStation=config.lastStation();sdResumeWeb=resume;sdWanted=true;
           sdBtStopAt=millis();
+          sdFailure.store(sdroute::Error::ReadIndex);
           sdman.clearIndexCancel();sdWorkerState.store(1);sdPrepare.store(SdPrepareState::Indexing);
           if(xTaskCreatePinnedToCore(sdIndexTask,"ibt_sd_index",6144,nullptr,1,nullptr,0)!=pdPASS){
             sdWorkerState.store(3);
@@ -714,6 +795,10 @@ void Player::loop() {
         _recovery.begin(config.getMode()==PM_WEB?(uint16_t)abs(requestP.payload):0);
         if(config.getMode()==PM_SDCARD && requestP.payload<0){config.sdResumePos=0;_resumeFilePos=0;}
         _play((uint16_t)abs(requestP.payload),requestP.payload>=0,!requestP.alarmToken&&!requestP.naturalSd,requestP.alarmToken);
+        if(btaudio::outputSelected()){
+          btStarted=isRunning();
+          if(!btStarted&&queueDepth()==0)sourcePaused=true;
+        }
         if(requestP.alarmToken&&!dual::alarmRequestValid(requestP.alarmToken))break;
         if (player_on_station_change) player_on_station_change(); 
         pm.on_station_change();
@@ -723,6 +808,9 @@ void Player::loop() {
         deferredSource=-1;sourceResumeAfterRetry=false;
         sourcePaused=false;
         if(sdWorkerState.load()!=0){sdWanted=false;sdResumeWeb=false;sdman.cancelIndex();break;}
+        // Ordinary toggle enqueues PR_STOP, which also shuts down Bluetooth.
+        // A local BT pause must keep the speaker connection and selected route.
+        if(btaudio::outputSelected()){sendCommand({PR_BT_TRANSPORT,0});break;}
         toggle();
         break;
       }
@@ -788,7 +876,9 @@ void Player::loop() {
         btStarted=btaudio::outputSelected()&&isRunning();
       }
     }else{
+      if(sdWanted&&sdFailure.load()==sdroute::Error::None)sdFailure.store(sdroute::Error::ReadIndex);
       if(sdman.ready)sdman.stop();
+      if(!sdWanted)sdFailure.store(sdroute::Error::Cancelled);
       sdPrepare.store(sdWanted?SdPrepareState::Failed:SdPrepareState::Cancelled);
       Serial.printf("[SD-AUDIO] INDEX=%s\n",sdWanted?"FAIL":"CANCELLED");
       if(deferredBt!=-1000)applyBt(deferredBt);
@@ -839,12 +929,23 @@ void Player::loop() {
     return;
   }
   if(returnToDac){
+#if IBT_NO_PSRAM
+    static bool waitLogged=false;
+    if(!btaudio::idle()){
+      if(!waitLogged&&uint32_t(millis()-returnToDacAt)>=10000){
+        waitLogged=true;Serial.println("[BT-LINK] teardown_wait=1 DAC_RESTORE=WAIT_ACK reboot=0");
+      }
+      return; // Keep the request until asynchronous teardown really completes.
+    }
+    waitLogged=false;
+#else
     if(!btaudio::idle()&&uint32_t(millis()-returnToDacAt)<10000)return;
     if(!btaudio::idle()){
       // Do not start another decoder against a non-quiescent Bluetooth host.
       returnToDac=false;setError("BT leallasi hiba: ujrainditas szukseges");
       Serial.println("[BT-LINK] teardown_timeout=1 DAC_RESTORE=DENIED");return;
     }
+#endif
     returnToDac=false;_recovery.begin(config.lastStation());_play(config.lastStation());
   }
   if(btaudio::inputSelected()){
@@ -864,7 +965,22 @@ void Player::loop() {
       if(isRunning())_stop();
       btStarted=false;return; // Free decoder RAM during pairing; no busy decoding.
     }
-    if(!btStarted){btStarted=true;_recovery.begin(config.lastStation());_play(config.lastStation());}
+    if(!btStarted){
+      // _play refuses queued route controls; do not latch a skipped start.
+      if(queueDepth()!=0)return;
+      _recovery.begin(config.lastStation());_play(config.lastStation());
+      btStarted=isRunning();
+      if(!btStarted&&queueDepth()!=0)return; // A control arrived during admission.
+      Serial.printf("[BT-SOURCE-START] result=%s station=%u generation=%lu free=%u largest=%u\n",
+        btStarted?"STARTED":"FAILED",unsigned(config.lastStation()),(unsigned long)playbackGeneration(),
+        unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+        unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+      if(!btStarted){
+        // File/memory failures need an explicit retry, never an open per tick.
+        sourcePaused=true;_recovery.cancel();
+        setError("SD-BT inditas sikertelen. Valassz fajlt es nyomj Inditot.");
+      }
+    }
   }else btStarted=false;
 #if IBT_NO_PSRAM
   // Also restore the idle/paused DAC after a denied/cancelled discovery.
@@ -879,8 +995,9 @@ void Player::loop() {
   if(_recovery.alarmToken&&!dual::alarmRequestValid(_recovery.alarmToken))_recovery.cancel();
   // Redirects may reconnect inside Audio, outside Player::_play(). Header time
   // belongs to the existing HTTP timeout, not the PCM low-buffer stall clock.
-  // Retry counts/backoff stay intact; only a real AUDIO_DATA stall can age it.
-  if(IBT_NO_PSRAM&&streamHeaderPending())_recovery.connectionResult(millis(),true);
+  // Startup/rebuffer has its own no-progress/deadline gate. Do not replace it
+  // with the low-buffer retry clock; transport closure still wins below.
+  if(IBT_NO_PSRAM&&(streamHeaderPending()||streamBuffering()))_recovery.connectionResult(millis(),true);
   if(_recovery.poll(millis(),config.getMode()==PM_WEB,WiFi.status()==WL_CONNECTED,isRunning(),inBufferFilled(),
                     btaudio::producerReady(),btaudio::producedFrames(),IBT_NO_PSRAM && streamTransportClosed())){
     Serial.printf("[STREAM-RECOVERY] retry reason=%s station=%u buffer=%u produced=%lu\n",
@@ -928,11 +1045,16 @@ void Player::setOutputPins(bool isPlaying) {
 }
 
 void Player::_play(uint16_t stationId, bool persistSdSelection,bool persistLifecycle,uint32_t alarmToken) {
+#if IBT_NO_PSRAM
+  if(!alarmToken&&bootcustom::busy()){_recovery.cancel();setError("Inditokep feltoltes folyamatban");return;}
+  if(routeQueue&&uxQueueMessagesWaiting(routeQueue)){_recovery.cancel();return;} // A queued route wins before any new open.
+  streamcancel::Scope openingScope;
+#endif
   if(!surfacepolicy::allows(surfacepolicy::current(),btaudio::outputSelected()?surfacepolicy::Route::SdBt:config.getMode()==PM_SDCARD?surfacepolicy::Route::SdDac:surfacepolicy::Route::WifiDac,alarmToken&&dual::alarmRequestValid(alarmToken))){_recovery.cancel();return;}
   if(network.offlinePlayer()&&config.getMode()==PM_WEB)return;
 #if IBT_NO_PSRAM
-  // Existing decoder paths still require I2S; never decode into a missing driver.
-  if(!restoreDacAfterBtSearch()){
+  // SD->BT owns its PCM sink; do not reinstall an unused DAC/DMA allocation.
+  if(!btaudio::outputSelected()&&!restoreDacAfterBtSearch()){
     _recovery.cancel();setError("DAC memoria nem elegendo");
     if(btaudio::outputSelected())btaudio::request(false);
     return;
@@ -947,6 +1069,14 @@ void Player::_play(uint16_t stationId, bool persistSdSelection,bool persistLifec
   const uint32_t sdPlayStarted=micros();
   sdFirstDecodeStarted=config.getMode()==PM_SDCARD?sdPlayStarted:0;
   if(!setDefaults(false,!IBT_NO_PSRAM)){_recovery.cancel();return;}
+#if IBT_NO_PSRAM
+  if(btaudio::outputSelected()&&!suspendDacForBtSearch()){
+    _recovery.cancel();setError("BT hangut: DAC nem adhato at");return;
+  }
+  if(btaudio::outputSelected())Serial.printf("[AUDIO-SINK] route=SD_BT physical_dac=0 ready=%u free=%u largest=%u\n",
+      unsigned(outputReady()),unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
+      unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)));
+#endif
   const uint32_t sdResetDone=micros();
   _status = STOPPED;
   setOutputPins(false);
@@ -981,6 +1111,11 @@ void Player::_play(uint16_t stationId, bool persistSdSelection,bool persistLifec
     Serial.printf("[STREAM-TEST] fallback=%s\n",config.station.url);
     isConnected=connecttohost(config.station.url);
   }
+#if IBT_NO_PSRAM
+  if(streamcancel::state().cancelled()){
+    _recovery.cancel();_stop();Serial.println("[STREAM-CANCEL] queued_control=1 stale_start=SUPPRESSED");return;
+  }
+#endif
   Serial.printf("[V026-PLAYER] station=%u connect=%d\n",stationId,(int)isConnected);
   if(config.getMode()==PM_WEB){
     _recovery.connectionResult(millis(),isConnected);
