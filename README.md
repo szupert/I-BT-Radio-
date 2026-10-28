@@ -1,3 +1,11 @@
+## Fejlesztési állapot · R296 · 2026. október 28.
+
+[**Mono/sztereó DSP, mérések és nyitott hibák**](docs/LIGHT_R296_STATUS.md)
+
+Az R294 rövid DAC-próbáiban az SD-MP3, a támogatott FLAC és a Wi-Fi-rádió hallható volt. Az új, kapcsolható mono/sztereó DSP-s **R296 helyi tesztjelölt kész, de a BOOT/feltöltési átadásra vár**; készülékes DSP-mérése még nincs. Az R295 próbáján talált CPU-küszöbhibát javítottuk. Ez a dokumentációs frissítés a nyilvános R270 telepítőt és forráspillanatképet nem cseréli le.
+
+---
+
 ## Aktuális Light4MB: R270 · tesztelhető béta
 
 [**Egykattintásos Windows telepítő**](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/4MB_PSRAM_NELKUL/R270/I-BT-Radio-Auto4-Install.exe) · [Teljes Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light) · [Előképek](https://github.com/szupert/I-BT-Radio-/tree/main/skins/light-320x240) · [Menü](https://github.com/szupert/I-BT-Radio-/tree/main/docs/menu) · [Próba és ismert hibák](https://github.com/szupert/I-BT-Radio-/blob/main/docs/LIGHT_R270_TEST_GUIDE.md)
