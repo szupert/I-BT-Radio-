@@ -42,7 +42,7 @@ A mono/sztereó próbák alatt a megfigyelt szabad belső RAM minimuma 35 200 b�
 
 ## Folyamatos selftest és nyitott tételek
 
-A teszt terve Wi-Fi/SD → DAC, menüjárás, RAM/verem, külön DSP Ki / Mono / Sztereó ablakok, SD → BT MP3 és BT → DAC mód. Telefonos forrás hiányában a BT-bemeneti hangpróba nem minősül sikeresnek. A Wi-Fi → BT fejlesztését egyelőre félretettük. Hiba esetén a futtató naplóz, vár és folytat; önálló reset vagy újraflashelési hurok nincs.
+A korábbi kör Wi-Fi/SD → DAC, menüjárás, RAM/verem, külön DSP Ki / Mono / Sztereó ablakok, SD → BT MP3 és BT → DAC mód vizsgálatát tartalmazta. A felhasználó jelenlegi kérése szerint most SD → DAC mono mellett folyik a stabilitási és WebUI-ellenőrzés, élő szűrőparaméter-próbával; automatikus sztereóra vagy más hangútra váltás nincs. Telefonos forrás hiányában a BT-bemeneti hangpróba nem minősül sikeresnek. A Wi-Fi → BT fejlesztését egyelőre félretettük. Hiba esetén a futtató naplóz, vár és folytat; önálló reset vagy újraflashelési hurok nincs.
 
 Nyitott marad az üzem közbeni 50%-os pufferminimum, az átmeneti WebUI-kapcsolatbontás, egyes nagy/24 bites FLAC-ok és a BT memóriaigénye, a fényerő/infra befejezése, valamint az új DSP tényleges terhelésének és hangjának összevetése. A legutóbbi hálózati próbában kapcsolódási időtúllépés is jelentkezett; ezt nem minősítjük DSP-hibának.
 
@@ -51,3 +51,13 @@ Nyitott marad az üzem közbeni 50%-os pufferminimum, az átmeneti WebUI-kapcsol
 ## Friss megfigyelés — 18:28 UTC
 
 A korábbi kapcsolódási időtúllépések után a Wi-Fi → DAC stream elindult; a TLS-kézfogás és az MP3-dekódolás igazolt. Sztereó DSP mellett viszont a Core 1 mért terhelése 85,8%-ot ért el. A 80%-os védelem ekkor ténylegesen kikapcsolta a DSP-t; a dekódolás utána is folytatódott. Ez részleges DSP-próba, nem teljes mérési ablakon át működő Wi-Fi–DSP siker. A készülék nem indult újra, memóriahibát ez az ablak sem jelzett. A hangfeladat élettartam szerinti szabad veremminimiuma ekkor 2996 bájt volt. A teszt folytatódik.
+
+## Aktuális mono-próba — 2026. október 28., este
+
+A felhasználó az SD-s MP3-at monónak, tisztának és szaggatásmentesnek hallotta. Ez egy azonosított hallgatási ablak visszajelzése, nem minden későbbi percre kiterjedő hangminősítés. A mono beállítás megmarad, közben a hét numerikus DSP-szűrő/hangszín-érték saját tartományát vizsgáljuk; a hangerő, a csúcshatároló és a basszusvédelem változatlan.
+
+A WebUI 39 menüoldalán 514 sikeres lekérés mellett három kapcsolatbontás is jelentkezett. Egy beállítás válasza elveszett, miközben az érték beállt; a vezérlő ezt visszaolvasással kezeli. Ez nyitott firmware/WebUI-hiba, a PC-s tesztvezérlő javítása nem firmware-javítás. Az ellenőrzés menüadatokra vonatkozik, nem teljes érintéses vagy rotary-próba.
+
+Az utolsó szabad belső RAM-minta 32 536 bájt, a legnagyobb szabad blokk 12 788 bájt volt. A kétperces RAM-középérték a többlet HTTP-terhelés megjelenésekor kb. 33,9-ről 32,5 kB-ra csökkent, utána több percig ezen a szinten maradt. Ez követendő változás, önmagában nem bizonyított memóriaszivárgás. A hangfeladat élettartam szerinti legkisebb szabad veremtartaléka 2852/12 288, a kijelzőé 3480/8192 bájt; új veremcsökkenés és jelzett memóriahiba nem látszott. A legutóbbi lezárt DSP-érték egy teljes, kb. kilencmásodperces CPU-ablakában a Core 1 terhelése 72,8% volt; ez teljes magterhelés, nem tiszta DSP-költség.
+
+A teszt és a hibakeresés folyamatban van. A nyilvános R270 telepítő és forráspillanatkép továbbra is változatlan; ez fejlesztési tájékoztató, nem stabil R296-kiadás.
