@@ -47,3 +47,7 @@ A teszt terve Wi-Fi/SD → DAC, menüjárás, RAM/verem, külön DSP Ki / Mono /
 Nyitott marad az üzem közbeni 50%-os pufferminimum, az átmeneti WebUI-kapcsolatbontás, egyes nagy/24 bites FLAC-ok és a BT memóriaigénye, a fényerő/infra befejezése, valamint az új DSP tényleges terhelésének és hangjának összevetése. A legutóbbi hálózati próbában kapcsolódási időtúllépés is jelentkezett; ezt nem minősítjük DSP-hibának.
 
 **Fejlesztői béta, nem végleges stabil kiadás.**
+
+## Friss megfigyelés — 18:28 UTC
+
+A korábbi kapcsolódási időtúllépések után a Wi-Fi → DAC stream elindult; a TLS-kézfogás és az MP3-dekódolás igazolt. Sztereó DSP mellett viszont a Core 1 mért terhelése 85,8%-ot ért el. A 80%-os védelem ekkor ténylegesen kikapcsolta a DSP-t; a dekódolás utána is folytatódott. Ez részleges DSP-próba, nem teljes mérési ablakon át működő Wi-Fi–DSP siker. A készülék nem indult újra, memóriahibát ez az ablak sem jelzett. A hangfeladat élettartam szerinti szabad veremminimiuma ekkor 2996 bájt volt. A teszt folytatódik.
