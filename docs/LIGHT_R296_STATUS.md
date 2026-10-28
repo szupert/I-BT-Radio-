@@ -15,7 +15,7 @@ Ez még nem állítható kompresszor vagy a hangszóró watt/ohm adataira épül
 
 Az R295 első készülékes DSP-próbája hibát talált: a CPU-kapu ezrelékes adatát százalékos küszöbhöz hasonlítottuk. Emiatt a DSP nem kapcsolt be; ezt a próbát nem tekintjük sikeres DSP-mérésnek. Az R296-ban a küszöb 800 ezrelék, azaz a tervezett 80%. A határértékek gépi ellenőrzése és a teljes fordítás sikeres.
 
-**Az R296 a helyi LATEST-ben kész, de a feltöltési/BOOT-átadásra vár. Készülékes hang-, CPU-, RAM- és veremmérése még nem futott.**
+**Az R296 feltöltése, az ellenőrzőösszeg és a teljes boot igazolt; a beállítások megmaradtak. A folyamatos készülékes selftest 2026. október 28-án 18:14 UTC-kor elindult. Az első SD-s MP3-dekódolás és menüjárás megfigyelt, a DSP Ki / Mono / Sztereó összevetése folyamatban van. Az első Wi-Fi-indítás kapcsolódási/dekódolási időtúllépéssel zárult; a teszt ezt hibaként megőrizte és továbblépett. Ez még nem teljes stabilitási vagy hallási PASS.**
 
 | Fordítási adat, R296 Light4MB | Érték |
 |---|---:|
