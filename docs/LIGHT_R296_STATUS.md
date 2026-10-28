@@ -26,6 +26,20 @@ Az R295 első készülékes DSP-próbája hibát talált: a CPU-kapu ezrelékes 
 
 A fix DRAM és a szabad flashhely nem futás közbeni szabad RAM. Az általános 500/2000 ms-os hangvédelmek megmaradtak.
 
+## Első R296 DSP-mérés készüléken
+
+Az SD-s MP3-próbában mind a mono, mind a sztereó motor ténylegesen dolgozott: aktív hangfeldolgozás és növekvő mintaszám igazolt. A rövid ablakokban nem történt CPU miatti DSP-kikapcsolás, memóriahiba vagy pánik.
+
+| SD-s próba | Core 0 | Core 1 |
+|---|---:|---:|
+| DSP Ki | 51,53% | 61,33% |
+| DSP Mono | 51,50% | 70,87% |
+| DSP Sztereó | 51,37% | 75,97% |
+
+Módonként három teljes, egyedi, összesen kb. 27 másodperces mérési ablak, a módváltás előtti átfedések nélkül. Ezek a teljes magterhelések, nem kizárólag a DSP számítási ideje; a zenerészletek sem bitazonosak. A sztereó eredmény már közel van a 80%-os védelmi határhoz, ezért további tartós mérés szükséges.
+
+A mono/sztereó próbák alatt a megfigyelt szabad belső RAM minimuma 35 200 bájt, a legnagyobb szabad blokk minimuma 17 396 bájt volt. A hangfeladat életciklus szerinti legkisebb szabad veremtartaléka 5 828, a kijelzőé 3 480 bájt. A hallható minőség külön felhasználói visszajelzést igényel; a teljes selftest továbbra is folyamatban van.
+
 ## Folyamatos selftest és nyitott tételek
 
 A teszt terve Wi-Fi/SD → DAC, menüjárás, RAM/verem, külön DSP Ki / Mono / Sztereó ablakok, SD → BT MP3 és BT → DAC mód. Telefonos forrás hiányában a BT-bemeneti hangpróba nem minősül sikeresnek. A Wi-Fi → BT fejlesztését egyelőre félretettük. Hiba esetén a futtató naplóz, vár és folytat; önálló reset vagy újraflashelési hurok nincs.
