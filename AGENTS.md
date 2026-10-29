@@ -12,6 +12,5 @@ Minden firmware-, kód-, hardverhibakeresési és dokumentációs feladat ELŐTT
 
 A PSRAM64H írás-visszaolvasási hibája nyitott, a működő 6404L konfigurációhoz nem nyúlunk. A két chipre vonatkozó állításokat külön tesztbizonyítékkal kezeljük.
 
-
-## 2026-10-22: public blockwise development
-Read docs/DEVELOPMENT_BLOCKS.md before changes. One logical block per commit/PR; retain existing implementations and proven behaviour. Light4MB Bluetooth/BLE precedes artwork. Read source/README.md for baseline and diagnostic limitations. Never publish credentials, NVS dumps or personal logs. The later explicit user RAM thresholds supersede the old64KiB planning text; do not reinterpret them.
+## Nyilvános kiadások
+Csak az adott forrásból és binárisból készült, teljes releváns készülékes teszten PASS eredménnyel lezárt verzió publikálható. A build, hostteszt, feltöltési hash, részteszt vagy RUNNING állapot nem teljes PASS. BOOT/feltöltésre várás, helyi tesztjelölt, fejlesztési lépések, következő feladatok és feltételes ígéretek belső dokumentációba kerüljenek. A nyilvános leírás a kiadott verzió tényleges viselkedését és lényeges korlátait ismertesse. Korábbi hibás vagy hiányosan tesztelt kiadást tilos átnevezéssel PASS-nak minősíteni.

@@ -1,60 +1,14 @@
-## Aktuális Light4MB: R270 · tesztelhető béta
+# I-BT-Radio — Light / Pro
 
-[**Egykattintásos Windows telepítő**](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/4MB_PSRAM_NELKUL/R270/I-BT-Radio-Auto4-Install.exe) · [Teljes Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light) · [Előképek](https://github.com/szupert/I-BT-Radio-/tree/main/skins/light-320x240) · [Menü](https://github.com/szupert/I-BT-Radio-/tree/main/docs/menu) · [Próba és ismert hibák](https://github.com/szupert/I-BT-Radio-/blob/main/docs/LIGHT_R270_TEST_GUIDE.md)
+ESP32-Internetradio mit eigenem Display, SD-Wiedergabe und Bluetooth-Audiowegen. LIGHT arbeitet ohne PSRAM, PRO mit PSRAM. Hardwareprofile und Anschlüsse unterscheiden sich.
 
-Választható koppintási mód, egységes állomáslista, villogásmentes boot-részletfrissítés, nagyobb fejléc, MP3-cím és BT-listagörgetés javítása. A jelenlegi béta gépen ellenőrzött, R270 készülékes PASS még nincs. Light16/Pro/8048 telepítők változatlanul elérhetők a profiljuk alatt. A korábbi R211/R216 szövegek és galériák alább **történeti kiadások**, nem a jelenlegi Light képességlistája.
-
-![Light lejátszó](https://raw.githubusercontent.com/szupert/I-BT-Radio-/main/skins/light-320x240/player.png)
-
----
-
-# Source / Installer · 2026-10-22
-
-Die vollständigen Light-/Pro-Anwendungsquellen und vier Hardwareprofile sind öffentlich. Die Windows-Einklick-Installer bleiben erhalten. R2114MB/ohnePSRAM ist eine Diagnoseversion (BT/BLE/SD/WebUI AUS); die Bluetooth-Wiederherstellung folgt als eigener Arbeitsblock. Entwicklungsbeta, keine Stabilitätszusage.
-
-[Source](source/README.md) · [Installer](beta/README.md) · [Contribution blocks](docs/DEVELOPMENT_BLOCKS.md)
-
----
-
-# I-BT-Radio — V166-R151 BETA · 19. Oktober 2026
-
-## Öffentliche Skin-Quellcodes · 2026.10.20.
-
-Ich habe den Skin-Quellcode mit Erlaubnis des Eigentümers veröffentlicht: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">Skin-Quellcode</a>.
-
-
-## Aktuelle Windows-Beta · R163 · 19.10.2026
-
-**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R163/I-BT-Radio-R163-Install.exe)** · [Anleitung und Prüfsummen](beta/16MB_PSRAM/V166_R163/README.md)
-
-Nur für die dokumentierte SMALL-Konfiguration mit ESP32-WROOM, PSRAM, 16 MB Flash, 320×240-Display und externem DAC. Laufzeitumgebung enthalten, kein separates Python nötig. Keine Firmware-/Skinquellen, ELF/MAP-Dateien oder persönlichen Einstellungen. Passende Partitionen ermöglichen ein Update mit Erhalt der Einstellungen; vollständiges Löschen nur nach ausdrücklichem IGEN. Kein automatischer Stresstest.
-
-**Test-Beta mit bekannten Fehlern, keine stabile Version:** Wi-Fi → DAC stottert hörbar mit und ohne Menüdurchlauf. Beim Menüdurchlauf leerte sich der Streampuffer und die Verbindung wurde neu aufgebaut. Das Flackern der Windows-7-Bootanimation ist ebenfalls offen.
-
-Den Watchdog-Pfad der Senderindexierung habe ich korrigiert: 480 Zeilen in 814 ms am Gerät, ohne neuen Watchdog oder Speicherfehler während der kurzen Beobachtung. Der 500-ms-Audioschutz und alle Sicherheitsgrenzen bleiben erhalten. Die Langzeitstabilität von R163 ist nicht geprüft. Reproduzierbare Fehler bitte unter [Issues](https://github.com/szupert/I-BT-Radio-/issues) melden.
-
----
-
+[Bedienung und Menüs](docs/menu/README.md) · [Hardware](hardware/README.md) · [Funktionen](docs/Features.md) · [Quellcode](source/README.md)
 
 [Magyar](README.md) · [English](README.en.md)
 
-Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
+[Früher veröffentlichte Pakete](beta/README.md) sind mit ihren jeweiligen Versionen, Prüfsummen und dokumentierten Einschränkungen archiviert. Für das archivierte R270 liegt keine vollständige PASS-Prüfung am Gerät vor.
 
-## Frühere Windows-Beta · R151
-
-**[Eigenständigen Installer herunterladen](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R151/I-BT-Radio-R151-Install.exe)** · [Anleitung und Prüfsummen](beta/16MB_PSRAM/V166_R151/README.md)
-
-Ich habe Laufzeitumgebung und Firmware in einer EXE gebündelt; eine separate Python-Installation ist nicht nötig. Die Beta ist ausschließlich für den dokumentierten SMALL ESP32-WROOM mit PSRAM, 16 MB Flash, 320×240-Display und externem DAC vorgesehen. Normale Updates erhalten eine passende Partitionierung. Vollständiges Löschen erfordert die ausdrückliche Bestätigung IGEN. Es startet kein automatischer Stresstest.
-
-Das gruppierte Menü und die korrigierten WebUI-Links sind enthalten. R150 absolvierte einen zehnminütigen Gerätetest mit 257/257 Menüzeilen und zweimal 34/34 WebUI-Seiten. In R151 habe ich synchrone WebUI-Arbeit aus dem Audiotask entfernt und das Warten der Antwortwarteschlange auf sich selbst beseitigt. Audio- und Speichergrenzen bleiben unverändert.
-
-**Experimentelle Beta:** R151 wurde erfolgreich kompiliert und auf dem PC geprüft. Das tatsächliche Flashen, der Ton und die Langzeitstabilität von R151 sind noch nicht am Gerät geprüft. Frühere Messungen sind kein Nachweis für diese Revision. Firmware- und Skinquellen, persönliche Einstellungen sowie ELF/MAP-Dateien sind nicht enthalten. Fehler bitte unter [Issues](https://github.com/szupert/I-BT-Radio-/issues) melden.
-
-Frühere Decoder-Messungen (R136–R137):
-
-Im R136-DAC-Test derselben 15 Beispieldateien erreichte die PCM-Erzeugung 98,44–99,60% der Echtzeit. Opus belastete Core1 noch mit 94,1%. In R137 habe ich die überflüssige Einzelkonvertierung bei der PCM16-Übergabe entfernt. Build und Hosttests sind erfolgreich; im R137-Test derselben 15 Dateien lag Opus Core1 bei 87,5%, die PCM-Erzeugung bei 99,40%. Pro Datei liegt ein sauberes CPU-Fenster von etwa 9 Sekunden vor; das belegt weder Dauerlast noch hörbare Qualität. ALAC24 erreichte 91,3% Core1 und 97,33% PCM und bleibt zu untersuchen. Die Sicherheitsgrenzen bleiben unverändert.
-
-Radio → DAC, SD → DAC und zuvor Telefon → BT-IN → DAC funktionierten am Gerät. SD → BT lief auch mit JBL; Pufferaussetzer und hohe Prozessorlast bleiben offen. WLAN-Audio → BT und EQ-Signalverarbeitung bleiben abgeschaltet. Wecker, BLE und Wetter brauchen weitere Tests. Die Touch-Menüdemo auf dem 800×480-Panel ESP32-8048S070C lief; sie ist noch kein vollständiger Radio-Port.
+---
 
 ## Skins
 
@@ -74,7 +28,6 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 <p align="center"><em>Frühere Layout-Vorschau.</em></p>
 
 
-<p align="center"><em>Ich zeige den R161-Startablauf nebeneinander. Auf dem Desktop stehen 15 zeittypische Programm- und Spielsymbole, darunter Red Alert 2, Need for Speed und GTA: San Andreas. Dies sind Vorschauen; Bild und Ton von R161 müssen noch am Gerät geprüft werden.</em></p>
 
 <h3 align="center">Media Player</h3>
 
@@ -86,7 +39,6 @@ In diesem Update veröffentliche ich ausschließlich Vorschaubilder und Beschrei
 <p align="center"><em>Frühere Layout-Vorschau.<br>Ich habe den Skin-Quellcode mit Erlaubnis des Eigentümers veröffentlicht: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">Skin-Quellcode</a>.</em></p>
 
 
-<p align="center"><em>Ich zeige den R161-Startablauf nebeneinander. Auf dem Desktop stehen 15 zeittypische Programm- und Spielsymbole, darunter Red Alert 2, Need for Speed und GTA: San Andreas. Dies sind Vorschauen; Bild und Ton von R161 müssen noch am Gerät geprüft werden.</em></p>
 
 <h3 align="center">Cassette</h3>
 

@@ -1,18 +1,6 @@
-## Aktuális Light4MB: R270 · tesztelhető béta
+# Korábban közzétett telepítők — archívum
 
-[**Egykattintásos Windows telepítő**](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/4MB_PSRAM_NELKUL/R270/I-BT-Radio-Auto4-Install.exe) · [Teljes Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light) · [Előképek](https://github.com/szupert/I-BT-Radio-/tree/main/skins/light-320x240) · [Menü](https://github.com/szupert/I-BT-Radio-/tree/main/docs/menu) · [Próba és ismert hibák](https://github.com/szupert/I-BT-Radio-/blob/main/docs/LIGHT_R270_TEST_GUIDE.md)
-
-Választható koppintási mód, egységes állomáslista, villogásmentes boot-részletfrissítés, nagyobb fejléc, MP3-cím és BT-listagörgetés javítása. A jelenlegi béta gépen ellenőrzött, R270 készülékes PASS még nincs. Light16/Pro/8048 telepítők változatlanul elérhetők a profiljuk alatt. A korábbi R211/R216 szövegek és galériák alább **történeti kiadások**, nem a jelenlegi Light képességlistája.
-
-![Light lejátszó](https://raw.githubusercontent.com/szupert/I-BT-Radio-/main/skins/light-320x240/player.png)
-
----
-
-## R216 Light4MB ·2026.10.22.
-
-[Menütesztelt béta és telepítő](https://github.com/szupert/I-BT-Radio-/tree/main/beta/4MB_PSRAM_NELKUL/R216) · [Aktuális Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light)
-
-Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú mérési béta; Wi-Fi hang, BT-OUT memória és veremtartalék továbbra nyitott. Az alábbi régebbi kiadások történeti állapotok.
+A csomagok történeti kiadások. A hozzájuk tartozó tesztleírás és ismert hibák érvényesek; az archívumban való szereplés nem teljes készülékes PASS minősítés.
 
 # Béta-telepítők — négy hardverprofil
 
@@ -25,6 +13,6 @@ Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú m
 
 Az egyfájlos Windows telepítő automatikusan ismeri fel a négy hardverprofilt; beépített futtatókörnyezet, nem kell külön Python. A négy mappában ugyanaz az ellenőrzött automata EXE található, Git ugyanazt a bináris objektumot tárolja, nem négy külön fordítást. A verziók nem azonosak: 4MB/noPSRAM:R211diagnosztika (BT/BLE/SD/WebUI OFF), 4MB/PSRAM és16MB/PSRAM:R176,16MB/noPSRAM:R189. Minden változat fejlesztői béta.
 
-A régebbi kiadások változatlan binárishashsel kerültek a megfelelő hardvermappa alá. [Teljes alkalmazásforrás](../source/README.md) · [Fejlesztési blokkok](../docs/DEVELOPMENT_BLOCKS.md).
+A régebbi kiadások változatlan binárishashsel kerültek a megfelelő hardvermappa alá. [Teljes alkalmazásforrás](../source/README.md).
 
 [8048S070C S3/16MB/8MB menu-demo: kulon egykattintasos telepito](16MB_PSRAM/8048/MENU8048C-R4/README.md). A negyprofilos WROOM automata helyett ezt valaszd az8048 panelhez.

@@ -13,13 +13,9 @@ A LIGHT_R270_MANIFEST.json és a frissített SOURCE_MANIFEST.json pontos SHA256 
 
 ## Fordítás és függőségek
 
-PlatformIO/pioarduino55.03.311, ArduinoESP323.3.11 és ESP-IDF5.5.5 az alkalmazott környezet. A `dependencies.lock`, az SDK-konfigurációk, CMake- és PlatformIO-fájlok megmaradtak. A jelenlegi fejlesztési környezet C:/esp32 alatti helyi útvonalakat és előre letöltött managed_components könyvtárat használ. Ez a publikált forráspillanatkép **még nem igazolt, tiszta gépen önmagában reprodukálható buildcsomag**; a környezet hordozhatóvá tétele külön, visszavonható fejlesztési blokk. Ne tekints egy eltérő SDK-val készülő buildet az eredeti BIN hiteles reprodukciójának.
+PlatformIO/pioarduino55.03.311, ArduinoESP323.3.11 és ESP-IDF5.5.5 az alkalmazott környezet. A `dependencies.lock`, az SDK-konfigurációk, CMake- és PlatformIO-fájlok megmaradtak. A jelenlegi fejlesztési környezet C:/esp32 alatti helyi útvonalakat és előre letöltött managed_components könyvtárat használ. Ez a publikált forráspillanatkép **még nem igazolt, tiszta gépen önmagában reprodukálható buildcsomag**. Ne tekints egy eltérő SDK-val készülő buildet az eredeti BIN hiteles reprodukciójának.
 
 Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
-
-## Közreműködés
-
-Egy PR egy ellenőrizhető munkablokk: hálózat, PCM/DAC, BT-életciklus, BLE-olvasás, menü/WebUI vagy telepítő. Kötelező baseline/hash, ok, érintett fájlok, célzott teszt, PASS/FAIL/NOT_RUN, visszaállítási pont. Teljes fákat újrageneráló és egymástól független javításokat összekeverő PR nem kérhető. A meglévő működő kód az alap; lezárt teszt ismétlése csak új változás vagy regressziógyanú miatt.
 
 A bináris telepítők a [beta](../beta/) négy hardverprofilja alatt maradnak. A forrás közzététele nem indít automatikus flashelést.
 

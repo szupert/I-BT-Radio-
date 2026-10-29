@@ -1,91 +1,18 @@
-## Fejlesztési állapot · R296 · 2026. október 28.
-
-[**Mono/sztereó DSP, mérések és nyitott hibák**](docs/LIGHT_R296_STATUS.md)
-
-Az R294 rövid DAC-próbáiban az SD-MP3, a támogatott FLAC és a Wi-Fi-rádió hallható volt. Az új, kapcsolható mono/sztereó DSP-s **R296 helyi tesztjelölt kész, de a BOOT/feltöltési átadásra vár**; készülékes DSP-mérése még nincs. Az R295 próbáján talált CPU-küszöbhibát javítottuk. Ez a dokumentációs frissítés a nyilvános R270 telepítőt és forráspillanatképet nem cseréli le.
-
----
-
-## Aktuális Light4MB: R270 · tesztelhető béta
-
-[**Egykattintásos Windows telepítő**](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/4MB_PSRAM_NELKUL/R270/I-BT-Radio-Auto4-Install.exe) · [Teljes Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light) · [Előképek](https://github.com/szupert/I-BT-Radio-/tree/main/skins/light-320x240) · [Menü](https://github.com/szupert/I-BT-Radio-/tree/main/docs/menu) · [Próba és ismert hibák](https://github.com/szupert/I-BT-Radio-/blob/main/docs/LIGHT_R270_TEST_GUIDE.md)
-
-Választható koppintási mód, egységes állomáslista, villogásmentes boot-részletfrissítés, nagyobb fejléc, MP3-cím és BT-listagörgetés javítása. A jelenlegi béta gépen ellenőrzött, R270 készülékes PASS még nincs. Light16/Pro/8048 telepítők változatlanul elérhetők a profiljuk alatt. A korábbi R211/R216 szövegek és galériák alább **történeti kiadások**, nem a jelenlegi Light képességlistája.
-
-![Light lejátszó](https://raw.githubusercontent.com/szupert/I-BT-Radio-/main/skins/light-320x240/player.png)
-
----
-
 # I-BT-Radio — Light / Pro
 
-![Light 4 MB](https://img.shields.io/badge/Light_4_MB-R216_b%C3%A9ta-blue) ![Pro](https://img.shields.io/badge/Pro-R176_b%C3%A9ta-purple)
+ESP32-alapú internetes rádió saját kijelzővel, SD-lejátszással és Bluetooth-hangutakkal. A LIGHT PSRAM nélküli, a PRO PSRAM-os kivitel; a hardverprofilok és bekötések eltérnek.
 
-**Nyilvános kiadások:** Light 4 MB / PSRAM nélkül: **R216 béta** · Pro / PSRAM-mal: **R176 béta**. A hardverprofilok verziói külön követhetők; a repository címe és a telepítők útvonalai állandók.
-
-Az **R222 Light4MB** helyi tesztjelölt; a gépi ellenőrzések sikeresek, de a készülékes SD-BT próba hibát talált: 130 fájl indexelve, üresnek látszó lista, hangátadás nélkül, BT-lezáráskor LoadProhibited összeomlással. Nem stabil kiadás, az R222 telepítő nincs itt közzétéve. A nyilvános telepítők verziói a fenti jelvényeken láthatók.
-
-## R216 Light4MB ·2026.10.22.
-
-[Menütesztelt béta és telepítő](https://github.com/szupert/I-BT-Radio-/tree/main/beta/4MB_PSRAM_NELKUL/R216) · [Aktuális Light-forrás](https://github.com/szupert/I-BT-Radio-/tree/main/source/light)
-
-Négy hangútválasztás és Vissza készülékesen igazolt. Nulla tartalékú mérési béta; Wi-Fi hang, BT-OUT memória és veremtartalék továbbra nyitott. Az alábbi régebbi kiadások történeti állapotok.
-
-## A projekt és a nyilvános forrás
-
-## Teljes forrás és négy hardverprofil · 2026. október 22.
-
-**[Teljes Light- és Pro-forrás](source/README.md)** · **[Egykattintásos telepítők](beta/README.md)** · **[Fejlesztés ellenőrizhető blokkokban](docs/DEVELOPMENT_BLOCKS.md)**
-
-A firmware, hangút, menü, WebUI, bootképernyő és skin alkalmazásforrása nyilvános. A további módosítások külön, visszavonható munkablokkokban és commitokban készülnek. Elsőbbség: Light4MB BT-IN/SD→BT-OUT, majd CLOCK/WEATHER BLE; az artwork további fejlesztése halasztva.
-
-**Béta, nem stabil kiadás.** Az R211 korábbi célzott diagnosztika volt, BT/BLE/SD/WebUI OFF állapottal; az aktuális nyilvános Light4MB csomagot a fenti R216 hivatkozás jelöli. A többi hardverprofil korábbi binárisát verziószámmal és hash-sel őrizzük, nem nevezzük frissen teszteltnek. A telepítő beépített Python/esptool futtatókörnyezetet és automatikus hardverfelismerést tartalmaz; nem kell a forrást lefordítani a használatához.
-
-## Korábbi kiadások és mérési feljegyzések
-
-
-## Nyilvános skinforrások · 2026.10.20.
-
-A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.
-
-
-## Aktuális Windows béta · R163 · 2026.10.19.
-
-**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R163/I-BT-Radio-R163-Install.exe)** · [Útmutató és ellenőrzőösszegek](beta/16MB_PSRAM/V166_R163/README.md)
-
-Kizárólag a dokumentált SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelző és külső DAC összeállításhoz. A telepítőben benne van a futtatókörnyezet; külön Python nem kell. Firmware- és skinforráskód, ELF/MAP és saját beállítás nincs a csomagban. Megfelelő partíció esetén adatmegőrző frissítés, teljes törlés csak külön IGEN megerősítéssel. Automatikus stresszteszt nincs.
-
-**Ismert hibás, tesztelésre szánt béta:** Wi-Fi → DAC alatt menü nélkül és menüjárással is hallható szaggatást tapasztaltam. Menüjárás közben a stream puffere kiürült és újracsatlakozott. A Windows 7 bootanimáció villogása is nyitott. Nem stabil kiadás.
-
-Az állomáslista-indexelő korábbi watchdogját javítottam: a készüléken 480 sor 814 ms alatt lefutott, új watchdog és memóriahiba nélkül. Az 500 ms-os hangvédelem és minden biztonsági határ maradt. A rövid próba nem hosszú stabilitási teszt. Reprodukálható hibákat az [Issues](https://github.com/szupert/I-BT-Radio-/issues) oldalon várok.
-
----
-
+[Menü és kezelés](docs/menu/README.md) · [Hardver és bekötés](hardware/README.md) · [Funkciók](docs/Features.md) · [Forrás](source/README.md)
 
 [English](README.en.md) · [Deutsch](README.de.md)
 
-Az eredetre és licencekre vonatkozó információ: [licencleírás](https://github.com/szupert/I-BT-Radio-/blob/main/THIRD_PARTY_NOTICES.md).
+A [korábban közzétett csomagok](beta/README.md) archívumában minden változat saját verziója, ellenőrzőösszege és dokumentált korlátai érvényesek. Az archív R270 nem rendelkezik teljes készülékes PASS minősítéssel.
 
-**[Funkciólista](docs/Features.md) · [Menü és kezelés](docs/menu/README.md) · [Bekötés](hardware/README.md)**
-
-## Korábbi Windows béta · R151
-
-**[Egyfájlos telepítő letöltése](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/16MB_PSRAM/V166_R151/I-BT-Radio-R151-Install.exe)** · **[Telepítési útmutató és ellenőrzőösszegek](beta/16MB_PSRAM/V166_R151/README.md)**
-
-Az EXE-be beépítettem a futtatókörnyezetet és a firmware-t, külön Python nem kell. A kiadás a SMALL ESP32-WROOM + PSRAM, 16 MB flash, 320×240 kijelzős, külső DAC-os összeállításhoz készült, a [dokumentált bekötéssel](hardware/README.md). Nem általános ESP32-telepítő. Meglévő megfelelő partíciót frissítéskor megőriz; teljes törlést csak külön IGEN megerősítéssel végez. Automatikus stresszteszt nincs.
-
-A rendezett menü és a javított webes hivatkozások már benne vannak. Az R150-ben a webes menü hiányzó oldalainak késleltetett újratöltése készüléken működött; a 10 perces kombinált mérésben 257/257 menüsor és két 34/34 oldalas webes betöltés teljesült. Az R151-ben a webes feldolgozást egyetlen kijelölt feladathoz kötöttem, a hangfeladat szinkron webhívásait és a válaszsor önmagára várását megszüntettem. A hangvédelmi és memóriahatárok maradtak.
-
-**Kísérleti béta:** az R151 fordítása és gépi ellenőrzése sikeres, a valódi R151 feltöltés, hang és hosszú stabilitás még nincs ellenőrizve. A korábbi méréseket nem tekintem az új változat készüléktesztjének. A csomagban nincs firmware- vagy skinforrás, személyes beállítás és ELF/MAP hibakeresési fájl. Hibajelzést az [Issues](https://github.com/szupert/I-BT-Radio-/issues) oldalon várok.
-
-Korábbi dekóderméréseim (R136–R137):
-
-Az R136-tal ugyanazon 15 mintafájl DAC-próbájában 98,44–99,60%-os PCM-előállítási ütemet mértem a valós időhöz képest. Az Opus Core1-terhelése még 94,1% volt. Az R137-ben a kész 16 bites PCM átadásából vettem ki a fölösleges mintánkénti átalakítást; a fordítás és a hosttesztek sikeresek. Az azonos 15 fájlos R137 DAC-próbában az Opus Core1 87,5%-ra csökkent, a PCM-előállítás 99,40% maradt. Ez fájlonként körülbelül 9 másodperces tiszta CPU-ablakból származó rövid mérés; hallható minőséget és hosszú stabilitást nem igazol. ALAC24-nél 91,3% Core1 és 97,33% PCM adódott, ezt tovább vizsgálom. A biztonsági határok változatlanok.
-
-A rádió → DAC, SD → DAC és korábban a telefon → BT-IN → DAC már működött a készüléken. Az SD → BT a JBL-lel is működött, de a pufferkihagyások és a nagy terhelés javítása még nyitott. **A Wi-Fi-hang → BT tiltott, az EQ hangfeldolgozás kikapcsolt.** Az óra, az ébresztés, a BLE és az időjárás további ellenőrzést igényel. A 800×480-as ESP32-8048S070C panelen az érintéses menüdemót is elindítottam; ez még nem teljes rádióport.
+---
 
 ## Skinek
 
-Frissítve: 2026. október 19. · R161 indulási előnézetek
+Grafikai előnézetek
 
 A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 260–320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
 
@@ -101,7 +28,6 @@ A korábbi előnézetek mellett most a teljes alkalmazásforrás is elérhető a
 <p align="center"><em>Korábbi grafikai előnézet.</em></p>
 
 
-<p align="center"><em>Az R161 indulási sorrendjét egymás mellett mutatom. Az asztalon 15 korabeli program és játék ikonja szerepel, köztük Red Alert 2, Need for Speed és GTA: San Andreas. A képek előnézetek; az R161 készülékes képi és hangpróbája még hátravan.</em></p>
 
 <h3 align="center">Media Player</h3>
 
@@ -113,7 +39,6 @@ A korábbi előnézetek mellett most a teljes alkalmazásforrás is elérhető a
 <p align="center"><em>Korábbi grafikai előnézet.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 
-<p align="center"><em>Az R161 indulási sorrendjét egymás mellett mutatom. Az asztalon 15 korabeli program és játék ikonja szerepel, köztük Red Alert 2, Need for Speed és GTA: San Andreas. A képek előnézetek; az R161 készülékes képi és hangpróbája még hátravan.</em></p>
 
 <h3 align="center">Cassette</h3>
 
@@ -185,7 +110,7 @@ A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A W
 <tr><td align="center"><a href="skins/videoton-rt6303s-320x240/boot.png"><img src="skins/videoton-rt6303s-320x240/boot.png" width="320" alt="Videoton RT 6303 S — Betöltő" /></a></td><td align="center"><a href="skins/videoton-rt6303s-320x240/player.png"><img src="skins/videoton-rt6303s-320x240/player.png" width="320" alt="Videoton RT 6303 S — Lejátszó" /></a></td></tr>
 </table>
 
-<p align="center"><em>Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → üres gomb sorrenddel és RT 6303 S típusfelirattal. Az R143-ban a bootképből eltűntek a zöld szövegmaradványok, a betöltősáv tisztán rajzolódik. A BT gomb menü nélkül IN módra váltott, a telefonról folyamatosan szólt a hang. A 36 oldalas, 255 menüsort érintő rövid rajzolási próbában nem tért vissza a veremtúlcsordulás. Az előnézeten példaadatok látszanak; a többi funkció teljes ellenőrzése még folyamatban van.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
+<p align="center"><em>Az elfogadott eredeti Videoton-felületet tartottam meg, felirat → LED → üres gomb sorrenddel és RT 6303 S típusfelirattal. Az R143-ban a bootképből eltűntek a zöld szövegmaradványok, a betöltősáv tisztán rajzolódik. A BT gomb menü nélkül IN módra váltott, a telefonról folyamatosan szólt a hang. A 36 oldalas, 255 menüsort érintő rövid rajzolási próbában nem tért vissza a veremtúlcsordulás. Az előnézeten példaadatok látszanak; az előnézet nem teljes firmware-minősítés.<br>A skin forráskódját a tulajdonos engedélyével közzétettem: <a href="https://github.com/szupert/I-BT-Radio-/tree/main/skins/source">skinforrások</a>.</em></p>
 
 
 
