@@ -1,0 +1,2 @@
+14c4df3a8755d5e012636f59d5f05c29c1455d44eb8200bce59b4cbd88ec73b2  I-BT-Radio_BETA_Install.exe
+7c081bf2545e97d6bff9299648f5eea85ab8413f88f44e8ee4cc5ca5ef79ade8  firmware.bin (embedded)

@@ -1,3 +1,9 @@
+## Új Windows-telepítő: V166-R356 BETA
+
+**[Letöltés: I-BT-Radio_BETA_Install.exe](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R356/I-BT-Radio_BETA_Install.exe)**
+
+Windows x64, 4 MB flash, PSRAM nélküli SMALL. A Python és a feltöltő beépítve; külön Python-telepítés nem szükséges. [Telepítés, kapcsolható DSP és ismert korlátok](beta/V166_R356/README.md). Kísérleti béta, a teljes készülékes teszt még nem lezárt.
+
 # I-BT-Radio — Light / Pro
 
 ## R352 béta tesztcsomag · 2026-11-02
