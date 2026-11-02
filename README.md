@@ -1,5 +1,10 @@
 # I-BT-Radio — Light / Pro
 
+## R352 béta tesztcsomag · 2026-11-02
+
+[Letöltés és telepítés – 4 MB, PSRAM nélkül](beta/V166_R352/README.md).
+
+
 ESP32-alapú internetes rádió saját kijelzővel, SD-lejátszással és Bluetooth-hangutakkal. A LIGHT PSRAM nélküli, a PRO PSRAM-os kivitel; a hardverprofilok és bekötések eltérnek.
 
 [Menü és kezelés](docs/menu/README.md) · [Hardver és bekötés](hardware/README.md) · [Funkciók](docs/Features.md) · [Forrás](source/README.md)

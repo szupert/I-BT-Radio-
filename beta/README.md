@@ -1,5 +1,10 @@
 # Korábban közzétett telepítők — archívum
 
+## R352 béta tesztcsomag · 2026-11-02
+
+[Letöltés és telepítés – 4 MB, PSRAM nélkül](V166_R352/README.md).
+
+
 A csomagok történeti kiadások. A hozzájuk tartozó tesztleírás és ismert hibák érvényesek; az archívumban való szereplés nem teljes készülékes PASS minősítés.
 
 # Béta-telepítők — négy hardverprofil
