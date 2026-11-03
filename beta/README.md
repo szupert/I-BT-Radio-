@@ -1,3 +1,9 @@
+## BIG P4 / JC1060 – DEV1 tesztverzió
+
+**[Windows-telepítő, beépített Pythonnal](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/BIG_P4_JC1060_DEV1/I-BT-Radio_BIG_BETA_Install.exe)** · **[Firmware alkalmazáskép](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/BIG_P4_JC1060_DEV1/firmware.bin)**
+
+JC1060P470C_I_W_Y, JD9165 V2, ESP32-P4 rev.0.1–1.99, 16 MB flash, beépített ES8311 mono. [Telepítés és tesztállapot](BIG_P4_JC1060_DEV1/README.md). Kísérleti kiadás: a készülékes hang-, kép-, érintés- és stabilitásvizsgálat még nincs lezárva.
+
 ## Új Windows-telepítő: V166-R356 BETA
 
 **[Letöltés: I-BT-Radio_BETA_Install.exe](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/V166_R356/I-BT-Radio_BETA_Install.exe)**

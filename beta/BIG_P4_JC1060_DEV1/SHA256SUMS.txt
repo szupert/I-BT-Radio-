@@ -1,0 +1,2 @@
+0f0f34fff7612e772df1da50a36cc3e1c440f2c8c35f9c3c1bef426144d50d2f  I-BT-Radio_BIG_BETA_Install.exe
+5293de18293ddf9edcf2e696b763e4867db069ec610d5980179297c6f7f7ab72  firmware.bin

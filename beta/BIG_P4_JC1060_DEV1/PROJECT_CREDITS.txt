@@ -1,0 +1,5 @@
+I-BT-Radio – nyílt forrású projekt
+szupert / I-BT-Radio
+https://github.com/szupert/I-BT-Radio-
+yoRadio alapokon, GNU GPLv3; eredeti szerzők és licencek megőrizve.
+BIG: Guition JC1060, Espressif Arduino/IDF/ES8311, Arduino_GFX, JPEGDEC.
