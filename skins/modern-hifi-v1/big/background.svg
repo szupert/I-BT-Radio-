@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+<rect width="1024" height="600" fill="#101518"/>
+<polyline points="12,57 1012,57" fill="none" stroke="#344247" stroke-width="1"/>
+<text x="20" y="12" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="26" font-weight="700" fill="#f2f0e9">I-BT-Radio</text>
+<rect x="12" y="78" width="168" height="56" rx="6" fill="#192226" stroke="#53d4bf"/>
+<text x="26" y="93" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#53d4bf">Rádió</text>
+<rect x="12" y="148" width="168" height="56" rx="6" fill="#192226" stroke="#344247"/>
+<text x="26" y="163" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#f2f0e9">Zene</text>
+<rect x="12" y="218" width="168" height="56" rx="6" fill="#192226" stroke="#344247"/>
+<text x="26" y="233" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#f2f0e9">Kedvencek</text>
+<rect x="12" y="288" width="168" height="56" rx="6" fill="#192226" stroke="#344247"/>
+<text x="26" y="303" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#f2f0e9">Hang</text>
+<rect x="12" y="358" width="168" height="56" rx="6" fill="#192226" stroke="#344247"/>
+<text x="26" y="373" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#f2f0e9">Beállítások</text>
+<text x="22" y="541" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="12" font-weight="400" fill="#a8b7bb">OPEN PROJECT</text>
+<rect x="202" y="88" width="270" height="270" rx="4" fill="#192226" stroke="#344247"/>
+<polygon points="332.0,214.0 346.0,223.0 332.0,232.0" fill="#38464a"/>
+<rect x="202.0" y="506" width="136.0" height="64" rx="5" fill="#192226" stroke="#344247"/>
+<polygon points="276.0,530.0 265.0,538.0 276.0,546.0" fill="#f2f0e9"/>
+<rect x="262.0" y="530.0" width="2.0" height="16.0" rx="0" fill="#f2f0e9" stroke="none"/>
+<rect x="342.0" y="506" width="136.0" height="64" rx="5" fill="#204c46" stroke="#53d4bf"/>
+<polygon points="405.0,529.0 419.0,538.0 405.0,547.0" fill="#53d4bf"/>
+<rect x="482.0" y="506" width="136.0" height="64" rx="5" fill="#192226" stroke="#344247"/>
+<polygon points="544.0,530.0 555.0,538.0 544.0,546.0" fill="#f2f0e9"/>
+<rect x="556.0" y="530.0" width="2.0" height="16.0" rx="0" fill="#f2f0e9" stroke="none"/>
+<polyline points="191,78 191,570" fill="none" stroke="#344247" stroke-width="1"/>
+<polygon points="663.25,533.75 668.6666666666666,533.75 675.1666666666666,527.25 675.1666666666666,546.75 668.6666666666666,540.25 663.25,540.25" fill="#f2f0e9"/>
+<polyline points="679.5,530.5 682.75,534.8333333333334 682.75,539.1666666666666 679.5,543.5" fill="none" stroke="#f2f0e9" stroke-width="2"/>
+<rect x="702" y="533" width="234" height="5" rx="2" fill="#38464a" stroke="none"/>
+<text x="954" y="517" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="21" font-weight="400" fill="#f2f0e9">VOL</text>
+<polyline points="202,493 998,493" fill="none" stroke="#344247" stroke-width="1"/>
+</svg>

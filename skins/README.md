@@ -104,3 +104,8 @@ A Wi-Fi-hang → BT továbbra is tiltott, az EQ hangfeldolgozás kikapcsolt. A W
 
 
 
+
+
+## Modern HiFi — SMALL / PRO / BIG
+
+[Új grafikai skin-csomag, előnézetek és letöltés](modern-hifi-v1/README.md). Szerkeszthető SVG, PNG, RGB565 és elrendezési adatok. Grafikai csomag; firmware-integráció és készülékes teszt még nincs.

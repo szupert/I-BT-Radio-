@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+<rect width="320" height="240" fill="#101518"/>
+<polyline points="2,26 318,26" fill="none" stroke="#344247" stroke-width="1"/>
+<text x="4" y="5" dominant-baseline="text-before-edge" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#f2f0e9">I-BT-Radio</text>
+<rect x="4" y="32" width="136" height="136" rx="4" fill="#192226" stroke="#344247"/>
+<polygon points="67.0,91.0 81.0,100.0 67.0,109.0" fill="#38464a"/>
+<rect x="4.0" y="194" width="74.0" height="42" rx="5" fill="#192226" stroke="#344247"/>
+<polygon points="47.0,207.0 36.0,215.0 47.0,223.0" fill="#f2f0e9"/>
+<rect x="33.0" y="207.0" width="2.0" height="16.0" rx="0" fill="#f2f0e9" stroke="none"/>
+<rect x="82.0" y="194" width="74.0" height="42" rx="5" fill="#204c46" stroke="#53d4bf"/>
+<polygon points="114.0,206.0 128.0,215.0 114.0,224.0" fill="#53d4bf"/>
+<rect x="160.0" y="194" width="74.0" height="42" rx="5" fill="#192226" stroke="#344247"/>
+<polygon points="191.0,207.0 202.0,215.0 191.0,223.0" fill="#f2f0e9"/>
+<rect x="203.0" y="207.0" width="2.0" height="16.0" rx="0" fill="#f2f0e9" stroke="none"/>
+<rect x="238.0" y="194" width="74.0" height="42" rx="5" fill="#192226" stroke="#344247"/>
+<polyline points="266.0,209.0 284.0,209.0" fill="none" stroke="#f2f0e9" stroke-width="2"/>
+<polyline points="266.0,215.0 284.0,215.0" fill="none" stroke="#f2f0e9" stroke-width="2"/>
+<polyline points="266.0,221.0 284.0,221.0" fill="none" stroke="#f2f0e9" stroke-width="2"/>
+<polyline points="4,190 315,190" fill="none" stroke="#38464a" stroke-width="1"/>
+</svg>

@@ -1,0 +1,35 @@
+{
+  "result": "PASS_ASSET_VALIDATION",
+  "checks": {
+    "small": {
+      "width": 320,
+      "height": 240,
+      "bytes": 153600,
+      "max_channel_error": 7,
+      "rgb565_roundtrip": "PASS",
+      "channel_order": "RGB565",
+      "byte_order": "little-endian"
+    },
+    "pro": {
+      "width": 320,
+      "height": 240,
+      "bytes": 153600,
+      "max_channel_error": 7,
+      "rgb565_roundtrip": "PASS",
+      "channel_order": "RGB565",
+      "byte_order": "little-endian"
+    },
+    "big": {
+      "width": 1024,
+      "height": 600,
+      "bytes": 1228800,
+      "max_channel_error": 7,
+      "rgb565_roundtrip": "PASS",
+      "channel_order": "RGB565",
+      "byte_order": "little-endian"
+    }
+  },
+  "hardware_test": "NOT_RUN",
+  "firmware_build": "NOT_RUN",
+  "dynamic_rendering": "NOT_INTEGRATED"
+}

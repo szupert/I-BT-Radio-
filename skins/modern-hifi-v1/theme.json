@@ -1,0 +1,25 @@
+{
+  "name": "Modern HiFi",
+  "version": "1.0.0-assets",
+  "colors": {
+    "background": "#101518",
+    "panel": "#192226",
+    "border": "#344247",
+    "text": "#f2f0e9",
+    "muted": "#a8b7bb",
+    "accent": "#53d4bf",
+    "inactive": "#38464a"
+  },
+  "margin": 4,
+  "small_pro_size": [
+    320,
+    240
+  ],
+  "big_size": [
+    1024,
+    600
+  ],
+  "buffer_height": 1,
+  "animation_default": "off",
+  "asset_status": "not integrated into firmware"
+}

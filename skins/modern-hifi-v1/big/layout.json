@@ -1,0 +1,114 @@
+{
+  "size": [
+    1024,
+    600
+  ],
+  "header": [
+    0,
+    0,
+    1024,
+    58
+  ],
+  "artwork": [
+    202,
+    88,
+    270,
+    270
+  ],
+  "artist": [
+    500,
+    103,
+    490,
+    44
+  ],
+  "title": [
+    500,
+    158,
+    490,
+    40
+  ],
+  "clock": [
+    872,
+    16,
+    140,
+    30
+  ],
+  "station": [
+    500,
+    221,
+    470,
+    30
+  ],
+  "transport": [
+    202,
+    506,
+    420,
+    64
+  ],
+  "volume": [
+    660,
+    506,
+    338,
+    64
+  ],
+  "queue": [
+    500,
+    298,
+    492,
+    174
+  ],
+  "navigation": [
+    12,
+    78,
+    168,
+    492
+  ],
+  "status": "ASSETS_ONLY_NOT_FIRMWARE_INTEGRATED",
+  "aw_status": [
+    790,
+    16,
+    36,
+    28
+  ],
+  "aw_hide_at_percent": 100,
+  "artwork_fit": "station: contain + edge extension; artist: cover crop",
+  "dynamic_fields": [
+    "clock",
+    "artist",
+    "title",
+    "station",
+    "status",
+    "buffer",
+    "vu",
+    "artwork"
+  ],
+  "touch_map": [
+    {
+      "action": "previous",
+      "rect": [
+        202,
+        506,
+        136,
+        64
+      ]
+    },
+    {
+      "action": "play_pause",
+      "rect": [
+        342,
+        506,
+        136,
+        64
+      ]
+    },
+    {
+      "action": "next",
+      "rect": [
+        482,
+        506,
+        136,
+        64
+      ]
+    }
+  ]
+}
