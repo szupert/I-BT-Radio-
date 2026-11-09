@@ -12,6 +12,20 @@ Az I-BT-Radio nyílt projekt új, egységes grafikai skin-csomagja.
 
 [Teljes csomag letöltése](Modern-HiFi-Skins.zip)
 
+## SMALL · 320×240
+
+![SMALL skin előnézet](small/preview.png)
+
+## PRO · 320×240
+
+![PRO skin előnézet](pro/preview.png)
+
+## BIG · 1024×600
+
+![BIG skin előnézet](big/preview.png)
+
+*A képek látványtervek bemutatóadatokkal, nem készülékfotók.*
+
 ## Tartalom és használat
 
 Mindhárom változat szerkeszthető SVG-t, natív méretű PNG hátteret, RGB565 little-endian hátteret és elrendezési adatokat tartalmaz. A preview bemutatóadatokat és szintetikus mintaborítót használ. A background fájlban nincs beégetett előadó, számcím vagy óra; ezeket a firmware rajzolja majd rá. Az ikonok külön SVG/PNG fájlok.
