@@ -1,3 +1,30 @@
+# I-BT-Radio — LIGHT R418 tesztkiadás
+
+**[R418 letöltés és kiadási megjegyzések](https://github.com/szupert/I-BT-Radio-/releases/tag/V166-R418-LIGHT)** · [Telepítési és tesztállapot](docs/releases/R418-LIGHT.md)
+
+2026. november 13. · LIGHT / SMALL · klasszikus ESP32 · 4 MB flash · PSRAM nélkül. **Tesztkiadás; a teljes készülékes stabilitásvizsgálat még hátravan.**
+
+Az R418 tartós SD-borítóleltárt, négy tájolást, adaptív álló/fekvő felületet, öt menübetűméretet és hosszúfelirat-görgetést hoz. A közös, lekerekített menükhöz kapcsolható animációk, órás Rádió gyorsgomb és opcionális SD-óraháttér-csomagok tartoznak. A hangvédelmek megmaradtak.
+
+A fordítás, öt feltöltő-hostteszt és a teljes csomag ellenőrzése sikeres. A kiadás eszközös tesztjei folyamatban lévő feladatok. A ZIP Python 3-at és a feltöltő függőségeit igényli; nem beépített Pythonos EXE.
+
+## LIGHT felület — előnézetek
+
+<p align="center"><img src="docs/images/light-r418/menu-artwork-vu.png" width="480" alt="LIGHT Borítókép és VU menü, natív rajzolóval készült előnézet" /></p>
+
+*A menükép az R417 natív rajzolójával készült, amelynek stílusát az R418 továbbviszi. Példaadatok, nem készülékfotó.*
+
+<p align="center"><img src="docs/images/light-r418/clock-layout-concept.png" width="480" alt="Jóváhagyott óranézet elrendezési előnézete" /></p>
+<p align="center"><img src="docs/images/light-r418/clock-touch-concept.png" width="480" alt="Érintős óravezérlés korábbi elrendezési terve" /></p>
+
+*Az óraképek korábban jóváhagyott látványtervek. Az R418 készülékes megjelenítése, animációja és érintéses működése még ellenőrzendő; a képek nem képernyőfelvételek.*
+
+---
+
+## Korábbi kiadások és felületek
+
+Az alábbi verziók és galériaképek történeti bejegyzések; a jelenlegi LIGHT tesztkiadás az R418.
+
 ## BIG P4 / JC1060 – DEV1 tesztverzió
 
 **[Windows-telepítő, beépített Pythonnal](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/BIG_P4_JC1060_DEV1/I-BT-Radio_BIG_BETA_Install.exe)** · **[Firmware alkalmazáskép](https://github.com/szupert/I-BT-Radio-/raw/refs/heads/main/beta/BIG_P4_JC1060_DEV1/firmware.bin)**
