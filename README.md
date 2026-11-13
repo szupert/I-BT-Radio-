@@ -21,6 +21,32 @@ A fordítás, öt feltöltő-hostteszt és a teljes csomag ellenőrzése sikeres
 
 ---
 
+## Időjárási órahátterek
+
+Öt natív, 320 × 240 pixeles háttér az R418 csomagból.
+
+### Napos
+
+![Óraháttér – napos](docs/images/light-r418/weather/SUN.jpg)
+
+### Felhős
+
+![Óraháttér – felhős](docs/images/light-r418/weather/CLOUD.jpg)
+
+### Esős
+
+![Óraháttér – esős](docs/images/light-r418/weather/RAIN.jpg)
+
+### Havas
+
+![Óraháttér – havas](docs/images/light-r418/weather/SNOW.jpg)
+
+### Fagyos
+
+![Óraháttér – fagyos](docs/images/light-r418/weather/FROST.jpg)
+
+---
+
 ## Korábbi kiadások és felületek
 
 Az alábbi verziók és galériaképek történeti bejegyzések; a jelenlegi LIGHT tesztkiadás az R418.
