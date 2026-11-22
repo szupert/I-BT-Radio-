@@ -2,7 +2,7 @@
 
 | Modell | Mit vehet a rádió? | Ellenőrzés |
 |---|---|---|
-| Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC, NUN4126GL) | Hőmérséklet és relatív páratartalom. A rádió a sugárzott BLE-nevet használja, ennek hiányában a felismert modellt. A titkosított gyári mérési csomaghoz az adott példány kulcsa szükséges. | [Magyar termékadatlap](https://mstore.hu/xiaomi-mi-temprerature-humidity-monitor-2-1473) |
+| Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC, NUN4126GL) | Hőmérséklet és relatív páratartalom. A rádió a sugárzott BLE-nevet használja, ennek hiányában a felismert modellt. A titkosított gyári mérési csomaghoz az adott példány kulcsa szükséges. | R474, LIGHT 4 MB: a rádió a Bluetooth indításakor újraindult. A név és a két mérési érték készülékes ellenőrzése nyitott. [Magyar termékadatlap](https://mstore.hu/xiaomi-mi-temprerature-humidity-monitor-2-1473) |
 | Shelly BLU H&T (SBHT-003C) | Hőmérséklet és páratartalom nyílt BTHome-adásból. | A gyártói adatmezők alapján támogatott, fizikai Shelly-próba függőben. [Adatformátum](https://shelly-api-docs.shelly.cloud/docs-ble/Devices/BLU/ht/) · [Hazai kínálat](https://defloc.hu/shelly-blu-h-t-kulteri-bluetooth-paratartalom-es-homerseklet-szenzor-fekete-szinu) |
 | Shelly BLU H&T ZB (SBHT-203C) | A Bluetooth-adás hőmérséklet- és páratartalom-mezői. | Nyílt BTHome-adással jelölt a készülékes próbára. [Adatformátum](https://shelly-api-docs.shelly.cloud/docs-ble/Devices/BLU_ZB/ht_ZB/) · [Hazai kínálat](https://shellyshop.hu/products/shelly_blu_ht_zb_kulteri_para_es_homerseklet_szenzor_bluetooth_zigbee_mokka) |
 
