@@ -6,9 +6,34 @@ Internetrádió, SD-lejátszó, ébresztőóra és relaxációs programok a klas
 
 A nyilvános ZIP meglévő, azonos partíciókiosztású R470 LIGHT rádió frissítésére szolgál. A PRO és a BIG/P4 saját firmware-t használ.
 
-## Rádió és borítóletöltés
+[Funkciók](#a-light-funkciói) · [Menütérkép](#menürendszer-állapottérképe) · [Kijelzőképek](#kijelző-és-programválasztás) · [Összes skin](#skinek)
 
-A hálózati borítóletöltés leállított webrádiónál indulhat. Wi-Fi → DAC lejátszáskor az MP3- és AAC-puffer elkérheti a letöltő felszabadult, legfeljebb 7 KiB-os munkaterületét. A puffer telítettségét és újratöltéseit a **Beállítások → Hang → Hangpuffer** oldalon követheted.
+## Melyik rádióhoz?
+
+| Változat | Hardver és kiadás |
+|---|---|
+| LIGHT | Klasszikus ESP32-WROOM, 320 × 240, 4 MB flash. Az R471 tesztkiadás PSRAM nélkül működik. A fenti ZIP meglévő R470 LIGHT frissítéséhez készült. |
+| PRO | A projekt 16 MB flashsel és PSRAM-mal szerelt Yellow Board változata. A panelhez tartozó kiadást és bekötést válaszd. [Korábbi kiadások és bekötések](KORABBI_KIADASOK_ES_SKINEK.md) |
+| BIG P4 | A JC1060 fejlesztői csomag 1024 × 600-as érintőkijelzőt, C6 Wi-Fi-t és beépített ES8311 monó hangot használ. Saját telepítője és tesztállapota van. [Kompatibilis panel és letöltés](beta/BIG_P4_JC1060_DEV1/README.md) |
+
+## A LIGHT funkciói
+
+| Mit szeretnél csinálni? | Hol találod, mit állíthatsz? |
+|---|---|
+| Internetrádiót hallgatni | **Rádió** → állomáslista, kedvencek, keresés és adóváltás. A Wi-Fi-adás a DAC-ra szól. A **Hang → Hangpuffer** oldalon látod a puffer telítettségét és az újratöltéseket. |
+| SD-ről vagy Bluetooth-on zenélni | A lejátszóban válthatsz forrást. SD-ről a helyi zenelistát böngészheted. A Bluetooth-menüben elérhető az eszközkeresés, a mentett eszközök, a telefon hangjának fogadása és a Bluetooth-kimenet beállítása. |
+| Hangot beállítani | **Hang** → hangerő és adatfolyam, hangkimenet, hangpuffer, DSP monó/sztereó. A **Szerviz** jelgenerátorában jelalak, frekvencia és kimenet választható. |
+| Borítót vagy VU-mérőt látni | Állomáslogók, előadói borítók, SD-leltár és külön borítóletöltő. Kép hiányában a VU jelenhet meg. Állítható a sávok iránya, frissítése és átlagolása. **Kijelző → Borítókép és VU**. |
+| Ébresztést vagy esti óranézetet beállítani | Négy ébresztés, heti napok, hangforrás, szundi, alvásidő és időzített óranézet. Az órán digitális vagy lapozós kijelzés, három méret, egyedi számjegyszín és kapcsolható kettőspont választható. |
+| Időjárást követni | Helyhez kötött Open-Meteo időjárás és kültéri adatok. Az órához napos, felhős, esős, havas és fagyos háttér tartozik, opcionális SD-képcsomaggal. Kompatibilis BLE-hőmérővel beltéri mérés is elérhető. |
+| Relaxációs programot indítani | A **Relaxáció** csempe Hang, Fény és Kombinált módot nyit. Program és időtartam választható. A külső fényprogramokhoz bekötött LED szükséges. |
+| A kijelzőt és kezelést személyre szabni | Fényerő, álló vagy fekvő nézet, öt menübetűméret, animációk, puffer- és indulási jelzők. Érintéskalibrálás, forgatógomb, gombkiosztás, menübezárás és infrás kezelés megfelelő vevővel. |
+| Hálózatot váltani | A **Wi-Fi** menüben vannak a hálózatok, a mentett kapcsolatok és a DNS-beállítások. SD- és Bluetooth-forráshoz hálózat nélküli mód is választható. |
+| Tárhelyet, rendszert vagy hibát ellenőrizni | **Tárhely és SD** → állomások és fájlok, SD-kártya, belső tárhely és memória. **Rendszer** → firmware-információ, diagnosztika és mentés. A webes kezelő mellett soros diagnosztika és naplózó selftest segíti a hibakeresést. |
+
+**Mit mutatott az R471 hangpróbája?** PSRAM nélkül, adónként három perc alatt a Budapest Rock 24 KiB puffert kapott és ötször pufferelt újra. A MegaDance 24 KiB mellett egyszer. A Delite AAC 23 KiB mellett nulla újrapufferelést, de 24 dekóder-adathiányt és két csatornaszámhibát jelzett. A mérések a rádió naplójából származnak.
+
+A hálózati borítóletöltés mindhárom mérési ablakban szünetelt. Leállítás után elindult. A Delite sikertelen csatlakozása és az újrapróbálás közötti rövid leállás alatt is indult borítókérés. Lejátszáskor az MP3- és AAC-puffer a borítóletöltő memóriájából legfeljebb 7 KiB-ot használhat.
 
 ## Menürendszer állapottérképe
 
@@ -41,10 +66,6 @@ Időjárási hátterek · napos, felhős, esős, havas és fagyos idő
 ## Skinek
 
 A galériában a projekt különböző kiadásainak képernyői láthatók. A választható skinek panelenként és kiadásonként eltérnek.
-
-Grafikai előnézetek
-
-A galériában 13 megmaradó felület előnézetét mutatom, köztük a Videoton lejátszót és bootképet, a Service és az új BT-Speaker képernyőt. A képek középre rendezve, 260–320 pixel szélességgel jelennek meg. Az Alapnézet / Basic player képeit kérésre eltávolítottam. A látványterveket, statikus háttereket és host-rajzokat külön jelölöm.
 
 A korábbi előnézetek mellett most a teljes alkalmazásforrás is elérhető a source könyvtárban.
 
