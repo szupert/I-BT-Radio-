@@ -1,14 +1,22 @@
-# I-BT-Radio — LIGHT R418 tesztkiadás
+# I-BT-Radio · LIGHT R471
 
-**[R418 letöltés és kiadási megjegyzések](https://github.com/szupert/I-BT-Radio-/releases/tag/V166-R418-LIGHT)** · [Telepítési és tesztállapot](docs/releases/R418-LIGHT.md)
+[Letöltés a Releases oldalon](https://github.com/szupert/I-BT-Radio-/releases/tag/V166-R471-LIGHT) · [Menütérkép](docs/menu/README.md) · [Funkciók](docs/Features.md)
 
-2026. november 13. · LIGHT / SMALL · klasszikus ESP32 · 4 MB flash · PSRAM nélkül. **Tesztkiadás; a teljes készülékes stabilitásvizsgálat még hátravan.**
+A 4 MB-os, PSRAM nélküli rádión az R471-ben lejátszáskor a hangpuffer használhatja a borítóletöltő szabad memóriáját. A kiadás készülékes visszamérése még hátravan.
 
-Az R418 tartós SD-borítóleltárt, négy tájolást, adaptív álló/fekvő felületet, öt menübetűméretet és hosszúfelirat-görgetést hoz. A közös, lekerekített menükhöz kapcsolható animációk, órás Rádió gyorsgomb és opcionális SD-óraháttér-csomagok tartoznak. A hangvédelmek megmaradtak.
+## A LIGHT kijelzője
 
-A fordítás, öt feltöltő-hostteszt és a teljes csomag ellenőrzése sikeres. A készülékes tesztek még hátravannak. A ZIP Python 3-at és a feltöltő függőségeit igényli; nem beépített Pythonos EXE.
+![Képes főmenü, fekvő nézet](docs/images/light-r471/main.png)
 
-## LIGHT felület — előnézetek
+**Relaxáció** · módválasztás fekvő kijelzőn és programlista álló kijelzőn.
+
+![Relaxáció módválasztó](docs/images/light-r471/modes.png) ![Álló programlista](docs/images/light-r471/list.png)
+
+A képek a LIGHT rajzolójával készült előnézetek.
+
+## További LIGHT előnézetek
+
+
 
 <p align="center"><img src="docs/images/light-r418/menu-artwork-vu.png" width="480" alt="LIGHT Borítókép és VU menü, natív rajzolóval készült előnézet" /></p>
 
@@ -49,7 +57,7 @@ A fordítás, öt feltöltő-hostteszt és a teljes csomag ellenőrzése sikeres
 
 ## Korábbi kiadások és felületek
 
-Az alábbi verziók és galériaképek történeti bejegyzések; a jelenlegi LIGHT tesztkiadás az R418.
+Az alábbi verziók és galériaképek történeti bejegyzések; az R418 korábbi LIGHT tesztkiadás.
 
 ## BIG P4 / JC1060 – DEV1 tesztverzió
 

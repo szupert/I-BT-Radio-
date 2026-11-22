@@ -1,3 +1,18 @@
+## LIGHT R471 · funkciók
+
+- **Internetrádió:** állomásválasztás, kedvencek, keresés és Wi-Fi → DAC lejátszás. A hangpuffer foglaltsága és az újratöltések száma megtekinthető.
+- **Borító és VU:** állomáslogók, előadói borítók, SD-leltár és a kép helyén használható VU-mérő. Az R471 a hálózati borítófeladatot leállított webrádió mellett engedi.
+- **SD és Bluetooth:** helyi zenefájlok, DAC-kimenet és Bluetooth-menü. A külső hangút működése a csatlakozó eszköztől is függ.
+- **Ébresztőóra és időjárás:** lapozós óra, négy ébresztés, szundi, alvásidő, időzített óranézet és időjárásfüggő háttér.
+- **Relaxáció:** hang-, fény- és kombinált programok. A külső fényhez megfelelően bekötött LED szükséges.
+- **Kezelés:** képes főmenü, forgatható kijelző, állítható menübetűméret és érintéskalibrálás.
+
+[Menütérkép](menu/README.md) · [R471 kiadási jegyzet](releases/R471-LIGHT.md)
+
+---
+
+## Korábbi verziók
+
 # Funkciók és fejlesztési állapot — V166-R125 BETA
 
 Frissítve: **2026. október 16.** Az I-BT-Radiót egy klasszikus ESP32-WROOM + PSRAM köré építem. A SMALL változatot fejlesztem; a nagy kijelzőn egyelőre a menüdemó működik.
