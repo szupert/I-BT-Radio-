@@ -4,6 +4,8 @@
 
 A 4 MB-os, PSRAM nélküli rádión az R471-ben lejátszáskor a hangpuffer használhatja a borítóletöltő szabad memóriáját. A kiadás készülékes visszamérése még hátravan.
 
+[![LIGHT R471 menütérkép](docs/images/light-r471/menu-map.png)](docs/menu/README.md)
+
 ## A LIGHT kijelzője
 
 ![Képes főmenü, fekvő nézet](docs/images/light-r471/main.png)

@@ -1,5 +1,7 @@
 # LIGHT menütérkép · R471
 
+![Az öt főmenücsempe és a Beállítások tíz csoportja](../images/light-r471/menu-map.png)
+
 | Főmenü csempéje | Mit nyit meg? |
 |---|---|
 | Rádió | Lejátszó, adóváltás, lejátszásvezérlés és forrásválasztás |
