@@ -195,9 +195,9 @@ Als Alternativen sind ESP-PSRAM64H oder LY68L6400SLI(T) mit passendem 3,3-V-SOP-
 | SD | SCK18, MISO19, MOSI23, CS5 |
 | Lichtsensor | GPIO34 |
 
-<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menu map 2026-10-19; next firmware menu preparation"></a></p>
+<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="LIGHT R471"></a></p>
 
-Grün kennzeichnet vorhandene Funktionsrückmeldungen. Rot kennzeichnet deaktivierte, fehlerhafte oder noch zu prüfende Funktionen. Die historische V156-Karte ist kein vollständiger Stabilitätsnachweis und bildet das neue Oberflächenmenü noch nicht ab.
+Menüstruktur von LIGHT R471: fünf Hauptkacheln und zehn Einstellungsgruppen. [Menüführung](docs/menu/README.md).
 
 ## Fehler melden
 

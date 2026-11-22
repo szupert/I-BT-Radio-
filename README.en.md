@@ -200,9 +200,9 @@ No IR receiver GPIO is assigned in the current firmware.
 
 ### Menu status
 
-<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="I-BT-Radio menu map 2026-10-19; next firmware menu preparation"></a></p>
+<p align="center"><a href="hardware/MENU_MAP.jpg"><img src="hardware/MENU_MAP.jpg" width="900" alt="LIGHT R471"></a></p>
 
-Green indicates positive operating feedback; red indicates disabled, faulty or not fully tested functions. This map is not a stability certification. See the [detailed hardware guide](hardware/README.md) for the original ESP32-WROOM-32 pinout and board-revision notes.
+LIGHT R471 menu navigation: five home tiles and ten settings groups. [Menu guide](docs/menu/README.md).
 
 ## Support
 
