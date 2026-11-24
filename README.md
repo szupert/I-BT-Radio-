@@ -1,10 +1,10 @@
-# I-BT-Radio · LIGHT R471
+# I-BT-Radio · LIGHT R479
 
 Internetrádió, SD-lejátszó, ébresztőóra és relaxációs programok a klasszikus ESP32-WROOM-os, 320 × 240-es érintőkijelzős rádióhoz. A LIGHT kiadás 4 MB flashsel, PSRAM nélkül fut.
 
-**[R471 tesztkiadás letöltése](https://github.com/szupert/I-BT-Radio-/releases/tag/V166-R471-LIGHT)** · [Telepítés](docs/releases/R471-LIGHT.md) · [Funkciók](docs/Features.md) · [Hardver és bekötés](hardware/README.md)
+**[R479 kiadás letöltése](https://github.com/szupert/I-BT-Radio-/releases/tag/V166-R479-LIGHT)** · [Telepítés](docs/releases/R479-LIGHT.md) · [Funkciók](docs/Features.md) · [Hardver és bekötés](hardware/README.md)
 
-A nyilvános ZIP meglévő, azonos partíciókiosztású R470 LIGHT rádió frissítésére szolgál. A PRO és a BIG/P4 saját firmware-t használ.
+A nyilvános ZIP meglévő, azonos partíciókiosztású R478 LIGHT rádió frissítésére szolgál. A PRO és a BIG/P4 saját firmware-t használ.
 
 [Funkciók](#a-light-funkciói) · [Menütérkép](#menürendszer-állapottérképe) · [Kijelzőképek](#kijelző-és-programválasztás) · [Összes skin](#skinek)
 
@@ -12,7 +12,7 @@ A nyilvános ZIP meglévő, azonos partíciókiosztású R470 LIGHT rádió fris
 
 | Változat | Hardver és kiadás |
 |---|---|
-| LIGHT | Klasszikus ESP32-WROOM, 320 × 240, 4 MB flash. Az R471 tesztkiadás PSRAM nélkül működik. A fenti ZIP meglévő R470 LIGHT frissítéséhez készült. |
+| LIGHT | Klasszikus ESP32-WROOM, 320 × 240, 4 MB flash. Az R479 PSRAM nélkül működik. A fenti ZIP meglévő R478 LIGHT frissítéséhez készült. |
 | PRO | A projekt 16 MB flashsel és PSRAM-mal szerelt Yellow Board változata. A panelhez tartozó kiadást és bekötést válaszd. [Korábbi kiadások és bekötések](KORABBI_KIADASOK_ES_SKINEK.md) |
 | BIG P4 | A JC1060 fejlesztői csomag 1024 × 600-as érintőkijelzőt, C6 Wi-Fi-t és beépített ES8311 monó hangot használ. Saját telepítője és tesztállapota van. [Kompatibilis panel és letöltés](beta/BIG_P4_JC1060_DEV1/README.md) |
 
